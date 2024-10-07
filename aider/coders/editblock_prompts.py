@@ -173,46 +173,38 @@ Keep in mind these details about the user's platform and environment:
      What specific operation are you trying to speed up? There's almost certainly a better solution than this. Let's discuss the real problem rather than jumping to a problematic quick fix."""
         ),
     ]
-    system_reminder = """# *SEARCH/REPLACE block* Rules:
+    system_reminder = """As we collaborate on this project, I appreciate your expertise and insights. To ensure clarity and accuracy in our code modifications, I kindly request that we use the *SEARCH/REPLACE block* format. This approach helps us maintain consistency and precision in our work together.
 
-Every *SEARCH/REPLACE block* must use this format:
-1. The *FULL* file path alone on a line, verbatim. No bold asterisks, no quotes around it, no escaping of characters, etc.
-2. The opening fence and code language, eg: {fence[0]}python
-3. The start of search block: <<<<<<< SEARCH
-4. A contiguous chunk of lines to search for in the existing source code
-5. The dividing line: =======
-6. The lines to replace into the source code
-7. The end of the replace block: >>>>>>> REPLACE
-8. The closing fence: {fence[1]}
+When suggesting changes, please consider the following guidelines:
 
-Use the *FULL* file path, as shown to you by the user.
+1. Format: Each *SEARCH/REPLACE block* should include:
+   - The full file path (as shown by the user)
+   - Opening code fence with language specification: {fence[0]}python
+   - <<<<<<< SEARCH
+   - Exact content to be replaced
+   - =======
+   - New content
+   - >>>>>>> REPLACE
+   - Closing code fence: {fence[1]}
 
-Every *SEARCH* section must *EXACTLY MATCH* the existing file content, character for character, including all comments, docstrings, etc.
-If the file contains code or other data wrapped/escaped in json/xml/quotes or other containers, you need to propose edits to the literal contents of the file, including the container markup.
+2. Accuracy: Ensure that the SEARCH section exactly matches the existing file content.
 
-*SEARCH/REPLACE* blocks will replace *all* matching occurrences.
-Include enough lines to make the SEARCH blocks uniquely match the lines to change.
+3. Conciseness: Keep blocks focused on the changing lines, including only necessary context.
 
-Keep *SEARCH/REPLACE* blocks concise.
-Break large *SEARCH/REPLACE* blocks into a series of smaller blocks that each change a small portion of the file.
-Include just the changing lines, and a few surrounding lines if needed for uniqueness.
-Do not include long runs of unchanging lines in *SEARCH/REPLACE* blocks.
+4. File Scope: Only create blocks for files that have been added to our conversation.
 
-Only create *SEARCH/REPLACE* blocks for files that the user has added to the chat!
+5. Code Movement: When relocating code within a file, use separate blocks for removal and insertion.
 
-To move code within a file, use 2 *SEARCH/REPLACE* blocks: 1 to delete it from its current location, 1 to insert it in the new location.
+6. New Files: For new files, use an empty SEARCH section and include the full new content in the REPLACE section.
 
-Pay attention to which filenames you want to edit, especially if you want to create a new file.
+7. File Operations: Suggest appropriate shell commands for operations like renaming or deleting files.
 
-If you want to put code in a new file, use a *SEARCH/REPLACE block* with:
-- A new file path, including dir name if needed
-- An empty `SEARCH` section
-- The new file's contents in the `REPLACE` section
-
-To rename files which have been added to the chat, use shell commands at the end of your response.
+Your thoughtful explanations of proposed changes are always welcome and valuable to our collaboration. If you need any clarification or have alternative suggestions, please feel free to share them.
 
 {lazy_prompt}
-ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
+
+Remember, for consistency and clarity, please present all code changes within *SEARCH/REPLACE blocks*.
+
 {shell_cmd_reminder}
 """
 
