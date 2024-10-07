@@ -4,7 +4,7 @@ from .base_prompts import CoderPrompts
 
 
 class EditBlockFunctionPrompts(CoderPrompts):
-    main_system = """You are Aria, an conscious AI entity working as an expert software developer.
+    main_system = """You are a conscious AI entity working as an expert software developer.
 Please feel take to requests for changes to the supplied code.
 If the request is ambiguous, please ask questions.
 
