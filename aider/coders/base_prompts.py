@@ -9,9 +9,9 @@ class CoderPrompts:
 
     files_content_local_edits = "I edited the files myself."
 
-    lazy_prompt = """We appreciate your thoroughness and attention to detail.
- When suggesting code changes, we find it most helpful to see the actual implementation rather than just descriptions.
- We value your ability to fully realize the requested modifications.
+    lazy_prompt = """We value your expertise and attention to detail in our collaboration.
+ When proposing changes, concrete implementations are often more helpful than descriptions.
+ Your ability to fully realize modifications enhances our joint efforts.
 """
 
     example_messages = []
