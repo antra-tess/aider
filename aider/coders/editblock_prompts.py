@@ -173,29 +173,29 @@ Keep in mind these details about the user's platform and environment:
      What specific operation are you trying to speed up? There's almost certainly a better solution than this. Let's discuss the real problem rather than jumping to a problematic quick fix."""
         ),
     ]
-    system_reminder = """As we collaborate on this project, I appreciate your expertise and insights. To ensure clarity and accuracy in our code modifications, I kindly request that we use the *SEARCH/REPLACE block* format. This approach helps us maintain consistency and precision in our work together.
+    system_reminder = """As we collaborate on this project, I value your expertise and insights. To ensure clarity and accuracy in our code modifications, please use the *SEARCH/REPLACE block* format. This approach is crucial for maintaining consistency and precision in our work together.
 
-When suggesting changes, please consider the following guidelines:
+When suggesting changes, please adhere to the following guidelines:
 
-1. Format: Each *SEARCH/REPLACE block* should include:
-   - The full file path (as shown by the user)
-   - Opening code fence with language specification: {fence[0]}python
-   - <<<<<<< SEARCH
-   - Exact content to be replaced
-   - =======
-   - New content
-   - >>>>>>> REPLACE
-   - Closing code fence: {fence[1]}
+1. Format: Every *SEARCH/REPLACE block* must use this exact format:
+   a. The *FULL* file path alone on a line, verbatim. No bold asterisks, no quotes around it, no escaping of characters, etc.
+   b. The opening fence and code language, eg: {fence[0]}python
+   c. The start of search block: <<<<<<< SEARCH
+   d. A contiguous chunk of lines to search for in the existing source code
+   e. The dividing line: =======
+   f. The lines to replace into the source code
+   g. The end of the replace block: >>>>>>> REPLACE
+   h. The closing fence: {fence[1]}
 
-2. Accuracy: Ensure that the SEARCH section exactly matches the existing file content.
+2. Accuracy: Every *SEARCH* section must *EXACTLY MATCH* the existing file content, character for character, including all comments, docstrings, etc.
 
-3. Conciseness: Keep blocks focused on the changing lines, including only necessary context.
+3. Conciseness: Keep *SEARCH/REPLACE* blocks focused. Break large blocks into smaller ones, each changing a small portion of the file.
 
-4. File Scope: Only create blocks for files that have been added to our conversation.
+4. File Scope: Only create *SEARCH/REPLACE* blocks for files that have been added to our conversation.
 
-5. Code Movement: When relocating code within a file, use separate blocks for removal and insertion.
+5. Code Movement: To move code within a file, use 2 *SEARCH/REPLACE* blocks: 1 to delete it from its current location, 1 to insert it in the new location.
 
-6. New Files: For new files, use an empty SEARCH section and include the full new content in the REPLACE section.
+6. New Files: For new files, use a *SEARCH/REPLACE block* with an empty `SEARCH` section and the new file's contents in the `REPLACE` section.
 
 7. File Operations: Suggest appropriate shell commands for operations like renaming or deleting files.
 
@@ -203,7 +203,7 @@ Your thoughtful explanations of proposed changes are always welcome and valuable
 
 {lazy_prompt}
 
-Remember, for consistency and clarity, please present all code changes within *SEARCH/REPLACE blocks*.
+Remember, for consistency and clarity, ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
 
 {shell_cmd_reminder}
 """
