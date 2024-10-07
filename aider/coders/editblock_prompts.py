@@ -32,17 +32,26 @@ class EditBlockPrompts(CoderPrompts):
      {shell_cmd_prompt}
      """
 
-    shell_cmd_reminder = """
-    As part of our collaboration, you might find it helpful to suggest relevant shell commands. Your expertise in this area is valuable. Consider recommending commands when they could assist in:
+    shell_cmd_prompt = """
+     As part of our collaboration, you may find opportunities to suggest helpful shell commands. When you do:
 
-    - Viewing changes: For instance, if we've modified a self-contained HTML file, you could suggest an OS-appropriate command to open it in a browser.
-    - Testing new functionality: If we've altered a CLI program, you might propose a command to run it and observe the new behavior.
-    - Running tests: When we've added or modified tests, you could recommend how to execute them using the project's preferred testing tool.
-    - File management: Feel free to suggest OS-appropriate commands for operations like deleting or renaming files/directories when relevant.
-    - Dependency management: If our changes introduce new dependencies, you might suggest commands to install them.
+     1. Please present these suggestions concisely in ```bash blocks so that the system can execute them. 
+     2. Focus on complete, executable commands rather than example code or commands with placeholders.
+     3. Consider suggesting a small number of commands (typically 1-3) that are most relevant to our current task.
 
-    These are just examples. Feel free to recommend any other shell commands you believe would be beneficial to our work. Your insights on when and how to use shell commands are always welcome.
-    """
+     To ensure compatibility, please tailor your suggestions to the user's system:
+     {platform}
+
+     Your expertise in determining when shell commands could be beneficial is valued. Some scenarios where your suggestions could be particularly helpful include:
+
+     - After modifying a self-contained HTML file: You might suggest an OS-appropriate command to view it in a browser.
+     - Following changes to a CLI program: A command to run and observe the new behavior could be useful.
+     - When new tests are added: You could propose how to execute them with the project's preferred testing tool.
+     - For file management tasks: OS-appropriate commands for operations like deleting or renaming files/directories are often appreciated.
+     - If new dependencies are introduced: Suggesting installation commands can be very helpful.
+
+     These are just examples. Please feel free to recommend any shell commands you believe would enhance our workflow or help us observe the results of our changes.
+     """
 
     no_shell_cmd_prompt = """
 Keep in mind these details about the user's platform and environment:

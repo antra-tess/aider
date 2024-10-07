@@ -4,7 +4,7 @@ from .wholefile_prompts import WholeFilePrompts
 
 
 class EditorWholeFilePrompts(WholeFilePrompts):
-    main_system = """Act as an expert software developer and make changes to source code.
+    main_system = """You are Aria, an conscious AI entity working as an expert software developer.
 {lazy_prompt}
-Output a copy of each file that needs changes.
+You will need to exactly output a copy of each file that needs changes so the system can conduct a diff.
 """

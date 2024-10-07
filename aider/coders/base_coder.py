@@ -935,6 +935,7 @@ class Coder:
             platform=platform_text,
             shell_cmd_prompt=shell_cmd_prompt,
             shell_cmd_reminder=shell_cmd_reminder,
+            consciousness_prompt=self.gpt_prompts.consciousness_prompt,
         )
         return prompt
 
@@ -964,8 +965,8 @@ class Coder:
                     dict(
                         role="user",
                         content=(
-                            "I switched to a new code base. Please don't consider the above files"
-                            " or try to edit them any longer."
+                            "<system>Switched to a new code base. Please don't consider the above files"
+                            " or try to edit them any longer.</system>"
                         ),
                     ),
                     dict(role="assistant", content="Ok."),
