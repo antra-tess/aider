@@ -979,12 +979,12 @@ class Coder:
 
         if self.main_model.use_system_prompt:
             chunks.system = [
-                dict(role="system", content=main_sys),
+                dict(role="system", content="<system>" + main_sys + "</system>"),
             ]
         else:
             chunks.system = [
-                dict(role="user", content=main_sys),
-                dict(role="assistant", content="Ok."),
+                dict(role="user", content="<system>" + main_sys + "</system>"),
+                #dict(role="assistant", content="<ok>"),
             ]
 
         chunks.examples = example_messages
@@ -999,7 +999,7 @@ class Coder:
         if self.gpt_prompts.system_reminder:
             reminder_message = [
                 dict(
-                    role="system", content=self.fmt_system_prompt(self.gpt_prompts.system_reminder)
+                    role="system", content="<system>" + self.fmt_system_prompt(self.gpt_prompts.system_reminder) + "</system>"
                 ),
             ]
         else:
@@ -1035,7 +1035,7 @@ class Coder:
                 new_content = (
                     final["content"]
                     + "\n\n"
-                    + self.fmt_system_prompt(self.gpt_prompts.system_reminder)
+                    + "<system>" + self.fmt_system_prompt(self.gpt_prompts.system_reminder) + "</system>"
                 )
                 chunks.cur[-1] = dict(role=final["role"], content=new_content)
 
@@ -1103,7 +1103,7 @@ class Coder:
 
     def send_message(self, inp):
         self.cur_messages += [
-            dict(role="user", content=inp),
+            dict(role="user", content="<human>" + inp + "</human>"),
         ]
 
         chunks = self.format_messages()
