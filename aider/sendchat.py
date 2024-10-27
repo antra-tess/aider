@@ -13,21 +13,31 @@ CACHE_PATH = "~/.aider.send.cache.v1"
 CACHE = None
 # CACHE = Cache(CACHE_PATH)
 
+RETRY_TIMEOUT = 60
+
 
 def retry_exceptions():
     import httpx
 
     return (
+        # httpx
         httpx.ConnectError,
         httpx.RemoteProtocolError,
         httpx.ReadTimeout,
+        # litellm
+        litellm.exceptions.BadRequestError,
+        litellm.exceptions.AuthenticationError,
+        litellm.exceptions.PermissionDeniedError,
+        litellm.exceptions.NotFoundError,
+        litellm.exceptions.UnprocessableEntityError,
+        litellm.exceptions.RateLimitError,
+        litellm.exceptions.InternalServerError,
+        litellm.exceptions.ContextWindowExceededError,
+        litellm.exceptions.ContentPolicyViolationError,
         litellm.exceptions.APIConnectionError,
         litellm.exceptions.APIError,
-        litellm.exceptions.RateLimitError,
         litellm.exceptions.ServiceUnavailableError,
         litellm.exceptions.Timeout,
-        litellm.exceptions.InternalServerError,
-        litellm.llms.anthropic.chat.AnthropicError,
     )
 
 
@@ -36,7 +46,7 @@ def lazy_litellm_retry_decorator(func):
         decorated_func = backoff.on_exception(
             backoff.expo,
             retry_exceptions(),
-            max_time=60,
+            max_time=RETRY_TIMEOUT,
             on_backoff=lambda details: print(
                 f"{details.get('exception', 'Exception')}\nRetry in {details['wait']:.1f} seconds."
             ),

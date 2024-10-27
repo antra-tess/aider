@@ -58,7 +58,7 @@ def get_parser(default_config_files, git_root):
         const=opus_model,
         help=f"Use {opus_model} model for the main chat",
     )
-    sonnet_model = "claude-3-5-sonnet-20240620"
+    sonnet_model = "claude-3-5-sonnet-20241022"
     group.add_argument(
         "--sonnet",
         action="store_const",
@@ -237,10 +237,8 @@ def get_parser(default_config_files, git_root):
         type=int,
         default=None,
         help=(
-            (
-                "Soft limit on tokens for chat history, after which summarization begins."
-                " If unspecified, defaults to the model's max_chat_history_tokens."
-            ),
+            "Soft limit on tokens for chat history, after which summarization begins."
+            " If unspecified, defaults to the model's max_chat_history_tokens."
         ),
     )
     # This is a duplicate of the argument in the preparser and is a no-op by this time of
@@ -690,6 +688,12 @@ def get_parser(default_config_files, git_root):
         default=True,
         help="Enable/disable suggesting shell commands (default: True)",
     )
+    group.add_argument(
+        "--fancy-input",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Enable/disable fancy input with history and completion (default: True)",
+    )
 
     ##########
     group = parser.add_argument_group("Voice Settings")
@@ -721,7 +725,6 @@ def get_md_help():
     parser.formatter_class = MarkdownHelpFormatter
 
     return argparse.ArgumentParser.format_help(parser)
-    return parser.format_help()
 
 
 def get_sample_yaml():
@@ -735,7 +738,6 @@ def get_sample_yaml():
     parser.formatter_class = YamlHelpFormatter
 
     return argparse.ArgumentParser.format_help(parser)
-    return parser.format_help()
 
 
 def get_sample_dotenv():
@@ -749,7 +751,6 @@ def get_sample_dotenv():
     parser.formatter_class = DotEnvFormatter
 
     return argparse.ArgumentParser.format_help(parser)
-    return parser.format_help()
 
 
 def main():

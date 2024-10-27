@@ -75,7 +75,7 @@ cog.outl("```")
 ## Use claude-3-opus-20240229 model for the main chat
 #AIDER_OPUS=
 
-## Use claude-3-5-sonnet-20240620 model for the main chat
+## Use claude-3-5-sonnet-20241022 model for the main chat
 #AIDER_SONNET=
 
 ## Use gpt-4-0613 model for the main chat
@@ -150,7 +150,7 @@ cog.outl("```")
 ## Only work with models that have meta-data available (default: True)
 #AIDER_SHOW_MODEL_WARNINGS=true
 
-## Maximum number of tokens to use for chat history. If not specified, uses the model's max_chat_history_tokens.
+## Soft limit on tokens for chat history, after which summarization begins. If unspecified, defaults to the model's max_chat_history_tokens.
 #AIDER_MAX_CHAT_HISTORY_TOKENS=
 
 ## Specify the .env file to load (default: .env in git root)
@@ -365,6 +365,9 @@ cog.outl("```")
 
 ## Enable/disable suggesting shell commands (default: True)
 #AIDER_SUGGEST_SHELL_COMMANDS=true
+
+## Enable/disable fancy input with history and completion (default: True)
+#AIDER_FANCY_INPUT=true
 
 #################
 # Voice Settings:

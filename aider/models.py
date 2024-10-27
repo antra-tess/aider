@@ -56,6 +56,7 @@ claude-3-haiku-20240307
 claude-3-opus-20240229
 claude-3-sonnet-20240229
 claude-3-5-sonnet-20240620
+claude-3-5-sonnet-20241022
 """
 
 ANTHROPIC_MODELS = [ln.strip() for ln in ANTHROPIC_MODELS.splitlines() if ln.strip()]
@@ -69,7 +70,6 @@ class ModelSettings:
     weak_model_name: Optional[str] = None
     use_repo_map: bool = False
     send_undo_reply: bool = False
-    accepts_images: bool = False
     lazy: bool = False
     reminder: str = "user"
     examples_as_sys_msg: bool = False
@@ -125,7 +125,6 @@ MODEL_SETTINGS = [
         "udiff",
         weak_model_name="gpt-4o-mini",
         use_repo_map=True,
-        accepts_images=True,
         lazy=True,
         reminder="sys",
     ),
@@ -134,7 +133,6 @@ MODEL_SETTINGS = [
         "udiff",
         weak_model_name="gpt-4o-mini",
         use_repo_map=True,
-        accepts_images=True,
         lazy=True,
         reminder="sys",
     ),
@@ -143,7 +141,6 @@ MODEL_SETTINGS = [
         "diff",
         weak_model_name="gpt-4o-mini",
         use_repo_map=True,
-        accepts_images=True,
         lazy=True,
         reminder="sys",
         editor_edit_format="editor-diff",
@@ -153,7 +150,6 @@ MODEL_SETTINGS = [
         "diff",
         weak_model_name="gpt-4o-mini",
         use_repo_map=True,
-        accepts_images=True,
         lazy=True,
         reminder="sys",
     ),
@@ -162,7 +158,6 @@ MODEL_SETTINGS = [
         "diff",
         weak_model_name="gpt-4o-mini",
         use_repo_map=True,
-        accepts_images=True,
         lazy=True,
         reminder="sys",
     ),
@@ -171,7 +166,6 @@ MODEL_SETTINGS = [
         "diff",
         weak_model_name="gpt-4o-mini",
         use_repo_map=True,
-        accepts_images=True,
         lazy=True,
         reminder="sys",
         editor_edit_format="editor-diff",
@@ -180,7 +174,6 @@ MODEL_SETTINGS = [
         "gpt-4o-mini",
         "whole",
         weak_model_name="gpt-4o-mini",
-        accepts_images=True,
         lazy=True,
         reminder="sys",
     ),
@@ -188,7 +181,6 @@ MODEL_SETTINGS = [
         "openai/gpt-4o-mini",
         "whole",
         weak_model_name="openai/gpt-4o-mini",
-        accepts_images=True,
         lazy=True,
         reminder="sys",
     ),
@@ -214,7 +206,6 @@ MODEL_SETTINGS = [
         "diff",
         weak_model_name="gpt-4o-mini",
         use_repo_map=True,
-        accepts_images=True,
         reminder="sys",
     ),
     ModelSettings(
@@ -265,7 +256,6 @@ MODEL_SETTINGS = [
         editor_edit_format="editor-diff",
         use_repo_map=True,
         examples_as_sys_msg=True,
-        accepts_images=True,
         extra_params={
             "extra_headers": {
                 "anthropic-beta": ANTHROPIC_BETA_HEADER,
@@ -278,8 +268,42 @@ MODEL_SETTINGS = [
     ModelSettings(
         "anthropic/claude-3-5-sonnet-20240620",
         "diff",
-        weak_model_name="claude-3-haiku-20240307",
+        weak_model_name="anthropic/claude-3-haiku-20240307",
         editor_model_name="anthropic/claude-3-5-sonnet-20240620",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
+        extra_params={
+            "extra_headers": {
+                "anthropic-beta": ANTHROPIC_BETA_HEADER,
+            },
+            "max_tokens": 8192,
+        },
+        cache_control=True,
+        reminder="user",
+    ),
+    ModelSettings(
+        "anthropic/claude-3-5-sonnet-20241022",
+        "diff",
+        weak_model_name="anthropic/claude-3-haiku-20240307",
+        editor_model_name="anthropic/claude-3-5-sonnet-20241022",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
+        extra_params={
+            "extra_headers": {
+                "anthropic-beta": ANTHROPIC_BETA_HEADER,
+            },
+            "max_tokens": 8192,
+        },
+        cache_control=True,
+        reminder="user",
+    ),
+    ModelSettings(
+        "claude-3-5-sonnet-20241022",
+        "diff",
+        weak_model_name="claude-3-haiku-20240307",
+        editor_model_name="claude-3-5-sonnet-20241022",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         examples_as_sys_msg=True,
@@ -319,12 +343,11 @@ MODEL_SETTINGS = [
     ModelSettings(
         "openrouter/anthropic/claude-3.5-sonnet",
         "diff",
-        weak_model_name="openrouter/anthropic/claude-3-haiku-20240307",
+        weak_model_name="openrouter/anthropic/claude-3-haiku",
         editor_model_name="openrouter/anthropic/claude-3.5-sonnet",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         examples_as_sys_msg=True,
-        accepts_images=True,
         extra_params={
             "max_tokens": 8192,
         },
@@ -334,12 +357,11 @@ MODEL_SETTINGS = [
     ModelSettings(
         "openrouter/anthropic/claude-3.5-sonnet:beta",
         "diff",
-        weak_model_name="openrouter/anthropic/claude-3-haiku-20240307",
+        weak_model_name="openrouter/anthropic/claude-3-haiku:beta",
         editor_model_name="openrouter/anthropic/claude-3.5-sonnet:beta",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         examples_as_sys_msg=True,
-        accepts_images=True,
         extra_params={
             "max_tokens": 8192,
         },
@@ -356,7 +378,19 @@ MODEL_SETTINGS = [
         editor_edit_format="editor-diff",
         use_repo_map=True,
         examples_as_sys_msg=True,
-        accepts_images=True,
+        extra_params={
+            "max_tokens": 8192,
+        },
+        reminder="user",
+    ),
+    ModelSettings(
+        "vertex_ai/claude-3-5-sonnet-v2@20241022",
+        "diff",
+        weak_model_name="vertex_ai/claude-3-haiku@20240307",
+        editor_model_name="vertex_ai/claude-3-5-sonnet-v2@20241022",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
         extra_params={
             "max_tokens": 8192,
         },
@@ -496,7 +530,6 @@ MODEL_SETTINGS = [
         "diff",
         weak_model_name="openrouter/openai/gpt-4o-mini",
         use_repo_map=True,
-        accepts_images=True,
         lazy=True,
         reminder="sys",
         editor_edit_format="editor-diff",
@@ -506,6 +539,18 @@ MODEL_SETTINGS = [
         "whole",
         weak_model_name="openai/gpt-4o-mini",
         editor_model_name="openai/gpt-4o",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        reminder="user",
+        use_system_prompt=False,
+        use_temperature=False,
+        streaming=False,
+    ),
+    ModelSettings(
+        "azure/o1-mini",
+        "whole",
+        weak_model_name="azure/gpt-4o-mini",
+        editor_model_name="azure/gpt-4o",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         reminder="user",
@@ -530,6 +575,18 @@ MODEL_SETTINGS = [
         "diff",
         weak_model_name="openai/gpt-4o-mini",
         editor_model_name="openai/gpt-4o",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        reminder="user",
+        use_system_prompt=False,
+        use_temperature=False,
+        streaming=False,
+    ),
+    ModelSettings(
+        "azure/o1-preview",
+        "diff",
+        weak_model_name="azure/gpt-4o-mini",
+        editor_model_name="azure/gpt-4o",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         reminder="user",
@@ -719,7 +776,7 @@ class Model(ModelSettings):
             self.edit_format = "diff"
             self.use_repo_map = True
             self.examples_as_sys_msg = True
-            self.reminder = None
+            self.reminder = "user"
 
         # use the defaults
         if self.edit_format == "diff":

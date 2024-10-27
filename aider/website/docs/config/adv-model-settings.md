@@ -81,8 +81,7 @@ cog.out(get_model_settings_as_yaml())
 cog.out("```\n")
 ]]]-->
 ```yaml
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -98,8 +97,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -115,8 +113,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -132,8 +129,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -149,8 +145,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -166,8 +161,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: udiff
   editor_edit_format: null
@@ -183,8 +177,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: udiff
   editor_edit_format: null
@@ -200,8 +193,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -217,8 +209,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -234,8 +225,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -251,8 +241,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -268,8 +257,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -285,8 +273,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -302,8 +289,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: openai/gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: udiff
   editor_edit_format: null
@@ -319,8 +305,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: udiff
   editor_edit_format: null
@@ -336,8 +321,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -353,8 +337,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -370,8 +353,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -387,8 +369,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -404,8 +385,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -421,8 +401,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: claude-3-haiku-20240307
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -438,8 +417,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: openrouter/anthropic/claude-3-haiku
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -455,8 +433,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: claude-3-haiku-20240307
-- accepts_images: true
-  cache_control: true
+- cache_control: true
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -475,8 +452,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: claude-3-haiku-20240307
-- accepts_images: false
-  cache_control: true
+- cache_control: true
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -494,9 +470,46 @@ cog.out("```\n")
   use_repo_map: true
   use_system_prompt: true
   use_temperature: true
+  weak_model_name: anthropic/claude-3-haiku-20240307
+- cache_control: true
+  caches_by_default: false
+  edit_format: diff
+  editor_edit_format: editor-diff
+  editor_model_name: anthropic/claude-3-5-sonnet-20241022
+  examples_as_sys_msg: true
+  extra_params:
+    extra_headers:
+      anthropic-beta: prompt-caching-2024-07-31
+    max_tokens: 8192
+  lazy: false
+  name: anthropic/claude-3-5-sonnet-20241022
+  reminder: user
+  send_undo_reply: false
+  streaming: true
+  use_repo_map: true
+  use_system_prompt: true
+  use_temperature: true
+  weak_model_name: anthropic/claude-3-haiku-20240307
+- cache_control: true
+  caches_by_default: false
+  edit_format: diff
+  editor_edit_format: editor-diff
+  editor_model_name: claude-3-5-sonnet-20241022
+  examples_as_sys_msg: true
+  extra_params:
+    extra_headers:
+      anthropic-beta: prompt-caching-2024-07-31
+    max_tokens: 8192
+  lazy: false
+  name: claude-3-5-sonnet-20241022
+  reminder: user
+  send_undo_reply: false
+  streaming: true
+  use_repo_map: true
+  use_system_prompt: true
+  use_temperature: true
   weak_model_name: claude-3-haiku-20240307
-- accepts_images: false
-  cache_control: true
+- cache_control: true
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -514,8 +527,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: anthropic/claude-3-haiku-20240307
-- accepts_images: false
-  cache_control: true
+- cache_control: true
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -533,8 +545,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: claude-3-haiku-20240307
-- accepts_images: true
-  cache_control: true
+- cache_control: true
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -550,9 +561,8 @@ cog.out("```\n")
   use_repo_map: true
   use_system_prompt: true
   use_temperature: true
-  weak_model_name: openrouter/anthropic/claude-3-haiku-20240307
-- accepts_images: true
-  cache_control: true
+  weak_model_name: openrouter/anthropic/claude-3-haiku
+- cache_control: true
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -568,9 +578,8 @@ cog.out("```\n")
   use_repo_map: true
   use_system_prompt: true
   use_temperature: true
-  weak_model_name: openrouter/anthropic/claude-3-haiku-20240307
-- accepts_images: true
-  cache_control: false
+  weak_model_name: openrouter/anthropic/claude-3-haiku:beta
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -587,8 +596,24 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: vertex_ai/claude-3-haiku@20240307
-- accepts_images: false
-  cache_control: false
+- cache_control: false
+  caches_by_default: false
+  edit_format: diff
+  editor_edit_format: editor-diff
+  editor_model_name: vertex_ai/claude-3-5-sonnet-v2@20241022
+  examples_as_sys_msg: true
+  extra_params:
+    max_tokens: 8192
+  lazy: false
+  name: vertex_ai/claude-3-5-sonnet-v2@20241022
+  reminder: user
+  send_undo_reply: false
+  streaming: true
+  use_repo_map: true
+  use_system_prompt: true
+  use_temperature: true
+  weak_model_name: vertex_ai/claude-3-haiku@20240307
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -604,8 +629,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: vertex_ai/claude-3-haiku@20240307
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -621,8 +645,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: vertex_ai/claude-3-haiku@20240307
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -638,8 +661,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: command-r-plus
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -655,8 +677,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: command-r-08-2024
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -672,8 +693,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: command-r-plus-08-2024
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -689,8 +709,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: groq/llama3-8b-8192
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -706,8 +725,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: openrouter/meta-llama/llama-3-70b-instruct
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -723,8 +741,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -740,8 +757,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff-fenced
   editor_edit_format: null
@@ -757,8 +773,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff-fenced
   editor_edit_format: null
@@ -774,8 +789,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff-fenced
   editor_edit_format: null
@@ -791,8 +805,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: null
@@ -808,8 +821,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -826,8 +838,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: true
   edit_format: diff
   editor_edit_format: null
@@ -844,8 +855,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -862,8 +872,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: true
   edit_format: diff
   editor_edit_format: null
@@ -880,8 +889,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: null
@@ -897,8 +905,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: null
-- accepts_images: true
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -914,8 +921,7 @@ cog.out("```\n")
   use_system_prompt: true
   use_temperature: true
   weak_model_name: openrouter/openai/gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: editor-diff
@@ -931,8 +937,23 @@ cog.out("```\n")
   use_system_prompt: false
   use_temperature: false
   weak_model_name: openai/gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
+  caches_by_default: false
+  edit_format: whole
+  editor_edit_format: editor-diff
+  editor_model_name: azure/gpt-4o
+  examples_as_sys_msg: false
+  extra_params: null
+  lazy: false
+  name: azure/o1-mini
+  reminder: user
+  send_undo_reply: false
+  streaming: false
+  use_repo_map: true
+  use_system_prompt: false
+  use_temperature: false
+  weak_model_name: azure/gpt-4o-mini
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: editor-diff
@@ -948,8 +969,7 @@ cog.out("```\n")
   use_system_prompt: false
   use_temperature: false
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff
@@ -965,8 +985,23 @@ cog.out("```\n")
   use_system_prompt: false
   use_temperature: false
   weak_model_name: openai/gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
+  caches_by_default: false
+  edit_format: diff
+  editor_edit_format: editor-diff
+  editor_model_name: azure/gpt-4o
+  examples_as_sys_msg: false
+  extra_params: null
+  lazy: false
+  name: azure/o1-preview
+  reminder: user
+  send_undo_reply: false
+  streaming: false
+  use_repo_map: true
+  use_system_prompt: false
+  use_temperature: false
+  weak_model_name: azure/gpt-4o-mini
+- cache_control: false
   caches_by_default: false
   edit_format: architect
   editor_edit_format: editor-diff
@@ -982,8 +1017,7 @@ cog.out("```\n")
   use_system_prompt: false
   use_temperature: false
   weak_model_name: gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: whole
   editor_edit_format: editor-diff
@@ -999,8 +1033,7 @@ cog.out("```\n")
   use_system_prompt: false
   use_temperature: false
   weak_model_name: openrouter/openai/gpt-4o-mini
-- accepts_images: false
-  cache_control: false
+- cache_control: false
   caches_by_default: false
   edit_format: diff
   editor_edit_format: editor-diff

@@ -85,7 +85,7 @@ cog.outl("```")
 ## Use claude-3-opus-20240229 model for the main chat
 #opus: false
 
-## Use claude-3-5-sonnet-20240620 model for the main chat
+## Use claude-3-5-sonnet-20241022 model for the main chat
 #sonnet: false
 
 ## Use gpt-4-0613 model for the main chat
@@ -160,7 +160,7 @@ cog.outl("```")
 ## Only work with models that have meta-data available (default: True)
 #show-model-warnings: true
 
-## Maximum number of tokens to use for chat history. If not specified, uses the model's max_chat_history_tokens.
+## Soft limit on tokens for chat history, after which summarization begins. If unspecified, defaults to the model's max_chat_history_tokens.
 #max-chat-history-tokens: xxx
 
 ## Specify the .env file to load (default: .env in git root)
@@ -396,6 +396,9 @@ cog.outl("```")
 
 ## Enable/disable suggesting shell commands (default: True)
 #suggest-shell-commands: true
+
+## Enable/disable fancy input with history and completion (default: True)
+#fancy-input: true
 
 #################
 # Voice Settings:

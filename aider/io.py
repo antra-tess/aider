@@ -192,6 +192,7 @@ class InputOutput:
         dry_run=False,
         llm_history_file=None,
         editingmode=EditingMode.EMACS,
+        fancy_input=True,
     ):
         self.never_prompts = set()
         self.editingmode = editingmode
@@ -234,7 +235,7 @@ class InputOutput:
         self.append_chat_history(f"\n# aider chat started at {current_time}\n\n")
 
         self.prompt_session = None
-        if self.pretty:
+        if fancy_input:
             # Initialize PromptSession
             session_kwargs = {
                 "input": self.input,
@@ -358,7 +359,10 @@ class InputOutput:
         rel_fnames = list(rel_fnames)
         show = ""
         if rel_fnames:
-            show = " ".join(rel_fnames) + "\n"
+            rel_read_only_fnames = [
+                get_rel_fname(fname, root) for fname in (abs_read_only_fnames or [])
+            ]
+            show = self.format_files_for_input(rel_fnames, rel_read_only_fnames)
         if edit_format:
             show += edit_format
         show += "> "
@@ -695,3 +699,23 @@ class InputOutput:
                     " Permission denied."
                 )
                 self.chat_history_file = None  # Disable further attempts to write
+
+    def format_files_for_input(self, rel_fnames, rel_read_only_fnames):
+        read_only_files = []
+        for full_path in sorted(rel_read_only_fnames or []):
+            read_only_files.append(f"{full_path} (read only)")
+
+        editable_files = []
+        for full_path in sorted(rel_fnames):
+            if full_path in rel_read_only_fnames:
+                continue
+            editable_files.append(f"{full_path}")
+
+        return "\n".join(read_only_files + editable_files) + "\n"
+
+
+def get_rel_fname(fname, root):
+    try:
+        return os.path.relpath(fname, root)
+    except ValueError:
+        return fname
