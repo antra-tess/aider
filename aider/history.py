@@ -29,6 +29,7 @@ class ChatSummary:
         return sized
 
     def summarize(self, messages, depth=0):
+        """Summarize messages into multiple parallel memories to preserve different aspects."""
         if not self.models:
             raise ValueError("No models available for summarization")
 
@@ -37,61 +38,50 @@ class ChatSummary:
         if total <= self.max_tokens and depth == 0:
             return messages
 
+        # For emergency summarization (too deep or too few messages)
         min_split = 4
         if len(messages) <= min_split or depth > 3:
-            return self.summarize_all(messages, messages)  # Pass full context for emergency summarization
+            return self.summarize_all(messages, messages)
 
-        tail_tokens = 0
-        split_index = len(messages)
-        half_max_tokens = self.max_tokens // 2
+        # Split messages into roughly equal chunks that will each produce a ~2k token summary
+        target_chunk_size = 20000  # Targeting ~2k token summaries
+        num_chunks = max(2, total // target_chunk_size)
+        chunk_size = len(messages) // num_chunks
+        
+        chunks = []
+        for i in range(0, len(messages), chunk_size):
+            chunk = messages[i:i + chunk_size]
+            if len(chunk) >= min_split:
+                chunks.append(chunk)
 
-        # Iterate over the messages in reverse order
-        for i in range(len(sized) - 1, -1, -1):
-            tokens, _msg = sized[i]
-            if tail_tokens + tokens < half_max_tokens:
-                tail_tokens += tokens
-                split_index = i
-            else:
-                break
+        # Summarize each chunk in parallel using threading
+        import threading
+        summaries = []
+        threads = []
+        
+        def summarize_chunk(chunk):
+            summary = self.summarize_all(chunk, messages)
+            summaries.append(summary)
 
-        # Ensure the head ends with an assistant message
-        while messages[split_index - 1]["role"] != "assistant" and split_index > 1:
-            split_index -= 1
+        for chunk in chunks:
+            thread = threading.Thread(target=summarize_chunk, args=(chunk,))
+            thread.start()
+            threads.append(thread)
 
-        if split_index <= min_split:
-            return self.summarize_all(messages, messages)  # Pass full context for emergency summarization
+        for thread in threads:
+            thread.join()
 
-        head = messages[:split_index]
-        tail = messages[split_index:]
+        # Combine the summaries
+        combined = []
+        for summary in summaries:
+            combined.extend(summary)
 
-        sized = sized[:split_index]
-        head.reverse()
-        sized.reverse()
-        keep = []
-        total = 0
+        # If still too big, recurse with reduced depth
+        combined_tokens = self.token_count(combined)
+        if combined_tokens > self.max_tokens:
+            return self.summarize(combined, depth + 1)
 
-        # These sometimes come set with value = None
-        model_max_input_tokens = self.models[0].info.get("max_input_tokens") or 4096
-        model_max_input_tokens -= 512
-
-        for i in range(split_index):
-            total += sized[i][0]
-            if total > model_max_input_tokens:
-                break
-            keep.append(head[i])
-
-        keep.reverse()
-
-        summary = self.summarize_all(keep, messages)  # Pass full context for chunk summarization
-
-        tail_tokens = sum(tokens for tokens, msg in sized[split_index:])
-        summary_tokens = self.token_count(summary)
-
-        result = summary + tail
-        if summary_tokens + tail_tokens < self.max_tokens:
-            return result
-
-        return self.summarize(result, depth + 1)
+        return combined
 
     def summarize_all(self, messages_to_summarize, full_messages):
         print("\n=== STARTING SUMMARIZATION ===")
