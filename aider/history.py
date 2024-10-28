@@ -70,7 +70,7 @@ class ChatSummary:
             return messages
 
         # Split older messages into chunks of roughly target_chunk_size tokens
-        target_chunk_size = 20000  # Targeting ~2k token summaries
+        target_chunk_size = 10000  # Targeting ~2k token summaries
         chunks = []
         current_chunk = []
         current_tokens = 0
@@ -104,6 +104,7 @@ class ChatSummary:
 
         for thread in threads:
             thread.join()
+        print("Summarization complete, chunks:", len(summaries))
 
         # Combine the summaries
         combined = []
@@ -115,6 +116,10 @@ class ChatSummary:
         if combined_tokens > self.max_tokens:
             return self.summarize(combined, depth + 1)
 
+        import traceback
+        # print trace
+        traceback.print_stack()
+        
         return combined
 
     def summarize_all(self, messages_to_summarize, full_messages):
