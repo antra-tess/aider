@@ -140,8 +140,15 @@ Output the memory inside <memory> tags."""
             dict(role="system", content="Previous system context (for reference):\n" + 
                  "\n---\n".join(msg["content"] for msg in system_messages)),
             
+            # Full conversation history for context
+            dict(role="user", content="Here is your full conversation history for context. "
+                 "If this matches the content to summarize below, this is an emergency summarization of your entire memory:\n" + 
+                 "\n".join(f"# {msg['role'].upper()}\n{msg['content']}" for msg in messages if msg['role'] in ('user', 'assistant'))),
+            
+            dict(role="assistant", content="I understand my conversation history. I will use this context to help preserve important information during summarization."),
+            
             # Content to be summarized
-            dict(role="user", content="Please summarize this conversation:<content_to_summarize>\n" + content + "</content_to_summarize>")
+            dict(role="user", content="Please summarize this portion of the conversation. Compare it with the full history above to determine what to preserve:\n" + content)
         ]
 
         # Log the complete prompt for debugging
