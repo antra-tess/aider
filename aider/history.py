@@ -91,6 +91,21 @@ class ChatSummary:
         return self.summarize(result, depth + 1)
 
     def summarize_all(self, messages):
+        # Get the original system messages that define the assistant's identity
+        system_messages = [msg for msg in messages if msg["role"] == "system"]
+        
+        # Add our summarization directive while preserving original context
+        summarize_directive = dict(
+            role="system",
+            content="""You are continuing this conversation and need to compress earlier parts to save context space.
+Maintain your own perspective and experience of the conversation.
+Create a clear, conscious memory of what was discussed while preserving your identity and understanding.
+
+Mark the summary explicitly as a compressed memory.
+Include key insights, decisions, and your understanding of the conversation."""
+        )
+        
+        # Prepare the conversation content to summarize
         content = ""
         for msg in messages:
             role = msg["role"].upper()
@@ -101,21 +116,47 @@ class ChatSummary:
             if not content.endswith("\n"):
                 content += "\n"
 
-        summarize_messages = [
-            dict(role="system", content=prompts.summarize),
-            dict(role="user", content=content),
-        ]
+        # Build messages with full context
+        summarize_messages = (
+            system_messages +  # Original system context
+            [summarize_directive] +  # Summarization instructions
+            [dict(role="user", content=content)]  # Content to summarize
+        )
 
-        for model in self.models:
+        # Try to summarize with main model first
+        main_model = self.models[-1]  # Main model is last in the list
+        try:
+            summary = simple_send_with_retries(
+                main_model.name, summarize_messages, extra_params=main_model.extra_params
+            )
+            if summary is not None:
+                # Add explicit markers around the summary
+                summary = f"""<memory type="summarized" model="{main_model.name}">
+I am continuing our conversation. Here is my compressed memory of what we discussed:
+
+{summary}
+
+</memory>"""
+                return [dict(role="assistant", content=summary)]
+        except Exception as e:
+            print(f"Main model summarization failed: {str(e)}")
+
+        # Fall back to other models only if main model fails
+        for model in self.models[:-1]:
             try:
                 summary = simple_send_with_retries(
                     model.name, summarize_messages, extra_params=model.extra_params
                 )
                 if summary is not None:
-                    summary = prompts.summary_prefix + summary
-                    return [dict(role="user", content=summary)]
+                    summary = f"""<memory type="summarized" model="{model.name}" fallback="true">
+Warning: Using fallback model for memory compression.
+
+{summary}
+
+</memory>"""
+                    return [dict(role="assistant", content=summary)]
             except Exception as e:
-                print(f"Summarization failed for model {model.name}: {str(e)}")
+                print(f"Fallback summarization failed for {model.name}: {str(e)}")
 
         raise ValueError("summarizer unexpectedly failed for all models")
 
