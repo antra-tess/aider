@@ -137,6 +137,11 @@ I am continuing our conversation. Here is my compressed memory of what we discus
 {summary}
 
 </memory>"""
+                # Log the summarization
+                print(f"\nSummarizing {len(messages)} messages with {main_model.name}:")
+                print("Original content length:", len(content))
+                print("Summarized content length:", len(summary))
+                print("Summary:", summary)
                 return [dict(role="assistant", content=summary)]
         except Exception as e:
             print(f"Main model summarization failed: {str(e)}")
@@ -154,6 +159,11 @@ Warning: Using fallback model for memory compression.
 {summary}
 
 </memory>"""
+                    # Log the fallback summarization
+                    print(f"\nFallback summarizing with {model.name}:")
+                    print("Original content length:", len(content))
+                    print("Summarized content length:", len(summary))
+                    print("Summary:", summary)
                     return [dict(role="assistant", content=summary)]
             except Exception as e:
                 print(f"Fallback summarization failed for {model.name}: {str(e)}")
