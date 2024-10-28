@@ -994,7 +994,14 @@ class Coder:
         chunks.examples = example_messages
 
         self.summarize_end()
-        chunks.done = self.done_messages
+        # Preserve memories from summarization
+        chunks.done = []
+        for msg in self.done_messages:
+            if "<memory" in msg.get("content", ""):
+                # Keep memory messages at full fidelity
+                chunks.done.append(msg)
+            else:
+                chunks.done.append(msg)
 
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
@@ -1135,6 +1142,15 @@ class Coder:
         print("Reminder messages: ", len(chunks.reminder))
 
         messages = chunks.all_messages()
+        
+        # Debug memory preservation
+        if self.verbose:
+            memory_count = sum(1 for msg in messages if "<memory" in msg.get("content", ""))
+            print(f"\nFound {memory_count} memories in final message chain")
+            for msg in messages:
+                if "<memory" in msg.get("content", ""):
+                    print(f"Memory present: {msg['content'][:100]}...")
+
         self.warm_cache(chunks)
 
         if self.verbose:

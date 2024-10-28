@@ -14,16 +14,21 @@ class ChatChunks:
     reminder: List = field(default_factory=list)
 
     def all_messages(self):
-        return (
-            self.system
-            + self.examples
-            + self.readonly_files
-            + self.repo
-            + self.done
-            + self.chat_files
-            + self.cur
-            + self.reminder
-        )
+        # Ensure we preserve all message attributes and content
+        messages = []
+        for msg_list in [
+            self.system,
+            self.examples,
+            self.readonly_files,
+            self.repo,
+            self.done,  # This contains our memories
+            self.chat_files,
+            self.cur,
+            self.reminder
+        ]:
+            messages.extend(msg_list)
+        
+        return messages
 
     def add_cache_control_headers(self):
         if self.examples:
