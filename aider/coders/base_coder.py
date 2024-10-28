@@ -813,7 +813,10 @@ class Coder:
         self.last_keyboard_interrupt = now
 
     def summarize_start(self):
+        print("\nChecking if summarization needed...")
+        print(f"Number of done_messages: {len(self.done_messages)}")
         if not self.summarizer.too_big(self.done_messages):
+            print("Messages not too big, no summarization needed")
             return
 
         self.summarize_end()
@@ -821,6 +824,7 @@ class Coder:
         if self.verbose:
             self.io.tool_output("Starting to summarize chat history.")
 
+        print("Starting summarization thread...")
         self.summarizer_thread = threading.Thread(target=self.summarize_worker)
         self.summarizer_thread.start()
 
@@ -1102,11 +1106,34 @@ class Coder:
         return chunks
 
     def send_message(self, inp):
-        self.cur_messages += [
-            dict(role="user", content="<human>" + inp + "</human>"),
-        ]
+        if inp.startswith("<system>") and inp.endswith("</system>"):
+            self.cur_messages += [
+                dict(role="user", content=inp),
+            ]
+        else:
+            self.cur_messages += [
+                dict(role="user", content="<human>" + inp + "</human>"),
+            ]
+
 
         chunks = self.format_messages()
+        #         self.system
+        #         + self.examples
+        #         + self.readonly_files
+        #         + self.repo
+        #         + self.done
+        #         + self.chat_files
+        #         + self.cur
+        #         + self.reminder
+        print("System messages: ", len(chunks.system))
+        print("Examples messages: ", len(chunks.examples))
+        print("Readonly files messages: ", len(chunks.readonly_files))
+        print("Repo messages: ", len(chunks.repo))
+        print("Done messages: ", len(chunks.done))
+        print("Chat files messages: ", len(chunks.chat_files))
+        print("Cur messages: ", len(chunks.cur))
+        print("Reminder messages: ", len(chunks.reminder))
+
         messages = chunks.all_messages()
         self.warm_cache(chunks)
 
