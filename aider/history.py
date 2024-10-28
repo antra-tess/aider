@@ -94,9 +94,13 @@ class ChatSummary:
         return self.summarize(result, depth + 1)
 
     def summarize_all(self, messages_to_summarize, full_messages):
-        print("Summarizing all messages")
+        print("\n=== STARTING SUMMARIZATION ===")
+        print(f"Messages to summarize: {len(messages_to_summarize)}")
+        print(f"Full message context: {len(full_messages)}")
+        
         # Get the original system messages that define the assistant's identity
-        #system_messages = [msg for msg in full_messages if msg["role"] == "system"]
+        system_messages = [msg for msg in full_messages if msg["role"] == "system"]
+        print(f"System messages found: {len(system_messages)}")
         
         # Add our summarization directive while preserving original context
         summarize_directive = dict(
@@ -123,7 +127,7 @@ Output the memory inside <memory> tags."""
         
         # Prepare the conversation content to summarize
         content = ""
-        for msg in messages:
+        for msg in messages_to_summarize:
             role = msg["role"].upper()
             if role not in ("USER", "ASSISTANT"):
                 continue
@@ -132,26 +136,28 @@ Output the memory inside <memory> tags."""
             if not content.endswith("\n"):
                 content += "\n"
 
+        print(f"\nContent prepared for summarization: {len(content)} characters")
+
+        # Determine if this is an emergency summarization
+        is_emergency = len(messages_to_summarize) == len(full_messages)
+        print(f"Emergency summarization: {'Yes' if is_emergency else 'No'}")
+
         prompt = prompts.summarize
-        if len(messages_to_summarize) == len(full_messages):
+        if is_emergency:
             prompt = summarize_directive
+            print("Using emergency summarization directive")
+        else:
+            print("Using standard summarization prompt")
 
         # Build messages with clear separation of context and content
-        summarize_messages = full_messages + [
+        summarize_messages = system_messages + [
             # System context for the summarization task
-            dict(role="user", content=prompts.prompt),
-
-            dict(role="assistant", content="<ack/>"),
-
+            dict(role="system", content=prompt),
+            dict(role="assistant", content="<ack>I understand I need to summarize this conversation while preserving my identity and experience.</ack>"),
             dict(role="user", content="<content_to_summarize>" + content + "</content_to_summarize>"),
         ]
 
-        # Log the complete prompt for debugging
-        print("\n=== COMPLETE SUMMARIZATION PROMPT ===")
-        for msg in summarize_messages:
-            print(f"\n--- {msg['role'].upper()} ---")
-            print(msg['content'])
-        print("\n=== END PROMPT ===\n")
+        print(f"\nPrepared {len(summarize_messages)} messages for summarization model")
 
         # Try to summarize with main model first
         main_model = self.models[-1]  # Main model is last in the list
