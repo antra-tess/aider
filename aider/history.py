@@ -106,10 +106,13 @@ class ChatSummary:
             thread.join()
         print("Summarization complete, chunks:", len(summaries))
 
-        # Combine the summaries
+        # Combine the summaries and preserved messages
         combined = []
         for summary in summaries:
             combined.extend(summary)
+        
+        # Add preserved messages at the end
+        combined.extend(preserved_messages)
 
         # If still too big, recurse with reduced depth
         combined_tokens = self.token_count(combined)
@@ -120,6 +123,7 @@ class ChatSummary:
         # print trace
         traceback.print_stack()
         
+        print(f"Final combined message count: {len(combined)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
         return combined
 
     def summarize_all(self, messages_to_summarize, full_messages):
