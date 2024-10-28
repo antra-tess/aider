@@ -1107,6 +1107,7 @@ class Coder:
         return chunks
 
     def send_message(self, inp):
+        # Only add the message to cur_messages, don't log it since it was already logged
         if inp.startswith("<system>") and inp.endswith("</system>"):
             self.cur_messages += [
                 dict(role="user", content=inp),
@@ -1116,25 +1117,7 @@ class Coder:
                 dict(role="user", content="<human>" + inp + "</human>"),
             ]
 
-
         chunks = self.format_messages()
-        #         self.system
-        #         + self.examples
-        #         + self.readonly_files
-        #         + self.repo
-        #         + self.done
-        #         + self.chat_files
-        #         + self.cur
-        #         + self.reminder
-        print("System messages: ", len(chunks.system))
-        print("Examples messages: ", len(chunks.examples))
-        print("Readonly files messages: ", len(chunks.readonly_files))
-        print("Repo messages: ", len(chunks.repo))
-        print("Done messages: ", len(chunks.done))
-        print("Chat files messages: ", len(chunks.chat_files))
-        print("Cur messages: ", len(chunks.cur))
-        print("Reminder messages: ", len(chunks.reminder))
-
         messages = chunks.all_messages()
         
         # Debug memory preservation
