@@ -1,12 +1,12 @@
 import hashlib
 import json
+import os
+from pathlib import Path
 
 import backoff
 
 from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
-
-# from diskcache import Cache
 
 
 CACHE_PATH = "~/.aider.send.cache.v1"
@@ -56,6 +56,30 @@ def lazy_litellm_retry_decorator(func):
     return wrapper
 
 
+def ensure_request_logs_dir():
+    logs_dir = Path("request_logs")
+    logs_dir.mkdir(exist_ok=True)
+    return logs_dir
+
+def get_next_log_number(logs_dir):
+    existing_logs = [f for f in logs_dir.glob("request_*.json")]
+    if not existing_logs:
+        return 1
+    numbers = [int(f.stem.split('_')[1]) for f in existing_logs]
+    return max(numbers) + 1
+
+def log_request(request_data, response_data, logs_dir):
+    log_num = get_next_log_number(logs_dir)
+    log_file = logs_dir / f"request_{log_num}.json"
+    
+    log_entry = {
+        "request": request_data,
+        "response": response_data
+    }
+    
+    with open(log_file, 'w', encoding='utf-8') as f:
+        json.dump(log_entry, f, indent=2, default=str)
+
 def send_completion(
     model_name,
     messages,
@@ -83,14 +107,28 @@ def send_completion(
         kwargs.update(extra_params)
 
     key = json.dumps(kwargs, sort_keys=True).encode()
-
-    # Generate SHA1 hash of kwargs and append it to chat_completion_call_hashes
     hash_object = hashlib.sha1(key)
 
     if not stream and CACHE is not None and key in CACHE:
         return hash_object, CACHE[key]
 
+    # Create logs directory and prepare request data
+    logs_dir = ensure_request_logs_dir()
+    request_data = {
+        "model": model_name,
+        "messages": messages,
+        "functions": functions,
+        "stream": stream,
+        "temperature": temperature,
+        "extra_params": extra_params,
+        "kwargs": kwargs
+    }
+
     res = litellm.completion(**kwargs)
+
+    # Log both request and response
+    response_data = res.model_dump() if hasattr(res, 'model_dump') else str(res)
+    log_request(request_data, response_data, logs_dir)
 
     if not stream and CACHE is not None:
         CACHE[key] = res
