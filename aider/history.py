@@ -166,15 +166,6 @@ Output the memory inside <memory> tags."""
                 "extra_params": main_model.extra_params,
             }
 
-            # Create logs directory and prepare request data
-            logs_dir = Path("request_logs")
-            logs_dir.mkdir(exist_ok=True)
-            request_data = {
-                "model": main_model.name,
-                "messages": summarize_messages,
-                "extra_params": main_model.extra_params,
-            }
-
             print("Summarizing with main model:", main_model.name)
             summary = simple_send_with_retries(
                 main_model.name, summarize_messages, extra_params=main_model.extra_params
@@ -183,17 +174,6 @@ Output the memory inside <memory> tags."""
                 print("Summary:", len(summary))
             else:
                 print("Summary: None")
-
-            # Log both request and response
-            log_num = len(list(logs_dir.glob("request_*.json"))) + 1
-            log_file = logs_dir / f"request_{log_num}.json"
-            log_entry = {
-                "request": request_data,
-                "response": summary,
-                "type": "summarization"
-            }
-            with open(log_file, 'w', encoding='utf-8') as f:
-                json.dump(log_entry, f, indent=2, default=str)
 
             # Log both request and response
             log_num = len(list(logs_dir.glob("request_*.json"))) + 1
@@ -233,29 +213,9 @@ Output the memory inside <memory> tags."""
                     "extra_params": model.extra_params,
                 }
 
-                # Create logs directory and prepare request data
-                logs_dir = Path("request_logs")
-                logs_dir.mkdir(exist_ok=True)
-                request_data = {
-                    "model": model.name,
-                    "messages": summarize_messages,
-                    "extra_params": model.extra_params,
-                }
-
                 summary = simple_send_with_retries(
                     model.name, summarize_messages, extra_params=model.extra_params
                 )
-
-                # Log both request and response
-                log_num = len(list(logs_dir.glob("request_*.json"))) + 1
-                log_file = logs_dir / f"request_{log_num}.json"
-                log_entry = {
-                    "request": request_data,
-                    "response": summary,
-                    "type": "summarization_fallback"
-                }
-                with open(log_file, 'w', encoding='utf-8') as f:
-                    json.dump(log_entry, f, indent=2, default=str)
 
                 # Log both request and response
                 log_num = len(list(logs_dir.glob("request_*.json"))) + 1
