@@ -661,7 +661,7 @@ class Coder:
             files_reply = self.gpt_prompts.files_no_full_files_with_repo_map_reply
         else:
             files_content = self.gpt_prompts.files_no_full_files
-            files_reply = "Ok."
+            files_reply = "<ack>"
 
         if files_content:
             chat_files_messages += [
@@ -673,7 +673,7 @@ class Coder:
         if images_message is not None:
             chat_files_messages += [
                 images_message,
-                dict(role="assistant", content="Ok."),
+                dict(role="assistant", content="<ack>"),
             ]
 
         return chat_files_messages
@@ -851,7 +851,7 @@ class Coder:
         if message:
             self.done_messages += [
                 dict(role="user", content=message),
-                dict(role="assistant", content="Ok."),
+                dict(role="assistant", content="<ack>"),
             ]
         self.cur_messages = []
 
@@ -969,7 +969,7 @@ class Coder:
                             " or try to edit them any longer.</system>"
                         ),
                     ),
-                    dict(role="assistant", content="Ok."),
+                    dict(role="assistant", content="<ack>"),
                 ]
 
         if self.gpt_prompts.system_reminder:
