@@ -18,11 +18,12 @@ class ChatSummary:
     def too_big(self, messages):
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
+        print(f"\nChecking message size: {total} tokens vs max_tokens: {self.max_tokens}")
         return total > self.max_tokens
 
     def tokenize(self, messages):
         sized = []
-        for msg in messages_to_summarize:
+        for msg in messages:
             tokens = self.token_count(msg)
             sized.append((tokens, msg))
         return sized
@@ -95,7 +96,7 @@ class ChatSummary:
     def summarize_all(self, messages_to_summarize, full_messages):
         print("Summarizing all messages")
         # Get the original system messages that define the assistant's identity
-        system_messages = [msg for msg in full_messages if msg["role"] == "system"]
+        #system_messages = [msg for msg in full_messages if msg["role"] == "system"]
         
         # Add our summarization directive while preserving original context
         summarize_directive = dict(
@@ -131,17 +132,18 @@ Output the memory inside <memory> tags."""
             if not content.endswith("\n"):
                 content += "\n"
 
+        prompt = prompts.summarize
+        if len(messages_to_summarize) == len(full_messages):
+            prompt = summarize_directive
+
         # Build messages with clear separation of context and content
-        summarize_messages = [
+        summarize_messages = full_messages + [
             # System context for the summarization task
-            dict(role="system", content=prompts.summarize),
-            
-            # Original context for the assistant's identity
-            dict(role="system", content="Previous system context (for reference):\n" + 
-                 "\n---\n".join(msg["content"] for msg in system_messages)),
-            
-            # Content to be summarized
-            dict(role="user", content="Please summarize this conversation. If this is all your memory, this is an emergency summarization:\n" + content)
+            dict(role="user", content=prompts.prompt),
+
+            dict(role="assistant", content="<ack/>"),
+
+            dict(role="user", content="<content_to_summarize>" + content + "</content_to_summarize>"),
         ]
 
         # Log the complete prompt for debugging
