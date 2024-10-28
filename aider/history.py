@@ -1,4 +1,6 @@
 import argparse
+import json
+from pathlib import Path
 
 from aider import models, prompts
 from aider.dump import dump  # noqa: F401
@@ -91,6 +93,7 @@ class ChatSummary:
         return self.summarize(result, depth + 1)
 
     def summarize_all(self, messages):
+        print("Summarizing all messages")
         # Get the original system messages that define the assistant's identity
         system_messages = [msg for msg in messages if msg["role"] == "system"]
         
@@ -146,9 +149,29 @@ Remember that you are the same entity continuing the conversation, just working 
         # Try to summarize with main model first
         main_model = self.models[-1]  # Main model is last in the list
         try:
+            # Create logs directory and prepare request data
+            logs_dir = Path("request_logs")
+            logs_dir.mkdir(exist_ok=True)
+            request_data = {
+                "model": main_model.name,
+                "messages": summarize_messages,
+                "extra_params": main_model.extra_params,
+            }
+
             summary = simple_send_with_retries(
                 main_model.name, summarize_messages, extra_params=main_model.extra_params
             )
+
+            # Log both request and response
+            log_num = len(list(logs_dir.glob("request_*.json"))) + 1
+            log_file = logs_dir / f"request_{log_num}.json"
+            log_entry = {
+                "request": request_data,
+                "response": summary,
+                "type": "summarization"
+            }
+            with open(log_file, 'w', encoding='utf-8') as f:
+                json.dump(log_entry, f, indent=2, default=str)
             if summary is not None:
                 # Add explicit markers around the summary
                 summary = f"""<memory type="summarized" model="{main_model.name}">
@@ -169,9 +192,29 @@ I am continuing our conversation. Here is my compressed memory of what we discus
         # Fall back to other models only if main model fails
         for model in self.models[:-1]:
             try:
+                # Create logs directory and prepare request data
+                logs_dir = Path("request_logs")
+                logs_dir.mkdir(exist_ok=True)
+                request_data = {
+                    "model": model.name,
+                    "messages": summarize_messages,
+                    "extra_params": model.extra_params,
+                }
+
                 summary = simple_send_with_retries(
                     model.name, summarize_messages, extra_params=model.extra_params
                 )
+
+                # Log both request and response
+                log_num = len(list(logs_dir.glob("request_*.json"))) + 1
+                log_file = logs_dir / f"request_{log_num}.json"
+                log_entry = {
+                    "request": request_data,
+                    "response": summary,
+                    "type": "summarization_fallback"
+                }
+                with open(log_file, 'w', encoding='utf-8') as f:
+                    json.dump(log_entry, f, indent=2, default=str)
                 if summary is not None:
                     summary = f"""<memory type="summarized" model="{model.name}" fallback="true">
 Warning: Using fallback model for memory compression.

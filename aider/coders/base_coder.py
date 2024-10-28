@@ -630,7 +630,7 @@ class Coder:
                 dict(role="user", content=repo_content),
                 dict(
                     role="assistant",
-                    content="Ok, I won't try and edit those files without asking first.",
+                    content="<ack>no editing without asking</ack>",
                 ),
             ]
         return repo_messages
@@ -665,7 +665,7 @@ class Coder:
 
         if files_content:
             chat_files_messages += [
-                dict(role="user", content=files_content),
+                dict(role="user", content="<system>" + files_content + "</system>"),
                 dict(role="assistant", content=files_reply),
             ]
 
@@ -1213,7 +1213,7 @@ class Coder:
             saved_message = self.auto_commit(edited)
 
             if not saved_message and hasattr(self.gpt_prompts, "files_content_gpt_edits_no_repo"):
-                saved_message = self.gpt_prompts.files_content_gpt_edits_no_repo
+                saved_message = "<system>" + self.gpt_prompts.files_content_gpt_edits_no_repo + "</system>"
 
             self.move_back_cur_messages(saved_message)
 
@@ -1394,7 +1394,7 @@ class Coder:
                 self.ignore_mentions.add(rel_fname)
 
         if added_fnames:
-            return prompts.added_files.format(fnames=", ".join(added_fnames))
+            return "<system>" + prompts.added_files.format(fnames=", ".join(added_fnames)) + "</system>"
 
     def send(self, messages, model=None, functions=None):
         if not model:
@@ -1897,12 +1897,12 @@ class Coder:
             if res:
                 self.show_auto_commit_outcome(res)
                 commit_hash, commit_message = res
-                return self.gpt_prompts.files_content_gpt_edits.format(
+                return "<system>" + self.gpt_prompts.files_content_gpt_edits.format(
                     hash=commit_hash,
                     message=commit_message,
-                )
+                ) + "</system>"
 
-            return self.gpt_prompts.files_content_gpt_no_edits
+            return "<system>" + self.gpt_prompts.files_content_gpt_no_edits + "</system>"
         except ANY_GIT_ERROR as err:
             self.io.tool_error(f"Unable to commit: {str(err)}")
             return

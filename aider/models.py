@@ -723,7 +723,7 @@ class Model(ModelSettings):
         if max_input_tokens < 32 * 1024:
             self.max_chat_history_tokens = 1024
         else:
-            self.max_chat_history_tokens = 2 * 1024
+            self.max_chat_history_tokens = max_input_tokens // 4
 
         self.configure_model_settings(model)
         if weak_model is False:

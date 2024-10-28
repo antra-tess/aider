@@ -538,7 +538,7 @@ class Commands:
         self.io.tool_output(f"Now at:  {current_head_hash} {current_head_message}")
 
         if self.coder.main_model.send_undo_reply:
-            return prompts.undo_command_reply
+            return "<system>" + prompts.undo_command_reply + "</system>"
 
     def cmd_diff(self, args=""):
         "Display the diff of changes since the last message"
@@ -891,7 +891,7 @@ class Commands:
             if instructions:
                 msg = instructions + "\n\n" + msg
 
-            return msg
+            return "<system>" + msg + "</system>"
 
     def cmd_exit(self, args):
         "Exit the application"

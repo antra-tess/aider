@@ -17,11 +17,11 @@ NEVER return code outside the `replace_lines` function.
 """
 
     files_content_prefix = "Here is the current content of the files:\n"
-    files_no_full_files = "I am not sharing any files yet."
+    files_no_full_files = "There were no files shared yet."
 
     redacted_edit_message = "No changes are needed."
 
     repo_content_prefix = (
-        "Below here are summaries of other files! Do not propose changes to these *read-only*"
-        " files without asking me first.\n"
+        "Below here are summaries of other files. Do not propose changes to these *read-only*"
+        " files without asking for permissions to be changed.\n"
     )

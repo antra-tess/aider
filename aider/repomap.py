@@ -150,7 +150,7 @@ class RepoMap:
             other = ""
 
         if self.repo_content_prefix:
-            repo_content = self.repo_content_prefix.format(other=other)
+            repo_content = "<system>" + self.repo_content_prefix.format(other=other) + "</system>"
         else:
             repo_content = ""
 
