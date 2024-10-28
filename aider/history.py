@@ -123,12 +123,18 @@ Remember that you are the same entity continuing the conversation, just working 
             if not content.endswith("\n"):
                 content += "\n"
 
-        # Build messages with full context
-        summarize_messages = (
-            system_messages +  # Original system context
-            [summarize_directive] +  # Summarization instructions
-            [dict(role="user", content=content)]  # Content to summarize
-        )
+        # Build messages with clear separation of context and content
+        summarize_messages = [
+            # System context for the summarization task
+            dict(role="system", content=prompts.summarize),
+            
+            # Original system context for reference only
+            dict(role="system", content="Previous system context (for reference):\n" + 
+                 "\n---\n".join(msg["content"] for msg in system_messages)),
+            
+            # Content to be summarized
+            dict(role="user", content="Please summarize this conversation:\n\n" + content)
+        ]
 
         # Try to summarize with main model first
         main_model = self.models[-1]  # Main model is last in the list
