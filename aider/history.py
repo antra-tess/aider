@@ -136,6 +136,13 @@ Remember that you are the same entity continuing the conversation, just working 
             dict(role="user", content="Please summarize this conversation:\n\n" + content)
         ]
 
+        # Log the complete prompt for debugging
+        print("\n=== COMPLETE SUMMARIZATION PROMPT ===")
+        for msg in summarize_messages:
+            print(f"\n--- {msg['role'].upper()} ---")
+            print(msg['content'])
+        print("\n=== END PROMPT ===\n")
+
         # Try to summarize with main model first
         main_model = self.models[-1]  # Main model is last in the list
         try:
