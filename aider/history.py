@@ -43,16 +43,24 @@ class ChatSummary:
         if len(messages) <= min_split or depth > 3:
             return self.summarize_all(messages, messages)
 
-        # Split messages into roughly equal chunks that will each produce a ~2k token summary
+        # Split messages into chunks of roughly target_chunk_size tokens
         target_chunk_size = 20000  # Targeting ~2k token summaries
-        num_chunks = max(2, total // target_chunk_size)
-        chunk_size = len(messages) // num_chunks
-        
         chunks = []
-        for i in range(0, len(messages), chunk_size):
-            chunk = messages[i:i + chunk_size]
-            if len(chunk) >= min_split:
-                chunks.append(chunk)
+        current_chunk = []
+        current_tokens = 0
+        
+        for msg, (tokens, _) in zip(messages, sized):
+            current_chunk.append(msg)
+            current_tokens += tokens
+            
+            if current_tokens >= target_chunk_size and len(current_chunk) >= min_split:
+                chunks.append(current_chunk)
+                current_chunk = []
+                current_tokens = 0
+                
+        # Add any remaining messages to the last chunk
+        if current_chunk and len(current_chunk) >= min_split:
+            chunks.append(current_chunk)
 
         # Summarize each chunk in parallel using threading
         import threading
