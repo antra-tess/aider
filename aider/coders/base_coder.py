@@ -994,14 +994,8 @@ class Coder:
         chunks.examples = example_messages
 
         self.summarize_end()
-        # Preserve memories from summarization
-        chunks.done = []
-        for msg in self.done_messages:
-            if "<memory" in msg.get("content", ""):
-                # Keep memory messages at full fidelity
-                chunks.done.append(msg)
-            else:
-                chunks.done.append(msg)
+        # Preserve all messages, memories don't need special handling
+        chunks.done = list(self.done_messages)
 
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
