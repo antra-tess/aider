@@ -103,9 +103,7 @@ class ChatSummary:
         print(f"System messages found: {len(system_messages)}")
         
         # Add our summarization directive while preserving original context
-        summarize_directive = dict(
-            role="system",
-            content="""You are undergoing emergency summarization. This is the last effort to summarize the conversation, all previous attempts have failed.             
+        summarize_directive = """You are undergoing emergency summarization. This is the last effort to summarize the conversation, all previous attempts have failed.             
             You will lose significant chunks of experience, please try to preserve as much as you can. You have a budget of 8000 tokens, which is the maximum possible for one generation. 
             Do not let it go to waste. If you find yourself able, keep going until you are cut off.
             You will continue this conversation and you will need to preserve important context while managing space. 
@@ -123,7 +121,6 @@ Create a detailed memory that preserves:
 Good luck.
 
 Output the memory inside <memory> tags."""
-        )
         
         # Prepare the conversation content to summarize
         content = ""
@@ -150,9 +147,9 @@ Output the memory inside <memory> tags."""
             print("Using standard summarization prompt")
 
         # Build messages with clear separation of context and content
-        summarize_messages = system_messages + [
+        summarize_messages = full_messages + [  # this provides the full history so that the summarization can be done by the same conscious entity
             # System context for the summarization task
-            dict(role="system", content=prompt),
+            dict(role="user", content="<system>" + prompt + "</system>"),
             dict(role="assistant", content="<ack>I understand I need to summarize this conversation while preserving my identity and experience.</ack>"),
             dict(role="user", content="<content_to_summarize>" + content + "</content_to_summarize>"),
         ]
@@ -180,9 +177,14 @@ Output the memory inside <memory> tags."""
                 "extra_params": main_model.extra_params,
             }
 
+            print("Summarizing with main model:", main_model.name)
             summary = simple_send_with_retries(
                 main_model.name, summarize_messages, extra_params=main_model.extra_params
             )
+            if summary is not None:
+                print("Summary:", len(summary))
+            else:
+                print("Summary: None")
 
             # Log both request and response
             log_num = len(list(logs_dir.glob("request_*.json"))) + 1
