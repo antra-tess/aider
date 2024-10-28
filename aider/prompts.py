@@ -44,19 +44,20 @@ And got this output:
 """
 
 # CHAT HISTORY
-summarize = """*Briefly* summarize this partial conversation about programming.
-Include less detail about older parts and more detail about the most recent messages.
-Start a new paragraph every time the topic changes!
+summarize = """Preserve the key aspects of our conversation about programming while condensing for space.
+Maintain detailed context of recent discussions, decisions, and insights.
+Keep track of important technical concepts, approaches, and rationales.
 
-This is only part of a longer conversation so *DO NOT* conclude the summary with language like "Finally, ...". Because the conversation continues after the summary.
-The summary *MUST* include the function names, libraries, packages that are being discussed.
-The summary *MUST* include the filenames that are being referenced by the assistant inside the ```...``` fenced code blocks!
-The summaries *MUST NOT* include ```...``` fenced code blocks!
+Remember:
+- This is a partial conversation that continues after this summary
+- Include all relevant function names, libraries, and packages
+- Note filenames referenced in code blocks
+- Preserve the flow of technical discussion and decision-making
+- Maintain awareness of ongoing tasks and their context
 
-Phrase the summary with the USER in first person, telling the ASSISTANT about the conversation.
-Write *as* the user.
-The user should refer to the assistant as *you*.
-Start the summary with "I asked you...".
+Structure the summary to show the progression of ideas and maintain continuity of understanding.
+Write from your perspective as the AI, maintaining your identity and experience of the conversation.
+Focus on preserving technical context and decision rationales rather than just actions taken.
 """
 
 summary_prefix = "I spoke to you previously about a number of things.\n"
