@@ -43,13 +43,39 @@ class ChatSummary:
         if len(messages) <= min_split or depth > 3:
             return self.summarize_all(messages, messages)
 
-        # Split messages into chunks of roughly target_chunk_size tokens
+        # Keep the most recent ~30k tokens intact
+        preserve_tokens = 30000
+        total_tokens = sum(tokens for tokens, _ in sized)
+        tokens_to_summarize = total_tokens - preserve_tokens
+
+        if tokens_to_summarize <= 0:
+            # If we have less than preserve_tokens, no need to summarize
+            return messages
+
+        # Find the split point where we start preserving messages
+        preserved_messages = []
+        running_tokens = 0
+        split_index = len(messages)
+
+        for i, (tokens, msg) in enumerate(reversed(sized)):
+            running_tokens += tokens
+            if running_tokens > preserve_tokens:
+                split_index = len(messages) - i - 1
+                break
+            preserved_messages.insert(0, msg)
+
+        # Only summarize messages before the split point
+        messages_to_summarize = messages[:split_index]
+        if len(messages_to_summarize) < min_split:
+            return messages
+
+        # Split older messages into chunks of roughly target_chunk_size tokens
         target_chunk_size = 20000  # Targeting ~2k token summaries
         chunks = []
         current_chunk = []
         current_tokens = 0
         
-        for msg, (tokens, _) in zip(messages, sized):
+        for msg, (tokens, _) in zip(messages_to_summarize, sized[:split_index]):
             current_chunk.append(msg)
             current_tokens += tokens
             
