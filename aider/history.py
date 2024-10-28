@@ -22,7 +22,7 @@ class ChatSummary:
 
     def tokenize(self, messages):
         sized = []
-        for msg in messages:
+        for msg in messages_to_summarize:
             tokens = self.token_count(msg)
             sized.append((tokens, msg))
         return sized
@@ -95,7 +95,7 @@ class ChatSummary:
     def summarize_all(self, messages_to_summarize, full_messages):
         print("Summarizing all messages")
         # Get the original system messages that define the assistant's identity
-        system_messages = [msg for msg in messages if msg["role"] == "system"]
+        system_messages = [msg for msg in full_messages if msg["role"] == "system"]
         
         # Add our summarization directive while preserving original context
         summarize_directive = dict(
@@ -205,7 +205,7 @@ Output the memory inside <memory> tags."""
 
 </memory>"""
                 # Log the summarization
-                print(f"\nSummarizing {len(messages)} messages with {main_model.name}:")
+                print(f"\nSummarizing {len(messages_to_summarize)} messages with {main_model.name}:")
                 print("Original content length:", len(content))
                 print("Summarized content length:", len(summary))
                 print("Summary:", summary)
