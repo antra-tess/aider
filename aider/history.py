@@ -38,7 +38,7 @@ class ChatSummary:
 
         min_split = 4
         if len(messages) <= min_split or depth > 3:
-            return self.summarize_all(messages)
+            return self.summarize_all(messages, messages)  # Pass full context for emergency summarization
 
         tail_tokens = 0
         split_index = len(messages)
@@ -58,7 +58,7 @@ class ChatSummary:
             split_index -= 1
 
         if split_index <= min_split:
-            return self.summarize_all(messages)
+            return self.summarize_all(messages, messages)  # Pass full context for emergency summarization
 
         head = messages[:split_index]
         tail = messages[split_index:]
@@ -81,7 +81,7 @@ class ChatSummary:
 
         keep.reverse()
 
-        summary = self.summarize_all(keep)
+        summary = self.summarize_all(keep, messages)  # Pass full context for chunk summarization
 
         tail_tokens = sum(tokens for tokens, msg in sized[split_index:])
         summary_tokens = self.token_count(summary)
@@ -92,7 +92,7 @@ class ChatSummary:
 
         return self.summarize(result, depth + 1)
 
-    def summarize_all(self, messages):
+    def summarize_all(self, messages_to_summarize, full_messages):
         print("Summarizing all messages")
         # Get the original system messages that define the assistant's identity
         system_messages = [msg for msg in messages if msg["role"] == "system"]
