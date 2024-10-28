@@ -833,12 +833,15 @@ class Model(ModelSettings):
     def token_count(self, messages):
         if type(messages) is list:
             try:
-                return litellm.token_counter(model=self.name, messages=messages)
+                count = litellm.token_counter(model=self.name, messages=messages)
+                #print(f"Token count for message list: {count}")
+                return count
             except Exception as err:
-                print(f"Unable to count tokens: {err}")
+                #print(f"Unable to count tokens with litellm: {err}")
                 return 0
 
         if not self.tokenizer:
+            print("No tokenizer available")
             return
 
         if type(messages) is str:
@@ -847,9 +850,11 @@ class Model(ModelSettings):
             msgs = json.dumps(messages)
 
         try:
-            return len(self.tokenizer(msgs))
+            count = len(self.tokenizer(msgs))
+            #print(f"Token count for string/dict: {count}")
+            return count
         except Exception as err:
-            print(f"Unable to count tokens: {err}")
+            #print(f"Unable to count tokens with tokenizer: {err}")
             return 0
 
     def token_count_for_image(self, fname):

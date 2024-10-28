@@ -115,7 +115,7 @@ class Linter:
         res += "\n"
         res += tree_context(rel_fname, code, lintres.lines)
 
-        return res
+        return "<system name='linter'>" + res + "</system>"
 
     def py_lint(self, fname, rel_fname, code):
         basic_res = basic_lint(rel_fname, code)
