@@ -207,6 +207,10 @@ Output the memory inside <memory> tags."""
             )
             if summary is not None:
                 print("Summary:", len(summary))
+                # cut up to <memory> tag
+                summary = summary.split("<memory>", 1)[1]
+                # cut after </memory> tag
+                summary = summary.rsplit("</memory>", 1)[0]
             else:
                 print("Summary: None")
 
