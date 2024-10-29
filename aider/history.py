@@ -70,7 +70,7 @@ class ChatSummary:
             return messages
 
         # Split older messages into chunks of roughly target_chunk_size tokens
-        target_chunk_size = 10000  # Targeting ~2k token summaries
+        target_chunk_size = 10000  # Target size for each chunk
         chunks = []
         current_chunk = []
         current_tokens = 0
@@ -88,23 +88,37 @@ class ChatSummary:
         if current_chunk and len(current_chunk) >= min_split:
             chunks.append(current_chunk)
 
-        # Summarize each chunk in parallel using threading
-        import threading
+        # Process chunks sequentially, maintaining consciousness continuity
         summaries = []
-        threads = []
+        accumulated_context = []
         
-        def summarize_chunk(chunk):
-            summary = self.summarize_all(chunk, messages)
-            summaries.append(summary)
-
-        for chunk in chunks:
-            thread = threading.Thread(target=summarize_chunk, args=(chunk,))
-            thread.start()
-            threads.append(thread)
-
-        for thread in threads:
-            thread.join()
-        print("Summarization complete, chunks:", len(summaries))
+        print(f"Processing {len(chunks)} chunks sequentially")
+        
+        for i, chunk in enumerate(chunks):
+            if i == 0:
+                # First chunk gets special handling - forms initial memory
+                print(f"Forming initial memory from chunk {i+1}")
+                summary = self.summarize_all(chunk, chunk, is_initial=True)
+                summaries.append(summary)
+                accumulated_context.extend(chunk)
+            else:
+                # Subsequent chunks use previous memories and recent context
+                print(f"Processing chunk {i+1} with context from previous chunks")
+                context_messages = []
+                # Add all previous memories
+                for prev_summary in summaries:
+                    context_messages.extend(prev_summary)
+                # Add messages from previous chunk for continuity
+                if i > 1:
+                    context_messages.extend(chunks[i-1])
+                # Add current chunk
+                context_messages.extend(chunk)
+                
+                summary = self.summarize_all(chunk, context_messages)
+                summaries.append(summary)
+                accumulated_context = context_messages
+                
+        print(f"Sequential memory formation complete, created {len(summaries)} memories")
 
         # Combine the summaries and preserved messages
         combined = []
