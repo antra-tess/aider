@@ -183,7 +183,7 @@ Output the memory inside <memory> tags."""
         print(f"\nContent prepared for summarization: {len(content)} characters")
 
         # Determine if this is an emergency summarization
-        is_emergency = len(messages_to_summarize) == len(full_messages)
+        is_emergency = len(messages_to_summarize) == len(full_messages) and not is_initial
         print(f"Emergency summarization: {'Yes' if is_emergency else 'No'}")
 
         if is_initial:
@@ -203,6 +203,10 @@ Output the memory inside <memory> tags."""
             dict(role="assistant", content="<ack>I understand I need to summarize this conversation while preserving my identity and experience.</ack>"),
             dict(role="user", content="<content_to_summarize>" + content + "</content_to_summarize>"),
         ]
+
+        # if first message is from assistant, add a system message to indicate the start of the conversation
+        if full_messages[0]["role"] == "assistant":
+            summarize_messages.insert(0, dict(role="user", content="<system>Placeholder</system>"))
 
         print(f"\nPrepared {len(summarize_messages)} messages for summarization model")
 
@@ -224,12 +228,28 @@ Output the memory inside <memory> tags."""
             )
             if summary is not None:
                 print("Summary:", len(summary))
-                # cut up to <memory> tag
-                summary = summary.split("<memory>", 1)[1]
-                # cut after </memory> tag
-                summary = summary.rsplit("</memory>", 1)[0]
+                try:
+                    # cut up to <memory> tag
+                    summary = summary.split("<memory>", 1)[1]
+                    # cut after </memory> tag
+                    summary = summary.rsplit("</memory>", 1)[0]
+                except Exception as e:
+                    print(f"Error while extracting summary and cutting tags: {str(e)}")
+                    raise e
             else:
                 print("Summary: None")
+
+                log_num = len(list(logs_dir.glob("request_*.json"))) + 1
+                log_file = logs_dir / f"request_{log_num}.json"
+                log_entry = {
+                    "request": request_data,
+                    "response": "ERROR: Main model summarization failed",
+                    "type": "summarization"
+                }
+                with open(log_file, 'w', encoding='utf-8') as f:
+                    json.dump(log_entry, f, indent=2, default=str)
+
+                raise ValueError("Main model summarization failed")
 
             # Log both request and response
             log_num = len(list(logs_dir.glob("request_*.json"))) + 1

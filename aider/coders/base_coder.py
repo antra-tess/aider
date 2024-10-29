@@ -416,6 +416,8 @@ class Coder:
                 self.done_messages = utils.split_chat_history_markdown(history_md)
                 self.summarize_start()
 
+        self.summarize_end()
+
         # Linting and testing
         self.linter = Linter(root=self.root, encoding=io.encoding)
         self.auto_lint = auto_lint
@@ -645,7 +647,7 @@ class Coder:
                 ),
                 dict(
                     role="assistant",
-                    content="Ok, I will use these files as references.",
+                    content="<ack/>",
                 ),
             ]
         return readonly_messages
@@ -843,6 +845,8 @@ class Coder:
 
         self.summarizer_thread.join()
         self.summarizer_thread = None
+
+        print("Summarization thread joined.")
 
         self.done_messages = self.summarized_done_messages
         self.summarized_done_messages = []

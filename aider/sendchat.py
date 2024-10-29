@@ -149,5 +149,6 @@ def simple_send_with_retries(model_name, messages, extra_params=None):
 
         _hash, response = send_completion(**kwargs)
         return response.choices[0].message.content
-    except (AttributeError, litellm.exceptions.BadRequestError):
+    except (AttributeError, litellm.exceptions.BadRequestError) as e:
+        print(f"Error in simple_send_with_retries: {e}")
         return
