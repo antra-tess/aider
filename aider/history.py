@@ -126,7 +126,7 @@ class ChatSummary:
         print(f"Final combined message count: {len(combined)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
         return combined
 
-    def summarize_all(self, messages_to_summarize, full_messages):
+    def summarize_all(self, messages_to_summarize, full_messages, is_initial=False):
         print("\n=== STARTING SUMMARIZATION ===")
         print(f"Messages to summarize: {len(messages_to_summarize)}")
         print(f"Full message context: {len(full_messages)}")
@@ -172,11 +172,14 @@ Output the memory inside <memory> tags."""
         is_emergency = len(messages_to_summarize) == len(full_messages)
         print(f"Emergency summarization: {'Yes' if is_emergency else 'No'}")
 
-        prompt = prompts.summarize
-        if is_emergency:
+        if is_initial:
+            prompt = prompts.initial_summarize
+            print("Using initial summarization prompt")
+        elif is_emergency:
             prompt = summarize_directive
             print("Using emergency summarization directive")
         else:
+            prompt = prompts.summarize
             print("Using standard summarization prompt")
 
         # Build messages with clear separation of context and content
