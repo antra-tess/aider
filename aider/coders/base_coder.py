@@ -263,6 +263,7 @@ class Coder:
         num_cache_warming_pings=0,
         suggest_shell_commands=True,
         chat_language=None,
+        spend_limit=None,
     ):
         self.chat_language = chat_language
         self.commit_before_message = []
@@ -1635,6 +1636,12 @@ class Coder:
 
         self.total_cost += cost
         self.message_cost += cost
+
+        # Check spend limit
+        if self.spend_limit is not None and self.total_cost > self.spend_limit:
+            raise ValueError(
+                f"Spend limit of ${self.spend_limit:.2f} exceeded. Total cost: ${self.total_cost:.2f}"
+            )
 
         def format_cost(value):
             if value == 0:
