@@ -1,5 +1,7 @@
 import argparse
+import hashlib
 import json
+import time
 from pathlib import Path
 
 from aider import models, prompts
@@ -145,6 +147,22 @@ class ChatSummary:
         print(f"Messages to summarize: {len(messages_to_summarize)}")
         print(f"Full message context: {len(full_messages)}")
         
+        # Create cache key from messages
+        cache_key = json.dumps([messages_to_summarize, full_messages, is_initial], sort_keys=True)
+        cache_hash = hashlib.sha256(cache_key.encode()).hexdigest()
+        cache_dir = Path.home() / ".aider" / "caches" / "summaries"
+        cache_file = cache_dir / f"{cache_hash}.json"
+
+        # Try to load from cache
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cached_data = json.load(f)
+                print(f"Loaded summary from cache: {cache_file}")
+                return [dict(role="assistant", content=cached_data["summary"])]
+            except Exception as e:
+                print(f"Error loading cache: {e}")
+
         # Get the original system messages that define the assistant's identity
         system_messages = [msg for msg in full_messages if msg["role"] == "system"]
         print(f"System messages found: {len(system_messages)}")
@@ -273,6 +291,21 @@ Output the memory inside <memory> tags."""
                 print("Original content length:", len(content))
                 print("Summarized content length:", len(summary))
                 print("Summary:", summary)
+
+                # Save to cache
+                try:
+                    cache_dir.mkdir(parents=True, exist_ok=True)
+                    cache_data = {
+                        "summary": summary,
+                        "timestamp": time.time(),
+                        "model": main_model.name
+                    }
+                    with open(cache_file, 'w', encoding='utf-8') as f:
+                        json.dump(cache_data, f, indent=2)
+                    print(f"Saved summary to cache: {cache_file}")
+                except Exception as e:
+                    print(f"Error saving cache: {e}")
+
                 return [dict(role="assistant", content=summary)]
         except Exception as e:
             print(f"Main model summarization failed: {str(e)}")
