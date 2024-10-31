@@ -271,6 +271,7 @@ class Coder:
         self.rejected_urls = set()
         self.abs_root_path_cache = {}
         self.ignore_mentions = set()
+        self.spend_limit = spend_limit
 
         self.suggest_shell_commands = suggest_shell_commands
 
