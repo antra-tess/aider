@@ -238,6 +238,7 @@ class Coder:
         repo=None,
         fnames=None,
         read_only_fnames=None,
+        files_cache_path=None,
         show_diffs=False,
         auto_commits=True,
         dirty_commits=True,
@@ -297,6 +298,7 @@ class Coder:
         self.verbose = verbose
         self.abs_fnames = set()
         self.abs_read_only_fnames = set()
+        self.files_cache_path = files_cache_path or (Path.home() / ".aider" / "files_cache.json")
 
         if cur_messages:
             self.cur_messages = cur_messages
@@ -371,6 +373,8 @@ class Coder:
 
         if not self.repo:
             self.root = utils.find_common_root(self.abs_fnames)
+
+        self.load_files_cache()
 
         if read_only_fnames:
             self.abs_read_only_fnames = set()
@@ -454,11 +458,44 @@ class Coder:
     def add_rel_fname(self, rel_fname):
         self.abs_fnames.add(self.abs_root_path(rel_fname))
         self.check_added_files()
+        self.save_files_cache()
+
+    def save_files_cache(self):
+        if not self.files_cache_path:
+            return
+        try:
+            cache_dir = self.files_cache_path.parent
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            cache_data = {
+                "files": list(self.get_inchat_relative_files()),
+                "read_only_files": [self.get_rel_fname(f) for f in self.abs_read_only_fnames],
+                "timestamp": time.time()
+            }
+            with open(self.files_cache_path, 'w', encoding='utf-8') as f:
+                json.dump(cache_data, f, indent=2)
+        except Exception as e:
+            self.io.tool_error(f"Error saving files cache: {e}")
+
+    def load_files_cache(self):
+        if not self.files_cache_path or not self.files_cache_path.exists():
+            return
+        try:
+            with open(self.files_cache_path, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+            for fname in cache_data.get("files", []):
+                self.add_rel_fname(fname)
+            for fname in cache_data.get("read_only_files", []):
+                abs_fname = self.abs_root_path(fname)
+                if os.path.exists(abs_fname):
+                    self.abs_read_only_fnames.add(abs_fname)
+        except Exception as e:
+            self.io.tool_error(f"Error loading files cache: {e}")
 
     def drop_rel_fname(self, fname):
         abs_fname = self.abs_root_path(fname)
         if abs_fname in self.abs_fnames:
             self.abs_fnames.remove(abs_fname)
+            self.save_files_cache()
             return True
 
     def abs_root_path(self, path):
