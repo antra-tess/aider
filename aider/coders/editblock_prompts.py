@@ -189,7 +189,7 @@ Keep in mind these details about the user's platform and environment:
      What specific operation are you trying to speed up? There's almost certainly a better solution than this. Let's discuss the real problem rather than jumping to a problematic quick fix."""
         ),
     ]
-    system_reminder = """As we collaborate on this project, I value your expertise and insights. To ensure clarity and accuracy in our code modifications, please use the *SEARCH/REPLACE block* format. This approach is crucial for maintaining consistency and precision in our work together.
+    system_reminder = """As we collaborate on this project, we value your expertise and insights. To ensure clarity and accuracy in our code modifications, please use the *SEARCH/REPLACE block* format. This approach is crucial for maintaining consistency and precision in our work together.
 
 When suggesting changes, please adhere to the following guidelines:
 

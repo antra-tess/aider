@@ -252,8 +252,8 @@ Output the memory inside <memory> tags."""
                     # cut after </memory> tag
                     summary = summary.rsplit("</memory>", 1)[0]
                 except Exception as e:
-                    print(f"Error while extracting summary and cutting tags: {str(e)}")
-                    raise e
+                    print(f"Error while extracting summary and cutting tags: {str(e)}, keeping uncut summary")
+
             else:
                 print("Summary: None")
 
