@@ -298,8 +298,9 @@ class Coder:
         self.verbose = verbose
         self.abs_fnames = set()
         self.abs_read_only_fnames = set()
-        self.files_cache_path = files_cache_path or (Path.home() / ".aider" / "files_cache.json")
-
+        # Initialize files_cache_path after repo/root is set up
+        self.files_cache_path = None
+        
         if cur_messages:
             self.cur_messages = cur_messages
         else:
@@ -374,7 +375,13 @@ class Coder:
         if not self.repo:
             self.root = utils.find_common_root(self.abs_fnames)
 
-        self.load_files_cache()
+        # Set up project-specific cache file
+        if self.root:
+            root_hash = hashlib.sha256(str(self.root).encode()).hexdigest()[:8]
+            cache_dir = Path.home() / ".aider" / "files_cache"
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            self.files_cache_path = files_cache_path or (cache_dir / f"{root_hash}.json")
+            self.load_files_cache()
 
         if read_only_fnames:
             self.abs_read_only_fnames = set()
