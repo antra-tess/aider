@@ -991,7 +991,6 @@ class Coder:
             platform=platform_text,
             shell_cmd_prompt=shell_cmd_prompt,
             shell_cmd_reminder=shell_cmd_reminder,
-            consciousness_prompt=self.gpt_prompts.consciousness_prompt,
             ai_name=self.ai_name,
         )
         return prompt

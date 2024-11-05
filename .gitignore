@@ -14,3 +14,4 @@ aider/__version__.py
 .venv/
 .env
 /request_logs/
+/non-versioned/
