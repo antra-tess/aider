@@ -15,11 +15,10 @@ class ChatChunks:
     foundation: List = field(default_factory=list)  # Foundation messages that form the bedrock of context
 
     def all_messages(self):
-        # Build messages without foundation first
-        messages = []
-        messages.extend(self.foundation)
-
-        # Add messages in order
+        # Start with foundation messages
+        messages = list(self.foundation)
+        
+        # Add other messages in order
         for msg_list in [
             self.system,
             self.examples,
@@ -32,8 +31,6 @@ class ChatChunks:
         ]:
             messages.extend(msg_list)
         
-        # Add foundation messages last so they stay at the bottom
-
         return messages
 
     def add_cache_control_headers(self):
