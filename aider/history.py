@@ -16,6 +16,7 @@ class ChatSummary:
         self.models = models if isinstance(models, list) else [models]
         self.max_tokens = max_tokens
         self.token_count = self.models[0].token_count
+        self.foundation_messages = []  # Messages that should never be compressed
 
     def too_big(self, messages):
         sized = self.tokenize(messages)
@@ -35,10 +36,16 @@ class ChatSummary:
         if not self.models:
             raise ValueError("No models available for summarization")
 
-        sized = self.tokenize(messages)
+        # Separate foundation messages from regular messages
+        regular_messages = [msg for msg in messages if msg not in self.foundation_messages]
+        
+        sized = self.tokenize(regular_messages)
         total = sum(tokens for tokens, _msg in sized)
-        if total <= self.max_tokens and depth == 0:
-            return messages
+        
+        # If everything fits with foundation messages, return all
+        foundation_tokens = sum(self.token_count(msg) for msg in self.foundation_messages)
+        if total + foundation_tokens <= self.max_tokens and depth == 0:
+            return self.foundation_messages + regular_messages
 
         # For emergency summarization (too deep or too few messages)
         min_split = 4
