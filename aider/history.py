@@ -217,8 +217,11 @@ class ChatSummary:
         print(f"Messages to summarize: {len(messages_to_summarize)}")
         print(f"Context messages: {len(context_messages)}")
         
-        # Create cache key from messages and flags
-        cache_key = json.dumps([messages_to_summarize, context_messages, is_initial, is_emergency], sort_keys=True)
+        # Create cache key from messages and flags, excluding foundation messages
+        # Filter out foundation messages from the cache key since they're constant
+        messages_for_key = [msg for msg in messages_to_summarize if msg not in self._foundation_messages]
+        context_for_key = [msg for msg in context_messages if msg not in self._foundation_messages]
+        cache_key = json.dumps([messages_for_key, context_for_key, is_initial, is_emergency], sort_keys=True)
         cache_hash = hashlib.sha256(cache_key.encode()).hexdigest()
         cache_dir = Path.home() / ".aider" / "caches" / "summaries"
         cache_file = cache_dir / f"{cache_hash}.json"
