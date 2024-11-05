@@ -58,24 +58,24 @@ class ChatSummary:
         tokens_to_summarize = total - preserve_tokens
 
         if tokens_to_summarize <= 0:
-            return foundation_messages + regular_messages
+            return messages
 
-        # Find split point in regular messages
+        # Find split point in messages
         preserved_messages = []
         running_tokens = 0
-        split_index = len(regular_messages)
+        split_index = len(messages)
 
         for i, (tokens, msg) in enumerate(reversed(sized)):
             running_tokens += tokens
             if running_tokens > preserve_tokens:
-                split_index = len(regular_messages) - i - 1
+                split_index = len(messages) - i - 1
                 break
             preserved_messages.insert(0, msg)
 
-        # Only summarize regular messages before the split point
-        messages_to_summarize = regular_messages[:split_index]
+        # Only summarize messages before the split point
+        messages_to_summarize = messages[:split_index]
         if len(messages_to_summarize) < min_split:
-            return foundation_messages + regular_messages
+            return messages
 
         # Split older messages into chunks
         target_chunk_size = 10000
@@ -100,7 +100,7 @@ class ChatSummary:
         print(f"Processing {len(chunks)} chunks sequentially")
         
         for i, chunk in enumerate(chunks):
-            context_messages = list(foundation_messages)  # Start with foundation messages
+            context_messages = []  # Start with empty context
             
             if i == 0:
                 # First chunk forms initial memory
@@ -137,10 +137,10 @@ class ChatSummary:
         # If still too big, recurse with reduced depth
         combined_tokens = self.token_count(combined)
         if combined_tokens > self.max_tokens:
-            return self.summarize(foundation_messages + combined, depth + 1)
+            return self.summarize(combined, depth + 1)
 
         print(f"Final combined message count: {len(combined)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
-        return foundation_messages + combined
+        return combined
 
     def summarize_all(self, messages_to_summarize, context_messages, is_initial=False, is_emergency=False):
         print("\n=== STARTING SUMMARIZATION ===")
