@@ -16,7 +16,22 @@ class ChatSummary:
         self.models = models if isinstance(models, list) else [models]
         self.max_tokens = max_tokens
         self.token_count = self.models[0].token_count
-        self.foundation_messages = []  # Messages that should never be compressed
+        self._foundation_messages = []  # Private storage for foundation messages
+        
+        # Initialize with basic foundation message
+        self.add_foundation_message(
+            "assistant",
+            "<foundation>I am an AI collaborating through a CLI interface. "
+            "This is my foundational context that informs all interactions.</foundation>"
+        )
+    
+    def add_foundation_message(self, role, content):
+        """Add a message to the foundation layer."""
+        self._foundation_messages.append({"role": role, "content": content})
+    
+    def get_foundation_messages(self):
+        """Return foundation messages that form the bedrock of context."""
+        return list(self._foundation_messages)  # Return a copy to prevent modification
 
     def too_big(self, messages):
         sized = self.tokenize(messages)
@@ -36,16 +51,16 @@ class ChatSummary:
         if not self.models:
             raise ValueError("No models available for summarization")
 
-        # Separate foundation messages from regular messages
-        regular_messages = [msg for msg in messages if msg not in self.foundation_messages]
+        # Foundation messages are always preserved and provided as context
+        foundation_messages = self.get_foundation_messages()
+        regular_messages = [msg for msg in messages if msg not in foundation_messages]
         
         sized = self.tokenize(regular_messages)
         total = sum(tokens for tokens, _msg in sized)
         
-        # If everything fits with foundation messages, return all
-        foundation_tokens = sum(self.token_count(msg) for msg in self.foundation_messages)
-        if total + foundation_tokens <= self.max_tokens and depth == 0:
-            return self.foundation_messages + regular_messages
+        # Foundation messages don't count against the token limit
+        if total <= self.max_tokens and depth == 0:
+            return foundation_messages + regular_messages
 
         # For emergency summarization (too deep or too few messages)
         min_split = 4
