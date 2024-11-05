@@ -1158,7 +1158,8 @@ class Coder:
                     dict(role="assistant", content="<ack>"),
                 ]
 
-        if self.gpt_prompts.system_reminder:
+        # Only add system_reminder for edit modes, not ask mode
+        if self.gpt_prompts.system_reminder and self.edit_format != "ask":
             main_sys += "\n" + self.fmt_system_prompt(self.gpt_prompts.system_reminder)
 
         chunks = ChatChunks()
