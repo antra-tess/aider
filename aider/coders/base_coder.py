@@ -1161,23 +1161,22 @@ class Coder:
 
         chunks = ChatChunks()
 
+        # Initialize foundation messages in constructor only
+        if not hasattr(self, 'foundation'):
+            self.foundation = FoundationMessages(self.ai_name)
+
+        # Always add foundation messages first, before any other content
+        chunks.system = self.foundation.get_messages()
+
+        # Then add system messages
         if self.main_model.use_system_prompt:
-            # Initialize foundation messages if not already done
-            if not hasattr(self, 'foundation'):
-                self.foundation = FoundationMessages(self.ai_name)
-            
-            # Get foundation messages directly
-            foundation_messages = self.foundation.get_messages()
-            
-            # Then add system messages
-            chunks.system = foundation_messages + [
-                dict(role="system", content="<system>" + main_sys + "</system>"),
-            ]
+            chunks.system.append(
+                dict(role="system", content="<system>" + main_sys + "</system>")
+            )
         else:
-            chunks.system = [
-                dict(role="user", content="<system>" + main_sys + "</system>"),
-                #dict(role="assistant", content="<ok>"),
-            ]
+            chunks.system.append(
+                dict(role="user", content="<system>" + main_sys + "</system>")
+            )
 
         chunks.examples = example_messages
 

@@ -36,28 +36,22 @@ class ChatSummary:
         if not self.models:
             raise ValueError("No models available for summarization")
 
-        # Separate foundation messages from regular messages
-        foundation_messages = self.get_foundation_messages()
-        regular_messages = [msg for msg in messages if msg not in foundation_messages]
-        
-        # Only count tokens for regular messages
-        sized = self.tokenize(regular_messages)
+        # Never include foundation messages in summarization
+        sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
         
-        # If regular messages fit within limit, return them with foundation messages at bottom
         if total <= self.max_tokens and depth == 0:
-            return foundation_messages + regular_messages
+            return messages
 
         # For emergency summarization (too deep or too few messages)
         min_split = 4
-        if len(regular_messages) <= min_split or depth > 3:
-            # Only summarize regular messages, use foundation as context
+        if len(messages) <= min_split or depth > 3:
             summarized = self.summarize_all(
-                messages_to_summarize=regular_messages,
-                context_messages=foundation_messages + regular_messages,
+                messages_to_summarize=messages,
+                context_messages=messages,
                 is_emergency=True
             )
-            return foundation_messages + summarized
+            return summarized
 
         # Keep the most recent ~30k tokens of regular messages intact
         preserve_tokens = 30000
