@@ -1054,7 +1054,7 @@ class Coder:
 
         # Initialize prompts with assistant name
         if hasattr(self, 'gpt_prompts'):
-            self.gpt_prompts = self.gpt_prompts.__class__(assistant_name=assistant_name)
+            self.gpt_prompts = self.gpt_prompts.__class__(name=self.name)
 
         if self.gpt_prompts.system_reminder:
             reminder_message = [
