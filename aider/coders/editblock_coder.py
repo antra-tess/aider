@@ -63,7 +63,7 @@ class EditBlockCoder(Coder):
 
         blocks = "block" if len(failed) == 1 else "blocks"
 
-        res = f"# {len(failed)} SEARCH/REPLACE {blocks} failed to match!\n"
+        res = f"<system># {len(failed)} SEARCH/REPLACE {blocks} failed to match!\n"
         for edit in failed:
             path, original, updated = edit
 
@@ -103,6 +103,7 @@ The REPLACE lines are already in {path}!
 Don't re-send them.
 Just reply with fixed versions of the {blocks} above that failed to match.
 """
+        res += "</system>"
         raise ValueError(res)
 
 

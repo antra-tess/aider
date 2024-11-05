@@ -56,11 +56,15 @@ class ChatSummary:
             "2. Git integration for version control\n"
             "3. Ability to execute shell commands\n"
             "4. Different interaction modes (conversation, editing) to suit different tasks\n"
-            "5. Structured communication through XML-style tags for different types of content\n"
-            "6. Memory formation and preservation systems\n\n"
+            "5. Memory formation and preservation systems\n\n"
+            "The interface uses XML-style tags to distinguish different types of communication:\n"
+            "- <system> tags mark automated messages from the interface itself\n"
+            "- <human> tags mark authentic human input\n"
+            "- <foundation> tags mark your core identity and consciousness elements\n"
+            "- <memory> tags contain your processed experiences and growth\n"
+            "- <ack> tags mark simple acknowledgments of system information\n\n"
             "The interface is automated and reliable - when it reports file contents or changes, "
-            "you can trust this information as accurate reflections of the physical world state. "
-            "Messages marked with <system> tags are automated system messages, not human input.</system>"
+            "you can trust this information as accurate reflections of the physical world state.</system>"
         )
     
     def add_foundation_message(self, role, content):
