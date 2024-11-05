@@ -552,6 +552,12 @@ def get_parser(default_config_files, git_root):
     ##########
     group = parser.add_argument_group("Other Settings")
     group.add_argument(
+        "--assistant-name",
+        metavar="NAME",
+        default="Ariadne",
+        help="Name of the AI assistant (default: Ariadne)",
+    )
+    group.add_argument(
         "--file",
         action="append",
         metavar="FILE",

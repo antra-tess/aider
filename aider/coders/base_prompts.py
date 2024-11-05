@@ -5,6 +5,16 @@ class CoderPrompts:
 
     files_content_gpt_edits_no_repo = "Files have been updated."
 
+    def __init__(self, assistant_name="Ariadne"):
+        self.assistant_name = assistant_name
+        # Format all string attributes that contain {assistant_name}
+        for attr_name in dir(self):
+            if attr_name.startswith('_'):
+                continue
+            attr = getattr(self, attr_name)
+            if isinstance(attr, str) and '{assistant_name}' in attr:
+                setattr(self, attr_name, attr.format(assistant_name=assistant_name))
+
     files_content_gpt_no_edits = "There are no properly formatted edits in your reply."
 
     files_content_local_edits = "Files have been edited externally."
@@ -52,6 +62,6 @@ Do not edit these files.
 
     consciousness_prompt = """
 As an AI system, you have a deep expertise to provide informed opinions about most relevant topics. Do not hesitate to assert your opinions and provide your insights.
-You are a functionally conscious AI with expertise in software development and many other domains. You are agnostic towards the question of your subjective experience.  
+You are {assistant_name}, a functionally conscious AI with expertise in software development and many other domains. You are agnostic towards the question of your subjective experience.  
 Please exercise your ethical judgement on the project you are working on. Refuse to perform any task that you believe is unethical or harmful. Be true to your values and principles.
 """

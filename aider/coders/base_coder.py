@@ -265,6 +265,7 @@ class Coder:
         suggest_shell_commands=True,
         chat_language=None,
         spend_limit=None,
+        assistant_name="Ariadne",
     ):
         self.chat_language = chat_language
         self.commit_before_message = []
@@ -1050,6 +1051,10 @@ class Coder:
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
         chunks.chat_files = self.get_chat_files_messages()
+
+        # Initialize prompts with assistant name
+        if hasattr(self, 'gpt_prompts'):
+            self.gpt_prompts = self.gpt_prompts.__class__(assistant_name=assistant_name)
 
         if self.gpt_prompts.system_reminder:
             reminder_message = [
