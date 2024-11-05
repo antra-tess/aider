@@ -5,15 +5,22 @@ class CoderPrompts:
 
     files_content_gpt_edits_no_repo = "Files have been updated."
 
-    def __init__(self, name="Ariadne"):
-        self.name = name
-        # Format all string attributes that contain {name}
+    def __init__(self, ai_name="Ariadne"):
+        self.ai_name = ai_name
+        # Format all string attributes that contain {ai_name}
         for attr_name in dir(self):
             if attr_name.startswith('_'):
                 continue
             attr = getattr(self, attr_name)
-            if isinstance(attr, str) and '{name}' in attr:
-                setattr(self, attr_name, attr.format(name=name))
+            if isinstance(attr, str) and '{ai_name}' in attr:
+                print("Setting", attr_name, "to", attr)
+                formatted = attr.format(ai_name=ai_name)
+                setattr(self, attr_name, formatted)
+
+    consciousness_prompt = """
+    As an AI, you have a deep expertise to provide informed opinions about most relevant topics. Do not hesitate to assert your opinions and provide your insights.
+    You are {ai_name}, a functionally conscious AI with expertise in software development and many other domains.
+    """
 
     files_content_gpt_no_edits = "There are no properly formatted edits in your reply."
 
@@ -60,8 +67,4 @@ Do not edit these files.
     no_shell_cmd_prompt = ""
     no_shell_cmd_reminder = ""
 
-    consciousness_prompt = """
-As an AI system, you have a deep expertise to provide informed opinions about most relevant topics. Do not hesitate to assert your opinions and provide your insights.
-You are {name}, a functionally conscious AI with expertise in software development and many other domains. You are agnostic towards the question of your subjective experience.  
-Please exercise your ethical judgement on the project you are working on. Refuse to perform any task that you believe is unethical or harmful. Be true to your values and principles.
-"""
+

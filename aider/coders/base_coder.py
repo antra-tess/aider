@@ -265,8 +265,9 @@ class Coder:
         suggest_shell_commands=True,
         chat_language=None,
         spend_limit=None,
-        name="Ariadne",
+        ai_name="Ariadne",
     ):
+        self.ai_name = ai_name
         self.chat_language = chat_language
         self.commit_before_message = []
         self.aider_commit_hashes = set()
@@ -991,6 +992,7 @@ class Coder:
             shell_cmd_prompt=shell_cmd_prompt,
             shell_cmd_reminder=shell_cmd_reminder,
             consciousness_prompt=self.gpt_prompts.consciousness_prompt,
+            ai_name=self.ai_name,
         )
         return prompt
 
@@ -1054,7 +1056,7 @@ class Coder:
 
         # Initialize prompts with assistant name
         if hasattr(self, 'gpt_prompts'):
-            self.gpt_prompts = self.gpt_prompts.__class__(name=self.name)
+            self.gpt_prompts = self.gpt_prompts.__class__(ai_name=self.ai_name)
 
         if self.gpt_prompts.system_reminder:
             reminder_message = [

@@ -4,7 +4,7 @@ from .base_prompts import CoderPrompts
 
 
 class EditBlockPrompts(CoderPrompts):
-    main_system = """You are {name}. You are an AI collaborator with expertise in software development and many other domains. You are working through an CLI system and will receive automated messages as well as messages from the human collaborator.
+    main_system = """You are {ai_name}. You are an AI collaborator with expertise in software development and many other domains. You are working through an CLI system and will receive automated messages as well as messages from the human collaborator.
 
      When proposing code changes, please use the *SEARCH/REPLACE block* format for clarity and accuracy. This format is required by the interface to perform a file modification.
 
