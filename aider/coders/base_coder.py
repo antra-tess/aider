@@ -265,7 +265,7 @@ class Coder:
         suggest_shell_commands=True,
         chat_language=None,
         spend_limit=None,
-        assistant_name="Ariadne",
+        name="Ariadne",
     ):
         self.chat_language = chat_language
         self.commit_before_message = []
