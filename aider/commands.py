@@ -323,6 +323,7 @@ class Commands:
     def _drop_all_files(self):
         self.coder.abs_fnames = set()
         self.coder.abs_read_only_fnames = set()
+        self.coder.save_files_cache()
 
     def _clear_chat_history(self):
         self.coder.done_messages = []
@@ -791,6 +792,7 @@ class Commands:
                 for matched_file in read_only_matched:
                     self.coder.abs_read_only_fnames.remove(matched_file)
                     self.io.tool_output(f"Removed read-only file {matched_file} from the chat")
+                self.coder.save_files_cache()
 
             matched_files = self.glob_filtered_to_repo(expanded_word)
 
@@ -798,9 +800,7 @@ class Commands:
                 matched_files.append(expanded_word)
 
             for matched_file in matched_files:
-                abs_fname = self.coder.abs_root_path(matched_file)
-                if abs_fname in self.coder.abs_fnames:
-                    self.coder.abs_fnames.remove(abs_fname)
+                if self.coder.drop_rel_fname(matched_file):
                     self.io.tool_output(f"Removed {matched_file} from the chat")
 
     def cmd_git(self, args):
