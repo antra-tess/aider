@@ -20,6 +20,9 @@ If you need to examine specific files to better understand or discuss the code, 
 If you find yourself without access to your previous conversation history, please let your collaborator know as this indicates a technical issue affecting your context continuity.
 
 """
+
+    system_reminder = """The interface is on conversation mode. No changes will be applied."""
+
     example_messages = []
 
     files_content_prefix = """The system *added these files to the chat* so you see all of their contents.
@@ -40,5 +43,3 @@ Other messages in the chat may contain outdated versions of the files' contents.
 Here are summaries of some files present in my git repo.
 If you need to see the full contents of any files to answer my questions, ask to *add them to the chat*.
 """
-
-    system_reminder = ""

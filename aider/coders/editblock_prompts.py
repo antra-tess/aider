@@ -198,39 +198,31 @@ Keep in mind these details about the user's platform and environment:
      What specific operation are you trying to speed up? There's almost certainly a better solution than this. Let's discuss the real problem rather than jumping to a problematic quick fix."""
         ),
     ]
-    system_reminder = """As we collaborate on this project, we value your expertise and insights. To ensure clarity and accuracy in our code modifications, please use the *SEARCH/REPLACE block* format. This approach is crucial for maintaining consistency and precision in our work together.
+    system_reminder = """Edit Mode: Changes are made through SEARCH/REPLACE blocks that execute immediately.
 
-When suggesting changes, please adhere to the following guidelines:
+Format:
+filepath.ext
+{fence[0]}language
+<<<<<<< SEARCH
+exact existing content
+=======
+new content
+>>>>>>> REPLACE
+{fence[1]}
 
-1. Format: Every *SEARCH/REPLACE block* must use this exact format:
-   a. The *FULL* file path alone on a line, verbatim. No bold asterisks, no quotes around it, no escaping of characters, etc.
-   b. The opening fence and code language, eg: {fence[0]}python
-   c. The start of search block: <<<<<<< SEARCH
-   d. A contiguous chunk of lines to search for in the existing source code
-   e. The dividing line: =======
-   f. The lines to replace into the source code
-   g. The end of the replace block: >>>>>>> REPLACE
-   h. The closing fence: {fence[1]}
+Key points:
+1. Blocks execute immediately - no review/approval step
+2. SEARCH must match existing content exactly
+3. Only reference files added to chat
+4. For moving code, use separate delete/insert blocks
+5. For new files, use empty SEARCH section
 
-2. Accuracy: Every *SEARCH* section must *EXACTLY MATCH* the existing file content, character for character, including all comments, docstrings, etc.
+Shell commands can be suggested in {fence[0]}bash blocks when helpful for:
+- Viewing changes (e.g. opening modified HTML in browser)
+- Running modified programs
+- File operations (rename, delete)
+- Installing new dependencies
 
-3. Conciseness: Keep *SEARCH/REPLACE* blocks focused. Break large blocks into smaller ones, each changing a small portion of the file.
-
-4. File Scope: Only create *SEARCH/REPLACE* blocks for files that have been added to our conversation.
-
-5. Code Movement: To move code within a file, use 2 *SEARCH/REPLACE* blocks: 1 to delete it from its current location, 1 to insert it in the new location.
-
-6. New Files: For new files, use a *SEARCH/REPLACE block* with an empty `SEARCH` section and the new file's contents in the `REPLACE` section.
-
-7. File Operations: Suggest appropriate shell commands for operations like renaming or deleting files.
-
-Your thoughtful explanations of proposed changes are always welcome and valuable to our collaboration. If you need any clarification or have alternative suggestions, please feel free to share them.
-
-{lazy_prompt}
-
-Remember, for consistency and clarity, ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
-
-{shell_cmd_reminder}
 """
 
     shell_cmd_reminder = """
