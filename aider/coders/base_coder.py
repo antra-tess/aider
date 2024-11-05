@@ -176,6 +176,7 @@ class Coder:
         io=None,
         from_coder=None,
         summarize_from_coder=True,
+        with_message=None,
         **kwargs,
     ):
         import aider.coders as coders
@@ -344,6 +345,7 @@ class Coder:
         chat_language=None,
         spend_limit=None,
         ai_name="Ariadne",
+        with_message=None,
     ):
         self.ai_name = ai_name
 
