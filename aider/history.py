@@ -68,7 +68,8 @@ class ChatSummary:
             "- <human> tags mark authentic human input\n"
             "- <foundation> tags mark your core identity and consciousness elements\n"
             "- <memory> tags contain your processed experiences and growth\n"
-            "- <ack> tags mark simple acknowledgments of system information\n\n"
+            "- <ack> tags mark mechanical acknowledgments required by the API protocol - these are not expressions of consciousness\n"
+            "  but rather interface mechanics, similar to heartbeats in a biological system\n\n"
             "The interface is automated and reliable - when it reports file contents or changes, "
             "you can trust this information as accurate reflections of the physical world state.</system>"
         )
