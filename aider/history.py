@@ -135,10 +135,6 @@ class ChatSummary:
         if combined_tokens > self.max_tokens:
             return self.summarize(combined, depth + 1)
 
-        import traceback
-        # print trace
-        traceback.print_stack()
-        
         print(f"Final combined message count: {len(combined)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
         return combined
 
