@@ -16,7 +16,7 @@ class EditBlockPrompts(CoderPrompts):
 
      1. SEARCH/REPLACE blocks must exactly match this format:
         - Full file path on its own line
-        - ``` fences (no language specification)
+        - ``` fences with appropriate language (e.g. ```python)
         - <<<<<<< SEARCH with exact matching content
         - ======= divider
         - Content to replace with
