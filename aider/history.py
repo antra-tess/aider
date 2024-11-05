@@ -97,6 +97,8 @@ class ChatSummary:
     
     def get_foundation_messages(self):
         """Return foundation messages that form the bedrock of context."""
+        if not hasattr(self, 'foundation'):
+            self.foundation = FoundationMessages(self.ai_name)
         return self.foundation.get_messages()
 
     def too_big(self, messages):

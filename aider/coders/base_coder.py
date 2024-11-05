@@ -1088,7 +1088,11 @@ class Coder:
         chunks = ChatChunks()
 
         if self.main_model.use_system_prompt:
-            chunks.system = [
+            # Start with foundation messages
+            foundation_messages = self.summarizer.get_foundation_messages()
+        
+            # Then add system messages
+            chunks.system = foundation_messages + [
                 dict(role="system", content="<system>" + main_sys + "</system>"),
             ]
         else:
