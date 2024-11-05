@@ -1302,12 +1302,19 @@ class Coder:
     def send_message(self, inp):
         import openai  # for error codes below
 
-        # Only add the message to cur_messages, don't log it since it was already logged
+        # Add the message to cur_messages with proper wrapping
         if inp.startswith("<system>") and inp.endswith("</system>"):
+            # System messages pass through unchanged
+            self.cur_messages += [
+                dict(role="user", content=inp),
+            ]
+        elif inp.startswith("<human>") and inp.endswith("</human>"):
+            # Already wrapped messages pass through unchanged
             self.cur_messages += [
                 dict(role="user", content=inp),
             ]
         else:
+            # Wrap unwrapped messages with <human> tags
             self.cur_messages += [
                 dict(role="user", content="<human>" + inp + "</human>"),
             ]
