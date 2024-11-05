@@ -17,7 +17,8 @@ class ChatChunks:
     def all_messages(self):
         # Build messages without foundation first
         messages = []
-        
+        messages.extend(self.foundation)
+
         # Add messages in order
         for msg_list in [
             self.system,
@@ -32,8 +33,7 @@ class ChatChunks:
             messages.extend(msg_list)
         
         # Add foundation messages last so they stay at the bottom
-        messages.extend(self.foundation)
-        
+
         return messages
 
     def add_cache_control_headers(self):
