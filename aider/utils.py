@@ -153,7 +153,14 @@ def split_chat_history_markdown(text, include_tool=False):
     def append_msg(role, lines):
         lines = "".join(lines)
         if lines.strip():
-            messages.append(dict(role=role, content=lines))
+            # Check for timestamp in format [YYYY-MM-DD HH:MM:SS]
+            import re
+            timestamp_match = re.match(r'.*?\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\](.*)$', lines.strip())
+            if timestamp_match:
+                timestamp, content = timestamp_match.groups()
+                messages.append(dict(role=role, content=content, timestamp=timestamp))
+            else:
+                messages.append(dict(role=role, content=lines))
 
     for line in lines:
         if line.startswith("# "):
@@ -165,8 +172,6 @@ def split_chat_history_markdown(text, include_tool=False):
             user = []
             tool.append(line[2:])
             continue
-        # if line.startswith("#### /"):
-        #    continue
 
         if line.startswith("#### "):
             append_msg("assistant", assistant)

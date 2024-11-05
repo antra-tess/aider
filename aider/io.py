@@ -474,14 +474,19 @@ class InputOutput:
 
         hist = f"  \n{prefix} ".join(hist)
 
+        # Add timestamp
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         hist = f"""
-{prefix} {hist}"""
+{prefix} [{timestamp}] {hist}"""
         self.append_chat_history(hist, linebreak=True)
 
     # OUTPUT
 
     def ai_output(self, content):
-        hist = "\n" + content.strip() + "\n\n"
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        hist = f"\n[{timestamp}] {content.strip()}\n\n"
         self.append_chat_history(hist)
 
     def confirm_ask(
