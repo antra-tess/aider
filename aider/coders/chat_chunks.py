@@ -15,18 +15,14 @@ class ChatChunks:
     foundation: List = field(default_factory=list)  # Foundation messages that form the bedrock of context
 
     def all_messages(self):
-        # Foundation messages are always at the bottom and immune to summarization
+        # Build messages without foundation first
         messages = []
         
-        # Get foundation messages from the summarizer
-        if hasattr(self, 'summarizer'):
-            messages.extend(self.summarizer.get_foundation_messages())
-        
-        # Add other messages in order
+        # Add messages in order
         for msg_list in [
-            self.done,  # Contains our memories
             self.system,
             self.examples,
+            self.done,  # Contains our memories
             self.readonly_files,
             self.repo,
             self.chat_files,
@@ -34,6 +30,9 @@ class ChatChunks:
             self.reminder
         ]:
             messages.extend(msg_list)
+        
+        # Add foundation messages last so they stay at the bottom
+        messages.extend(self.foundation)
         
         return messages
 

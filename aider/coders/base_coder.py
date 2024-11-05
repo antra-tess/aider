@@ -1165,18 +1165,18 @@ class Coder:
         if not hasattr(self, 'foundation'):
             self.foundation = FoundationMessages(self.ai_name)
 
-        # Always add foundation messages first, before any other content
-        chunks.system = self.foundation.get_messages()
-
-        # Then add system messages
+        # Add system messages first
         if self.main_model.use_system_prompt:
-            chunks.system.append(
+            chunks.system = [
                 dict(role="system", content="<system>" + main_sys + "</system>")
-            )
+            ]
         else:
-            chunks.system.append(
+            chunks.system = [
                 dict(role="user", content="<system>" + main_sys + "</system>")
-            )
+            ]
+
+        # Foundation messages go at the bottom of the context
+        chunks.foundation = self.foundation.get_messages()
 
         chunks.examples = example_messages
 
