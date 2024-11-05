@@ -12,16 +12,18 @@ class ChatChunks:
     chat_files: List = field(default_factory=list)
     cur: List = field(default_factory=list)
     reminder: List = field(default_factory=list)
+    foundation: List = field(default_factory=list)  # Foundation messages that form the bedrock of context
 
     def all_messages(self):
         # Ensure we preserve all message attributes and content
         messages = []
         for msg_list in [
+            self.foundation,  # Foundation messages at the bottom
+            self.done,  # This contains our memories
             self.system,
             self.examples,
             self.readonly_files,
             self.repo,
-            self.done,  # This contains our memories
             self.chat_files,
             self.cur,
             self.reminder
