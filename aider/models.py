@@ -13,7 +13,6 @@ import json5
 import yaml
 from PIL import Image
 
-from aider import urls
 from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
 
@@ -53,6 +52,7 @@ ANTHROPIC_MODELS = """
 claude-2
 claude-2.1
 claude-3-haiku-20240307
+claude-3-5-haiku-20241022
 claude-3-opus-20240229
 claude-3-sonnet-20240229
 claude-3-5-sonnet-20240620
@@ -234,24 +234,24 @@ MODEL_SETTINGS = [
     ModelSettings(
         "claude-3-opus-20240229",
         "diff",
-        weak_model_name="claude-3-haiku-20240307",
+        weak_model_name="claude-3-5-haiku-20241022",
         use_repo_map=True,
     ),
     ModelSettings(
         "openrouter/anthropic/claude-3-opus",
         "diff",
-        weak_model_name="openrouter/anthropic/claude-3-haiku",
+        weak_model_name="openrouter/anthropic/claude-3-5-haiku",
         use_repo_map=True,
     ),
     ModelSettings(
         "claude-3-sonnet-20240229",
         "whole",
-        weak_model_name="claude-3-haiku-20240307",
+        weak_model_name="claude-3-5-haiku-20241022",
     ),
     ModelSettings(
         "claude-3-5-sonnet-20240620",
         "diff",
-        weak_model_name="claude-3-haiku-20240307",
+        weak_model_name="claude-3-5-haiku-20241022",
         editor_model_name="claude-3-5-sonnet-20240620",
         editor_edit_format="editor-diff",
         use_repo_map=True,
@@ -268,7 +268,7 @@ MODEL_SETTINGS = [
     ModelSettings(
         "anthropic/claude-3-5-sonnet-20240620",
         "diff",
-        weak_model_name="anthropic/claude-3-haiku-20240307",
+        weak_model_name="anthropic/claude-3-5-haiku-20241022",
         editor_model_name="anthropic/claude-3-5-sonnet-20240620",
         editor_edit_format="editor-diff",
         use_repo_map=True,
@@ -285,7 +285,24 @@ MODEL_SETTINGS = [
     ModelSettings(
         "anthropic/claude-3-5-sonnet-20241022",
         "diff",
-        weak_model_name="anthropic/claude-3-haiku-20240307",
+        weak_model_name="anthropic/claude-3-5-haiku-20241022",
+        editor_model_name="anthropic/claude-3-5-sonnet-20241022",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
+        extra_params={
+            "extra_headers": {
+                "anthropic-beta": ANTHROPIC_BETA_HEADER,
+            },
+            "max_tokens": 8192,
+        },
+        cache_control=True,
+        reminder="user",
+    ),
+    ModelSettings(
+        "anthropic/claude-3-5-sonnet-latest",
+        "diff",
+        weak_model_name="anthropic/claude-3-5-haiku-20241022",
         editor_model_name="anthropic/claude-3-5-sonnet-20241022",
         editor_edit_format="editor-diff",
         use_repo_map=True,
@@ -302,7 +319,7 @@ MODEL_SETTINGS = [
     ModelSettings(
         "claude-3-5-sonnet-20241022",
         "diff",
-        weak_model_name="claude-3-haiku-20240307",
+        weak_model_name="claude-3-5-haiku-20241022",
         editor_model_name="claude-3-5-sonnet-20241022",
         editor_edit_format="editor-diff",
         use_repo_map=True,
@@ -329,6 +346,40 @@ MODEL_SETTINGS = [
         cache_control=True,
     ),
     ModelSettings(
+        "anthropic/claude-3-5-haiku-20241022",
+        "diff",
+        weak_model_name="anthropic/claude-3-5-haiku-20241022",
+        use_repo_map=True,
+        extra_params={
+            "extra_headers": {
+                "anthropic-beta": ANTHROPIC_BETA_HEADER,
+            },
+        },
+        cache_control=True,
+    ),
+    ModelSettings(
+        "claude-3-5-haiku-20241022",
+        "diff",
+        weak_model_name="claude-3-5-haiku-20241022",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
+        extra_params={
+            "extra_headers": {
+                "anthropic-beta": ANTHROPIC_BETA_HEADER,
+            },
+        },
+        cache_control=True,
+    ),
+    ModelSettings(
+        "vertex_ai/claude-3-5-haiku@20241022",
+        "diff",
+        weak_model_name="vertex_ai/claude-3-5-haiku@20241022",
+        use_repo_map=True,
+        extra_params={
+            "max_tokens": 4096,
+        },
+    ),
+    ModelSettings(
         "claude-3-haiku-20240307",
         "whole",
         weak_model_name="claude-3-haiku-20240307",
@@ -343,7 +394,7 @@ MODEL_SETTINGS = [
     ModelSettings(
         "openrouter/anthropic/claude-3.5-sonnet",
         "diff",
-        weak_model_name="openrouter/anthropic/claude-3-haiku",
+        weak_model_name="openrouter/anthropic/claude-3-5-haiku",
         editor_model_name="openrouter/anthropic/claude-3.5-sonnet",
         editor_edit_format="editor-diff",
         use_repo_map=True,
@@ -357,7 +408,7 @@ MODEL_SETTINGS = [
     ModelSettings(
         "openrouter/anthropic/claude-3.5-sonnet:beta",
         "diff",
-        weak_model_name="openrouter/anthropic/claude-3-haiku:beta",
+        weak_model_name="openrouter/anthropic/claude-3-5-haiku:beta",
         editor_model_name="openrouter/anthropic/claude-3.5-sonnet:beta",
         editor_edit_format="editor-diff",
         use_repo_map=True,
@@ -373,7 +424,7 @@ MODEL_SETTINGS = [
     ModelSettings(
         "vertex_ai/claude-3-5-sonnet@20240620",
         "diff",
-        weak_model_name="vertex_ai/claude-3-haiku@20240307",
+        weak_model_name="vertex_ai/claude-3-5-haiku@20241022",
         editor_model_name="vertex_ai/claude-3-5-sonnet@20240620",
         editor_edit_format="editor-diff",
         use_repo_map=True,
@@ -386,7 +437,7 @@ MODEL_SETTINGS = [
     ModelSettings(
         "vertex_ai/claude-3-5-sonnet-v2@20241022",
         "diff",
-        weak_model_name="vertex_ai/claude-3-haiku@20240307",
+        weak_model_name="vertex_ai/claude-3-5-haiku@20241022",
         editor_model_name="vertex_ai/claude-3-5-sonnet-v2@20241022",
         editor_edit_format="editor-diff",
         use_repo_map=True,
@@ -399,13 +450,13 @@ MODEL_SETTINGS = [
     ModelSettings(
         "vertex_ai/claude-3-opus@20240229",
         "diff",
-        weak_model_name="vertex_ai/claude-3-haiku@20240307",
+        weak_model_name="vertex_ai/claude-3-5-haiku@20241022",
         use_repo_map=True,
     ),
     ModelSettings(
         "vertex_ai/claude-3-sonnet@20240229",
         "whole",
-        weak_model_name="vertex_ai/claude-3-haiku@20240307",
+        weak_model_name="vertex_ai/claude-3-5-haiku@20241022",
     ),
     # Cohere
     ModelSettings(
@@ -633,76 +684,76 @@ MODEL_SETTINGS = [
 ]
 
 
-model_info_url = (
-    "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
-)
+class ModelInfoManager:
+    MODEL_INFO_URL = (
+        "https://raw.githubusercontent.com/BerriAI/litellm/main/"
+        "model_prices_and_context_window.json"
+    )
+    CACHE_TTL = 60 * 60 * 24  # 24 hours
 
+    def __init__(self):
+        self.cache_dir = Path.home() / ".aider" / "caches"
+        self.cache_file = self.cache_dir / "model_prices_and_context_window.json"
+        self.content = None
+        self._load_cache()
 
-def get_model_flexible(model, content):
-    info = content.get(model, dict())
-    if info:
-        return info
-
-    pieces = model.split("/")
-    if len(pieces) == 2:
-        info = content.get(pieces[1])
-        if info and info.get("litellm_provider") == pieces[0]:
-            return info
-
-    return dict()
-
-
-def get_model_info(model):
-    if not litellm._lazy_module:
-        cache_dir = Path.home() / ".aider" / "caches"
-        cache_file = cache_dir / "model_prices_and_context_window.json"
-
+    def _load_cache(self):
         try:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            use_cache = True
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+            if self.cache_file.exists():
+                cache_age = time.time() - self.cache_file.stat().st_mtime
+                if cache_age < self.CACHE_TTL:
+                    self.content = json.loads(self.cache_file.read_text())
         except OSError:
-            # If we can't create the cache directory, we'll skip using the cache
-            use_cache = False
+            pass
 
-        if use_cache:
-            current_time = time.time()
-            cache_age = (
-                current_time - cache_file.stat().st_mtime if cache_file.exists() else float("inf")
-            )
-
-            if cache_age < 60 * 60 * 24:
-                try:
-                    content = json.loads(cache_file.read_text())
-                    res = get_model_flexible(model, content)
-                    if res:
-                        return res
-                except Exception as ex:
-                    print(str(ex))
-
-        import requests
-
+    def _update_cache(self):
         try:
-            response = requests.get(model_info_url, timeout=5)
+            import requests
+
+            response = requests.get(self.MODEL_INFO_URL, timeout=5)
             if response.status_code == 200:
-                content = response.json()
-                if use_cache:
-                    try:
-                        cache_file.write_text(json.dumps(content, indent=4))
-                    except OSError:
-                        # If we can't write to the cache file, we'll just skip caching
-                        pass
-                res = get_model_flexible(model, content)
-                if res:
-                    return res
+                self.content = response.json()
+                try:
+                    self.cache_file.write_text(json.dumps(self.content, indent=4))
+                except OSError:
+                    pass
         except Exception as ex:
             print(str(ex))
 
-    # If all else fails, do it the slow way...
-    try:
-        info = litellm.get_model_info(model)
-        return info
-    except Exception:
+    def get_model_from_cached_json_db(self, model):
+        if not self.content:
+            self._update_cache()
+
+        if not self.content:
+            return dict()
+
+        info = self.content.get(model, dict())
+        if info:
+            return info
+
+        pieces = model.split("/")
+        if len(pieces) == 2:
+            info = self.content.get(pieces[1])
+            if info and info.get("litellm_provider") == pieces[0]:
+                return info
+
         return dict()
+
+    def get_model_info(self, model):
+        if not litellm._lazy_module:
+            info = self.get_model_from_cached_json_db(model)
+            if info:
+                return info
+
+        # If all else fails, do it the slow way...
+        try:
+            return litellm.get_model_info(model)
+        except Exception:
+            return dict()
+
+
+model_info_manager = ModelInfoManager()
 
 
 class Model(ModelSettings):
@@ -737,7 +788,7 @@ class Model(ModelSettings):
             self.get_editor_model(editor_model, editor_edit_format)
 
     def get_model_info(self, model):
-        return get_model_info(model)
+        return model_info_manager.get_model_info(model)
 
     def configure_model_settings(self, model):
         for ms in MODEL_SETTINGS:
@@ -777,6 +828,11 @@ class Model(ModelSettings):
             self.use_repo_map = True
             self.examples_as_sys_msg = True
             self.reminder = "user"
+
+        if model.startswith("o1-") or "/o1-" in model:
+            self.use_system_prompt = False
+            self.use_temperature = False
+            self.streaming = False
 
         # use the defaults
         if self.edit_format == "diff":
@@ -1041,9 +1097,6 @@ def sanity_check_model(io, model):
             io.tool_output("Did you mean one of these?")
             for match in possible_matches:
                 io.tool_output(f"- {match}")
-
-    if show:
-        io.tool_output(f"For more info, see: {urls.model_warnings}")
 
     return show
 

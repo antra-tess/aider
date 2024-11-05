@@ -2,11 +2,14 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import time
 
 import backoff
 
 from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
+
+# from diskcache import Cache
 
 
 CACHE_PATH = "~/.aider.send.cache.v1"
@@ -24,20 +27,25 @@ def retry_exceptions():
         httpx.ConnectError,
         httpx.RemoteProtocolError,
         httpx.ReadTimeout,
-        # litellm
-        litellm.exceptions.BadRequestError,
-        litellm.exceptions.AuthenticationError,
-        litellm.exceptions.PermissionDeniedError,
-        litellm.exceptions.NotFoundError,
-        litellm.exceptions.UnprocessableEntityError,
-        litellm.exceptions.RateLimitError,
-        litellm.exceptions.InternalServerError,
-        litellm.exceptions.ContextWindowExceededError,
-        litellm.exceptions.ContentPolicyViolationError,
-        litellm.exceptions.APIConnectionError,
-        litellm.exceptions.APIError,
-        litellm.exceptions.ServiceUnavailableError,
-        litellm.exceptions.Timeout,
+        #
+        # litellm exceptions inherit from openai exceptions
+        # https://docs.litellm.ai/docs/exception_mapping
+        #
+        # openai.BadRequestError,
+        # litellm.ContextWindowExceededError,
+        # litellm.ContentPolicyViolationError,
+        #
+        # openai.AuthenticationError,
+        # openai.PermissionDeniedError,
+        # openai.NotFoundError,
+        #
+        openai.APITimeoutError,
+        openai.UnprocessableEntityError,
+        openai.RateLimitError,
+        openai.APIConnectionError,
+        # openai.APIError,
+        # openai.APIStatusError,
+        openai.InternalServerError,
     )
 
 
@@ -71,12 +79,12 @@ def get_next_log_number(logs_dir):
 def log_request(request_data, response_data, logs_dir):
     log_num = get_next_log_number(logs_dir)
     log_file = logs_dir / f"request_{log_num}.json"
-    
+
     log_entry = {
         "request": request_data,
         "response": response_data
     }
-    
+
     with open(log_file, 'w', encoding='utf-8') as f:
         json.dump(log_entry, f, indent=2, default=str)
 
@@ -88,8 +96,6 @@ def send_completion(
     temperature=0,
     extra_params=None,
 ):
-    from aider.llm import litellm
-
     kwargs = dict(
         model=model_name,
         messages=messages,
@@ -136,19 +142,28 @@ def send_completion(
     return hash_object, res
 
 
-@lazy_litellm_retry_decorator
 def simple_send_with_retries(model_name, messages, extra_params=None):
-    try:
-        kwargs = {
-            "model_name": model_name,
-            "messages": messages,
-            "functions": None,
-            "stream": False,
-            "extra_params": extra_params,
-        }
+    retry_delay = 0.125
+    while True:
+        try:
+            kwargs = {
+                "model_name": model_name,
+                "messages": messages,
+                "functions": None,
+                "stream": False,
+                "extra_params": extra_params,
+            }
 
-        _hash, response = send_completion(**kwargs)
-        return response.choices[0].message.content
-    except (AttributeError, litellm.exceptions.BadRequestError) as e:
-        print(f"Error in simple_send_with_retries: {e}")
-        return
+            _hash, response = send_completion(**kwargs)
+            return response.choices[0].message.content
+        except retry_exceptions() as err:
+            print(str(err))
+            retry_delay *= 2
+            if retry_delay > RETRY_TIMEOUT:
+                break
+            print(f"Retrying in {retry_delay:.1f} seconds...")
+            time.sleep(retry_delay)
+            continue
+        except AttributeError:
+            print(f"Error in simple_send_with_retries: {e}")
+            return

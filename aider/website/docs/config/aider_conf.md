@@ -88,6 +88,9 @@ cog.outl("```")
 ## Use claude-3-5-sonnet-20241022 model for the main chat
 #sonnet: false
 
+## Use claude-3-5-haiku-20241022 model for the main chat
+#haiku: false
+
 ## Use gpt-4-0613 model for the main chat
 #4: false
 
@@ -321,6 +324,18 @@ cog.outl("```")
 ## Run tests and fix problems found
 #test: false
 
+############
+# Analytics:
+
+## Enable/disable analytics for one session (default: False)
+#analytics: false
+
+## Specify a file to log analytics events
+#analytics-log: xxx
+
+## Permanently disable analytics
+#analytics-disable: false
+
 #################
 # Other Settings:
 
@@ -364,6 +379,9 @@ cog.outl("```")
 ## Apply the changes from the given file instead of running the chat (debug)
 #apply: xxx
 
+## Apply clipboard contents as edits using the main model's editor format
+#apply-clipboard-edits: false
+
 ## Always say yes to every confirmation
 #yes-always: false
 
@@ -385,13 +403,16 @@ cog.outl("```")
 ## Specify a file containing the message to send the LLM, process reply, then exit (disables chat mode)
 #message-file: xxx
 
+## Load and execute /commands from a file on launch
+#load: xxx
+
 ## Specify the encoding for input and output (default: utf-8)
 #encoding: utf-8
 
 ## Specify the config file (default: search for .aider.conf.yml in git root, cwd or home directory)
 #config: xxx
 
-## Run aider in your browser
+## Run aider in your browser (default: False)
 #gui: false
 
 ## Enable/disable suggesting shell commands (default: True)

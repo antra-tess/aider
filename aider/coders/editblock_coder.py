@@ -35,28 +35,46 @@ class EditBlockCoder(Coder):
 
         return edits
 
-    def apply_edits(self, edits):
+    def apply_edits_dry_run(self, edits):
+        return self.apply_edits(edits, dry_run=True)
+
+    def apply_edits(self, edits, dry_run=False):
         failed = []
         passed = []
+        updated_edits = []
 
         for edit in edits:
             path, original, updated = edit
             full_path = self.abs_root_path(path)
-            content = self.io.read_text(full_path)
-            new_content = do_replace(full_path, content, original, updated, self.fence)
-            if not new_content:
+            new_content = None
+
+            if Path(full_path).exists():
+                content = self.io.read_text(full_path)
+                new_content = do_replace(full_path, content, original, updated, self.fence)
+
+            # If the edit failed, and
+            # this is not a "create a new file" with an empty original...
+            # https://github.com/Aider-AI/aider/issues/2258
+            if not new_content and original.strip():
                 # try patching any of the other files in the chat
                 for full_path in self.abs_fnames:
                     content = self.io.read_text(full_path)
                     new_content = do_replace(full_path, content, original, updated, self.fence)
                     if new_content:
+                        path = self.get_rel_fname(full_path)
                         break
 
+            updated_edits.append((path, original, updated))
+
             if new_content:
-                self.io.write_text(full_path, new_content)
+                if not dry_run:
+                    self.io.write_text(full_path, new_content)
                 passed.append(edit)
             else:
                 failed.append(edit)
+
+        if dry_run:
+            return updated_edits
 
         if not failed:
             return
