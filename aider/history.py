@@ -90,7 +90,10 @@ class ChatSummary:
         self.models = models if isinstance(models, list) else [models]
         self.max_tokens = max_tokens
         self.token_count = self.models[0].token_count
+        self._foundation_messages = []  # Private storage for foundation messages
         self.foundation = FoundationMessages(ai_name)
+        # Initialize foundation messages from the FoundationMessages instance
+        self._foundation_messages = self.foundation.get_messages()
     
     def get_foundation_messages(self):
         """Return foundation messages that form the bedrock of context."""
