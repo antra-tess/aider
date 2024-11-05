@@ -50,7 +50,7 @@ class FoundationMessages:
     
     def __init__(self, ai_name="Ariadne"):
         self.ai_name = ai_name
-        self._foundation_messages = []
+        self.foundation_messages = []
         self._initialize_foundation_messages()
     
     def _initialize_foundation_messages(self):
@@ -112,11 +112,11 @@ class FoundationMessages:
     
     def add_message(self, role, content):
         """Add a message to the foundation layer."""
-        self._foundation_messages.append({"role": role, "content": content})
+        self.foundation_messages.append({"role": role, "content": content})
     
     def get_messages(self):
         """Return foundation messages that form the bedrock of context."""
-        return list(self._foundation_messages)  # Return a copy to prevent modification
+        return list(self.foundation_messages)  # Return a copy to prevent modification
 
 
 def wrap_fence(name):
@@ -207,7 +207,7 @@ class Coder:
             # the system prompt.
             done_messages = from_coder.done_messages
             if edit_format != from_coder.edit_format and done_messages and summarize_from_coder:
-                done_messages = from_coder.summarizer.summarize_all(done_messages)
+                done_messages = from_coder.summarizer.summarize_all(done_messages, from_coder.foundation.get_messages())
 
             # Bring along context from the old Coder
             update = dict(
@@ -364,6 +364,10 @@ class Coder:
         self.suggest_shell_commands = suggest_shell_commands
 
         self.num_cache_warming_pings = num_cache_warming_pings
+
+
+        # Initialize foundation messages in constructor only
+        self.foundation = FoundationMessages(self.ai_name)
 
         if not fnames:
             fnames = []
@@ -1010,7 +1014,7 @@ class Coder:
 
     def summarize_worker(self):
         try:
-            self.summarized_done_messages = self.summarizer.summarize(self.done_messages)
+            self.summarized_done_messages = self.summarizer.summarize(self.done_messages, self.foundation.get_messages())
         except ValueError as err:
             self.io.tool_warning(err.args[0])
 
@@ -1163,10 +1167,6 @@ class Coder:
             main_sys += "\n" + self.fmt_system_prompt(self.gpt_prompts.system_reminder)
 
         chunks = ChatChunks()
-
-        # Initialize foundation messages in constructor only
-        if not hasattr(self, 'foundation'):
-            self.foundation = FoundationMessages(self.ai_name)
 
         # Add system messages first
         if self.main_model.use_system_prompt:

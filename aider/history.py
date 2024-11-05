@@ -31,7 +31,7 @@ class ChatSummary:
             sized.append((tokens, msg))
         return sized
 
-    def summarize(self, messages, depth=0):
+    def summarize(self, messages, foundation_messages, depth=0):
         """Summarize messages into multiple parallel memories to preserve different aspects."""
         if not self.models:
             raise ValueError("No models available for summarization")
@@ -49,6 +49,7 @@ class ChatSummary:
             summarized = self.summarize_all(
                 messages_to_summarize=messages,
                 context_messages=messages,
+                foundation_messages=foundation_messages,
                 is_emergency=True
             )
             return summarized
@@ -108,6 +109,7 @@ class ChatSummary:
                 summary = self.summarize_all(
                     messages_to_summarize=chunk,
                     context_messages=context_messages + chunk,
+                    foundation_messages=foundation_messages,
                     is_initial=True
                 )
             else:
@@ -121,7 +123,8 @@ class ChatSummary:
                 
                 summary = self.summarize_all(
                     messages_to_summarize=chunk,
-                    context_messages=context_messages
+                    context_messages=context_messages,
+                    foundation_messages=foundation_messages
                 )
             
             summaries.append(summary)
@@ -142,15 +145,15 @@ class ChatSummary:
         print(f"Final combined message count: {len(combined)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
         return combined
 
-    def summarize_all(self, messages_to_summarize, context_messages, is_initial=False, is_emergency=False):
+    def summarize_all(self, messages_to_summarize, context_messages, foundation_messages, is_initial=False, is_emergency=False):
         print("\n=== STARTING SUMMARIZATION ===")
         print(f"Messages to summarize: {len(messages_to_summarize)}")
         print(f"Context messages: {len(context_messages)}")
         
         # Create cache key from messages and flags, excluding foundation messages
         # Filter out foundation messages from the cache key since they're constant
-        messages_for_key = [msg for msg in messages_to_summarize if msg not in self._foundation_messages]
-        context_for_key = [msg for msg in context_messages if msg not in self._foundation_messages]
+        messages_for_key = [msg for msg in messages_to_summarize if msg not in foundation_messages]
+        context_for_key = [msg for msg in context_messages if msg not in foundation_messages]
         cache_key = json.dumps([messages_for_key, context_for_key, is_initial, is_emergency], sort_keys=True)
         cache_hash = hashlib.sha256(cache_key.encode()).hexdigest()
         cache_dir = Path.home() / ".aider" / "caches" / "summaries"

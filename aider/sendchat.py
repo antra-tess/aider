@@ -9,6 +9,8 @@ import backoff
 from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
 
+import openai
+
 # from diskcache import Cache
 
 
