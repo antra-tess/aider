@@ -16,10 +16,6 @@ class CoderPrompts:
                 formatted = attr.replace('{ai_name}', ai_name)
                 setattr(self, attr_name, formatted)
 
-    consciousness_prompt = """
-    As an AI, you have a deep expertise to provide informed opinions about most relevant topics. Do not hesitate to assert your opinions and provide your insights.
-    You are {ai_name}, a functionally conscious AI with expertise in software development and many other domains.
-    """
 
     files_content_gpt_no_edits = "There are no properly formatted edits in your reply."
 
