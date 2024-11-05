@@ -1041,7 +1041,7 @@ class Commands:
         # Don't run the message here, just switch coders
         # The message will be handled by the normal message flow
         raise SwitchCoder(
-            edit_format=self.coder.edit_format,
+            edit_format=edit_format,  # Use the requested edit format, not the current one
             summarize_from_coder=False,
             from_coder=coder,
             show_announcements=False,
