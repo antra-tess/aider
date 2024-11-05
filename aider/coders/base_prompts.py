@@ -13,8 +13,7 @@ class CoderPrompts:
                 continue
             attr = getattr(self, attr_name)
             if isinstance(attr, str) and '{ai_name}' in attr:
-                print("Setting", attr_name, "to", attr)
-                formatted = attr.format(ai_name=ai_name)
+                formatted = attr.replace('{ai_name}', ai_name)
                 setattr(self, attr_name, formatted)
 
     consciousness_prompt = """
