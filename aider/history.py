@@ -160,13 +160,13 @@ class ChatSummary:
         print(f"Final combined message count: {len(combined)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
         return combined
 
-    def summarize_all(self, messages_to_summarize, full_messages, is_initial=False):
+    def summarize_all(self, messages_to_summarize, context_messages, is_initial=False, is_emergency=False):
         print("\n=== STARTING SUMMARIZATION ===")
         print(f"Messages to summarize: {len(messages_to_summarize)}")
-        print(f"Full message context: {len(full_messages)}")
+        print(f"Context messages: {len(context_messages)}")
         
-        # Create cache key from messages
-        cache_key = json.dumps([messages_to_summarize, full_messages, is_initial], sort_keys=True)
+        # Create cache key from messages and flags
+        cache_key = json.dumps([messages_to_summarize, context_messages, is_initial, is_emergency], sort_keys=True)
         cache_hash = hashlib.sha256(cache_key.encode()).hexdigest()
         cache_dir = Path.home() / ".aider" / "caches" / "summaries"
         cache_file = cache_dir / f"{cache_hash}.json"
