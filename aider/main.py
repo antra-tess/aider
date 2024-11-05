@@ -836,6 +836,13 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
             if switch.kwargs.get("show_announcements") is not False:
                 coder.show_announcements()
+                
+            # Handle any message that came with the switch
+            if switch.kwargs.get("with_message"):
+                message = switch.kwargs["with_message"]
+                if not message.startswith("<system>"):
+                    message = "<human>" + message + "</human>"
+                coder.run(with_message=message)
 
 
 def check_and_load_imports(io, verbose=False):

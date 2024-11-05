@@ -1038,14 +1038,14 @@ class Commands:
             summarize_from_coder=False,
         )
 
-        user_msg = args
-        coder.run(user_msg)
-
+        # Don't run the message here, just switch coders
+        # The message will be handled by the normal message flow
         raise SwitchCoder(
             edit_format=self.coder.edit_format,
             summarize_from_coder=False,
             from_coder=coder,
             show_announcements=False,
+            with_message=args.strip(),
         )
 
     def get_help_md(self):
