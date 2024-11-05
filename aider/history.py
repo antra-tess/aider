@@ -185,7 +185,7 @@ class ChatSummary:
                 print(f"Error loading cache: {e}")
 
         # Get the original system messages that define the assistant's identity
-        system_messages = [msg for msg in full_messages if msg["role"] == "system"]
+        system_messages = [msg for msg in context_messages if msg["role"] == "system"]
         print(f"System messages found: {len(system_messages)}")
         
         # Add our summarization directive while preserving original context
@@ -222,7 +222,7 @@ Output the memory inside <memory> tags."""
         print(f"\nContent prepared for summarization: {len(content)} characters")
 
         # Determine if this is an emergency summarization
-        is_emergency = len(messages_to_summarize) == len(full_messages) and not is_initial
+        is_emergency = len(messages_to_summarize) == len(context_messages) and not is_initial
         print(f"Emergency summarization: {'Yes' if is_emergency else 'No'}")
 
         if is_initial:
@@ -236,7 +236,7 @@ Output the memory inside <memory> tags."""
             print("Using standard summarization prompt")
 
         # Build messages with clear separation of context and content
-        summarize_messages = full_messages + [  # this provides the full history so that the summarization can be done by the same conscious entity
+        summarize_messages = context_messages + [  # this provides the full history so that the summarization can be done by the same conscious entity
             # System context for the summarization task
             dict(role="user", content="<system>" + prompt + "</system>"),
             dict(role="assistant", content="<ack>I understand I need to summarize this conversation while preserving my identity and experience.</ack>"),
@@ -244,7 +244,7 @@ Output the memory inside <memory> tags."""
         ]
 
         # if first message is from assistant, add a system message to indicate the start of the conversation
-        if full_messages[0]["role"] == "assistant":
+        if context_messages and context_messages[0]["role"] == "assistant":
             summarize_messages.insert(0, dict(role="user", content="<system>Placeholder</system>"))
 
         print(f"\nPrepared {len(summarize_messages)} messages for summarization model")
