@@ -466,21 +466,9 @@ class InputOutput:
 
             self.console.print(Text(inp), **style)
 
-        # Add timestamp to both history and message content
+        # Add timestamp to message content
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        # For history file
-        prefix = "####"
-        if inp:
-            hist = inp.splitlines()
-        else:
-            hist = ["<blank>"]
-
-        hist = f"  \n{prefix} ".join(hist)
-        hist = f"""
-{prefix} [{timestamp}] {hist}"""
-        self.append_chat_history(hist, linebreak=True)
 
         # Return timestamped content for message
         if not inp.startswith("<system>"):
