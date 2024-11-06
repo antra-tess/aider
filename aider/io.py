@@ -466,6 +466,11 @@ class InputOutput:
 
             self.console.print(Text(inp), **style)
 
+        # Add timestamp to both history and message content
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # For history file
         prefix = "####"
         if inp:
             hist = inp.splitlines()
@@ -473,19 +478,22 @@ class InputOutput:
             hist = ["<blank>"]
 
         hist = f"  \n{prefix} ".join(hist)
-
-        # Add timestamp
-        from datetime import datetime
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         hist = f"""
 {prefix} [{timestamp}] {hist}"""
         self.append_chat_history(hist, linebreak=True)
+
+        # Return timestamped content for message
+        if not inp.startswith("<system>"):
+            inp = f'<human timestamp="{timestamp}">{inp}</human>'
+        return inp
 
     # OUTPUT
 
     def ai_output(self, content):
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Write timestamped version to history
         hist = f"\n[{timestamp}] {content.strip()}\n\n"
         self.append_chat_history(hist)
 

@@ -1312,22 +1312,13 @@ class Coder:
     def send_message(self, inp):
         import openai  # for error codes below
 
-        # Add the message to cur_messages with proper wrapping
-        if inp.startswith("<system>") and inp.endswith("</system>"):
-            # System messages pass through unchanged
-            self.cur_messages += [
-                dict(role="user", content=inp),
-            ]
-        elif inp.startswith("<human>") and inp.endswith("</human>"):
-            # Already wrapped messages pass through unchanged
-            self.cur_messages += [
-                dict(role="user", content=inp),
-            ]
-        else:
-            # Wrap unwrapped messages with <human> tags
-            self.cur_messages += [
-                dict(role="user", content="<human>" + inp + "</human>"),
-            ]
+        # Get timestamped content from io
+        timestamped_inp = self.io.user_input(inp, log_only=True)
+        
+        # Add the message to cur_messages
+        self.cur_messages += [
+            dict(role="user", content=timestamped_inp),
+        ]
 
         chunks = self.format_messages()
         messages = chunks.all_messages()
