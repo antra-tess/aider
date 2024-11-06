@@ -222,7 +222,7 @@ Output the memory inside <memory> tags."""
             print("Using standard summarization prompt")
 
         # Build messages with clear separation of context and content
-        summarize_messages = context_messages + [  # this provides the full history so that the summarization can be done by the same conscious entity
+        summarize_messages = foundation_messages + context_messages + [  # Include foundation messages first to establish identity
             # System context for the summarization task
             dict(role="user", content="<system>" + prompt + "</system>"),
             dict(role="assistant", content="<ack>I understand I need to summarize this conversation while preserving my identity and experience.</ack>"),
