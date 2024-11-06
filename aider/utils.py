@@ -158,7 +158,9 @@ def split_chat_history_markdown(text, include_tool=False):
             timestamp_match = re.match(r'.*?\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\](.*)$', lines.strip())
             if timestamp_match:
                 timestamp, content = timestamp_match.groups()
-                messages.append(dict(role=role, content=content, timestamp=timestamp))
+                if role == "user":
+                    content = f'<human timestamp="{timestamp}">{content}</human>'
+                messages.append(dict(role=role, content=content))
             else:
                 messages.append(dict(role=role, content=lines))
 
