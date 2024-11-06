@@ -1882,7 +1882,8 @@ class Coder:
         if not self.usage_report:
             return
 
-        self.io.tool_output(self.usage_report)
+        # Print directly to console without adding to chat history
+        print(self.usage_report)
 
         prompt_tokens = self.message_tokens_sent
         completion_tokens = self.message_tokens_received
