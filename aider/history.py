@@ -36,7 +36,7 @@ class ChatSummary:
         if not self.models:
             raise ValueError("No models available for summarization")
 
-        # Never include foundation messages in summarization
+        # Never include foundation messages in summarization, but keep them for context
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
         
