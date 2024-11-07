@@ -79,7 +79,7 @@ class ChatSummary:
             return messages
 
         # Split older messages into chunks
-        target_chunk_size = 10000
+        target_chunk_size = 3000
         chunks = []
         current_chunk = []
         current_tokens = 0
@@ -138,9 +138,9 @@ class ChatSummary:
         combined.extend(preserved_messages)
 
         # If still too big, recurse with reduced depth
-        combined_tokens = self.token_count(combined)
-        if combined_tokens > self.max_tokens:
-            return self.summarize(combined, depth + 1)
+        # combined_tokens = self.token_count(combined)
+        # if combined_tokens > self.max_tokens:
+        #     return self.summarize(combined, foundation_messages, depth=depth + 1)
 
         print(f"Final combined message count: {len(combined)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
         return combined

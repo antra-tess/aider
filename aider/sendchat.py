@@ -14,7 +14,7 @@ import openai
 # from diskcache import Cache
 
 
-CACHE_PATH = "~/.aider.send.cache.v1"
+CACHE_PATH = ".aider.send.cache.v1"
 CACHE = None
 # CACHE = Cache(CACHE_PATH)
 
