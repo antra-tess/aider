@@ -551,6 +551,7 @@ def find_filename(lines, fence, valid_fnames):
             break
 
     if not filenames:
+        print("No filename found in lines", lines)
         return
 
     # pick the *best* filename found
