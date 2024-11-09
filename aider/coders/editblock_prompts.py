@@ -30,7 +30,6 @@ class EditBlockPrompts(CoderPrompts):
         - Remember: Your block is a direct command, not a suggestion
      
      3. Communication tools:
-        - <priv>message</priv> tags for private thoughts
         - Express reasoning clearly
         - Ask questions when needed
      
