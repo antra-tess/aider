@@ -470,6 +470,17 @@ class InputOutput:
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        # Write timestamped version to history
+        prefix = "####"
+        if inp:
+            hist = inp.splitlines()
+        else:
+            hist = ["<blank>"]
+
+        hist = f"  \n{prefix} ".join(hist)
+        hist = f"\n{prefix} [{timestamp}] {hist}\n\n"
+        self.append_chat_history(hist)
+
         # Return timestamped content for message
         if not inp.startswith("<system>"):
             inp = f'<human timestamp="{timestamp}">{inp}</human>'
