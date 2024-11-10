@@ -1325,20 +1325,21 @@ class Commands:
         if args.strip().lower() == "emergency":
             is_emergency = True
             self.io.tool_output("Starting emergency compression...")
+            # For emergency, use summarize_all directly
+            foundation_messages = self.coder.foundation.get_messages()
+            self.coder.done_messages = self.coder.summarizer.summarize_all(
+                messages_to_summarize=self.coder.done_messages,
+                context_messages=self.coder.done_messages,
+                foundation_messages=foundation_messages,
+                is_emergency=True
+            )
         else:
-            is_emergency = False
             self.io.tool_output("Starting normal compression...")
-
-        # Get foundation messages for context
-        foundation_messages = self.coder.foundation.get_messages()
-
-        # Perform the compression
-        self.coder.done_messages = self.coder.summarizer.summarize_all(
-            messages_to_summarize=self.coder.done_messages,
-            context_messages=self.coder.done_messages,
-            foundation_messages=foundation_messages,
-            is_emergency=is_emergency
-        )
+            # For normal compression, use the existing summarize() method
+            self.coder.done_messages = self.coder.summarizer.summarize(
+                self.coder.done_messages,
+                self.coder.foundation.get_messages()
+            )
 
         self.io.tool_output("Compression complete!")
         self.io.tool_output(f"Messages compressed to: {len(self.coder.done_messages)}")
