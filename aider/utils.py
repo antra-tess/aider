@@ -165,10 +165,19 @@ def split_chat_history_markdown(text, include_tool=False):
                     if human_match:
                         # Strip existing wrapping and use the inner content
                         content = human_match.group(1)
+                    
+                    # For command messages, strip the command prefix for deduplication
+                    command_match = re.match(r'^\s*(/\w+)\s+(.+)$', content)
+                    if command_match:
+                        # Use the command content for deduplication
+                        dedup_content = command_match.group(2)
+                    else:
+                        dedup_content = content
+
                     # Create new wrapped content with timestamp
                     wrapped_content = f'<human timestamp="{timestamp}">{content}</human>'
                     # Only add if we haven't seen this exact message before
-                    msg_key = (timestamp, content)
+                    msg_key = (timestamp, dedup_content)
                     if msg_key not in seen_messages:
                         seen_messages.add(msg_key)
                         messages.append(dict(role=role, content=wrapped_content))
