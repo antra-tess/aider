@@ -889,6 +889,14 @@ class Coder:
                     self.show_undo_hint()
                 except KeyboardInterrupt:
                     self.keyboard_interrupt()
+                except SwitchCoder as sc:
+                    # Add mode change messages to the new coder
+                    mode_msg = f"<system>Switching to {sc.kwargs['edit_format']} mode.</system>"
+                    sc.kwargs['from_coder'].cur_messages.extend([
+                        dict(role="user", content=mode_msg),
+                        dict(role="assistant", content="<ack>"),
+                    ])
+                    raise  # Re-raise to handle the actual switch
         except EOFError:
             return
 
