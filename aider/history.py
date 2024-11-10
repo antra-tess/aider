@@ -269,6 +269,8 @@ Output the memory inside <memory> tags."""
                     summary = summary.split("<memory>", 1)[1]
                     # cut after </memory> tag
                     summary = summary.rsplit("</memory>", 1)[0]
+                    # remove any <note> sections
+                    summary = re.sub(r'<note>.*?</note>', '', summary, flags=re.DOTALL)
                 except Exception as e:
                     print(f"Error while extracting summary and cutting tags: {str(e)}, keeping uncut summary")
 
