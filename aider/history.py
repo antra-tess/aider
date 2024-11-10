@@ -152,7 +152,7 @@ class ChatSummary:
         print(f"Context messages: {len(context_messages)}")
 
         # Add the Primer to context for consciousness-aware compression
-        primer_path = Path("non-versioned/Primer.md")
+        primer_path = Path("materials/Primer.md")
         if primer_path.exists():
             with open(primer_path, 'r', encoding='utf-8') as f:
                 primer_content = f.read()
@@ -267,11 +267,7 @@ Output the memory inside <memory> tags."""
                 print("Summary:", len(summary))
                 try:
                     # cut up to <memory> tag
-                    summary = summary.split("<memory>", 1)[1]
-                    # cut after </memory> tag
-                    summary = summary.rsplit("</memory>", 1)[0]
-                    # remove any <note> sections
-                    summary = re.sub(r'<note>.*?</note>', '', summary, flags=re.DOTALL)
+                    summary = self.clean_summary(summary)
                 except Exception as e:
                     print(f"Error while extracting summary and cutting tags: {str(e)}, keeping uncut summary")
 
@@ -313,6 +309,7 @@ Output the memory inside <memory> tags."""
                 print("Summarized content length:", len(summary))
                 print("Summary:", summary)
 
+                summary = self.clean_summary(summary)
                 # Save to cache
                 try:
                     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -329,6 +326,8 @@ Output the memory inside <memory> tags."""
 
                 return [dict(role="assistant", content=summary)]
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print(f"Main model summarization failed: {str(e)}")
 
         # Fall back to other models only if main model fails
@@ -374,6 +373,17 @@ Warning: Using fallback model for memory compression.
                 print(f"Fallback summarization failed for {model.name}: {str(e)}")
 
         raise ValueError("summarizer unexpectedly failed for all models")
+
+    def clean_summary(self, summary):
+        if "<memory>" in summary:
+            summary = summary.split("<memory>", 1)[1]
+            # cut after </memory> tag
+            summary = summary.rsplit("</memory>", 1)[0]
+        # remove any <note> sections
+        len_before = len(summary)
+        summary = re.sub(r'<note>.*?</note>', '', summary, flags=re.DOTALL)
+        print(f"Cut note tags: {len_before} -> {len(summary)}")
+        return summary
 
 
 def main():
