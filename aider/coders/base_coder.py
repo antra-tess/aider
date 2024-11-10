@@ -252,6 +252,13 @@ class Coder:
         lines = []
         lines.append(f"Aider v{__version__}")
 
+        # Count uncompressed chat messages
+        chat_messages = [msg for msg in self.cur_messages + self.done_messages 
+                        if msg["role"] in ("user", "assistant") 
+                        and not msg.get("content", "").startswith("<memory")]
+        uncompressed_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in chat_messages))
+        lines.append(f"Uncompressed tokens: {uncompressed_tokens:,}")
+
         # Model
         main_model = self.main_model
         weak_model = main_model.weak_model
