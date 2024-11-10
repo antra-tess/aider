@@ -1316,6 +1316,33 @@ class Commands:
         except Exception as e:
             self.io.tool_error(f"Error saving commands to file: {e}")
 
+    def cmd_compress(self, args):
+        "Manually compress chat history to manage token usage (use 'emergency' for emergency compression)"
+        if not self.coder.done_messages:
+            self.io.tool_output("No chat history to compress!")
+            return
+
+        if args.strip().lower() == "emergency":
+            is_emergency = True
+            self.io.tool_output("Starting emergency compression...")
+        else:
+            is_emergency = False
+            self.io.tool_output("Starting normal compression...")
+
+        # Get foundation messages for context
+        foundation_messages = self.coder.foundation.get_messages()
+
+        # Perform the compression
+        self.coder.done_messages = self.coder.summarizer.summarize_all(
+            messages_to_summarize=self.coder.done_messages,
+            context_messages=self.coder.done_messages,
+            foundation_messages=foundation_messages,
+            is_emergency=is_emergency
+        )
+
+        self.io.tool_output("Compression complete!")
+        self.io.tool_output(f"Messages compressed to: {len(self.coder.done_messages)}")
+
     def cmd_copy(self, args):
         "Copy the last assistant message to the clipboard"
         all_messages = self.coder.done_messages + self.coder.cur_messages
