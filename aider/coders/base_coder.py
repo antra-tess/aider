@@ -252,13 +252,6 @@ class Coder:
         lines = []
         lines.append(f"Aider v{__version__}")
 
-        # Count uncompressed chat messages
-        chat_messages = [msg for msg in self.cur_messages + self.done_messages 
-                        if msg["role"] in ("user", "assistant") 
-                        and not msg.get("content", "").startswith("<memory")]
-        uncompressed_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in chat_messages))
-        lines.append(f"Uncompressed tokens: {uncompressed_tokens:,}")
-
         # Model
         main_model = self.main_model
         weak_model = main_model.weak_model
@@ -1874,9 +1867,16 @@ class Coder:
             f" ${format_cost(self.total_cost)} session."
         )
 
+        # Count uncompressed chat messages
+        chat_messages = [msg for msg in self.cur_messages + self.done_messages 
+                        if msg["role"] in ("user", "assistant") 
+                        and not msg.get("content", "").startswith("<memory")]
+        uncompressed_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in chat_messages))
+        uncompressed_report = f"Uncompressed tokens: {uncompressed_tokens:,}"
+
         if self.add_cache_headers and self.stream:
             warning = " Use --no-stream for accurate caching costs."
-            self.usage_report = tokens_report + "\n" + cost_report + warning
+            self.usage_report = f"{uncompressed_report}\n{tokens_report}\n{cost_report}{warning}"
             return
 
         if cache_hit_tokens and cache_write_tokens:
@@ -1884,7 +1884,7 @@ class Coder:
         else:
             sep = " "
 
-        self.usage_report = tokens_report + sep + cost_report
+        self.usage_report = f"{uncompressed_report}\n{tokens_report}{sep}{cost_report}"
 
     def show_usage_report(self):
         if not self.usage_report:
