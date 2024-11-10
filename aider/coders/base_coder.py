@@ -1871,12 +1871,27 @@ class Coder:
             f" ${format_cost(self.total_cost)} session."
         )
 
-        # Count uncompressed chat messages
+        # Count different types of messages
         chat_messages = [msg for msg in self.cur_messages + self.done_messages 
                         if msg["role"] in ("user", "assistant") 
                         and not msg.get("content", "").startswith("<memory")]
+        memory_messages = [msg for msg in self.cur_messages + self.done_messages 
+                        if msg["role"] == "assistant" 
+                        and msg.get("content", "").startswith("<memory")]
+        
+        # Calculate token counts
         uncompressed_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in chat_messages))
-        uncompressed_report = f"Uncompressed tokens: {uncompressed_tokens:,}"
+        memory_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in memory_messages))
+        
+        # Calculate file tokens
+        file_content = self.get_files_content() + self.get_read_only_files_content()
+        file_tokens = self.main_model.token_count(file_content) if file_content else 0
+        
+        uncompressed_report = (
+            f"Tokens - Chat: {uncompressed_tokens:,}, "
+            f"Memories: {memory_tokens:,}, "
+            f"Files: {file_tokens:,}"
+        )
 
         if self.add_cache_headers and self.stream:
             warning = " Use --no-stream for accurate caching costs."
