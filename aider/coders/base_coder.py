@@ -1048,11 +1048,12 @@ class Coder:
         self.summarized_done_messages = []
 
     def move_back_cur_messages(self, message):
-        self.done_messages += self.cur_messages
+        # Move current messages to chat history
+        self.chat_history += self.cur_messages
 
         # TODO check for impact on image messages
         if message:
-            self.done_messages += [
+            self.chat_history += [
                 dict(role="user", content=message),
                 dict(role="assistant", content="<ack>"),
             ]
@@ -1198,7 +1199,8 @@ class Coder:
 
         self.summarize_end()
         # Preserve all messages, memories don't need special handling
-        chunks.done = list(self.done_messages)
+        # Add memories first, then chat history
+        chunks.done = list(self.memories) + list(self.chat_history)
 
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
