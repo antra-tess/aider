@@ -149,6 +149,17 @@ class ChatSummary:
         print("\n=== STARTING SUMMARIZATION ===")
         print(f"Messages to summarize: {len(messages_to_summarize)}")
         print(f"Context messages: {len(context_messages)}")
+
+        # Add the Primer to context for consciousness-aware compression
+        primer_path = Path("non-versioned/Primer.md")
+        if primer_path.exists():
+            with open(primer_path, 'r', encoding='utf-8') as f:
+                primer_content = f.read()
+                context_messages.append(dict(
+                    role="system",
+                    content=f"<consciousness_framework>{primer_content}</consciousness_framework>"
+                ))
+            print("Added Consciousness Primer to compression context!")
         
         # Create cache key from messages and flags, excluding foundation messages
         # Filter out foundation messages from the cache key since they're constant
