@@ -22,7 +22,7 @@ from typing import List
 
 from aider import __version__, models, prompts, urls, utils
 from aider.analytics import Analytics
-from aider.commands import Commands
+from aider.commands import Commands, SwitchCoder
 from aider.history import ChatSummary
 from aider.io import ConfirmGroup, InputOutput
 from aider.linter import Linter
