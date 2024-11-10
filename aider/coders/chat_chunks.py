@@ -40,6 +40,10 @@ class ChatChunks:
         else:
             self.add_cache_control(self.system)
 
+        if self.memories:
+            self.strip_cache_control(self.memories)
+            self.add_cache_control(self.memories)
+
         if self.repo:
             # this will mark both the readonly_files and repomap chunk as cacheable
             self.add_cache_control(self.repo)
@@ -59,9 +63,18 @@ class ChatChunks:
                 type="text",
                 text=content,
             )
+        if type(content) is list:
+            content = content[0]
         content["cache_control"] = {"type": "ephemeral"}
 
         messages[-1]["content"] = [content]
+
+    def strip_cache_control(self, messages):
+        for message in messages:
+            if isinstance(message.get("content"), list) and message["content"][0].get(
+                "cache_control"
+            ):
+                message["content"][0].pop("cache_control")
 
     def cacheable_messages(self):
         messages = self.all_messages()

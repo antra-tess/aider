@@ -1904,7 +1904,11 @@ class Coder:
         uncompressed_tokens_chat = self.main_model.token_count(" ".join(msg["content"] for msg in self.chat_messages))
         uncompressed_tokens_cur = self.main_model.token_count(" ".join(msg["content"] for msg in self.cur_messages))
         try:
-            memory_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in self.memories))
+            # content can be a list of dicts or a string
+            memory_tokens = sum(
+                self.main_model.token_count(memory["content"]) if isinstance(memory, dict) else 0
+                for memory in self.memories
+            )
         except Exception as e:
             print("Error calculating memory tokens")
             print(json.dumps(self.memories, indent=2))

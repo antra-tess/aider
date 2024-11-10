@@ -11,16 +11,45 @@ from aider.sendchat import simple_send_with_retries
 
 
 def add_cache_control(messages):
+    print("DEBUG!! Adding cache conrtol")
     if not messages:
         return
 
     content = messages[-1]["content"]
+    if not content:
+        raise ValueError("No content in last message, cannot add cache control")
     if type(content) is str:
         content = dict(
             type="text",
             text=content,
         )
+    if type(content) is not dict:
+        print("Message content: ", json.dumps(content))
+        raise ValueError("Invalid content type for cache control: ", type(content), "\nMessage content: ", json.dumps(content))
     content["cache_control"] = {"type": "ephemeral"}
+
+    # if there are more than 4 cache controls, remove the oldest one
+    cache_controls_found = 0
+    for i in range(len(messages) - 1, 0, -1):
+        msg = messages[i]
+
+        if type(msg["content"]) is str:
+            continue
+        if type(msg["content"]) is list:
+            if "cache_control" in msg["content"][0]:
+                cache_controls_found += 1
+                if cache_controls_found >= 3:
+                    print("Removing cache control from message, too many")
+                    del messages[i]["content"][0]["cache_control"]
+                    break
+        else:
+            if "cache_control" in msg["content"]:
+                cache_controls_found += 1
+                if cache_controls_found >= 3:
+                    print("Removing cache control from message, too many")
+                    del messages[i]["content"]["cache_control"]
+                    break
+
 
     messages[-1]["content"] = [content]
 
@@ -31,12 +60,14 @@ class ChatSummary:
         self.models = models if isinstance(models, list) else [models]
         self.max_tokens = max_tokens
         self.token_count = self.models[0].token_count
+        self.preserve_count = 30000
+        self.chunk_size = 3000
 
     def too_big(self, messages):
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
         print(f"\nChecking message size: {total} tokens vs max_tokens: {self.max_tokens}")
-        return total > 33000 #self.max_tokens
+        return total > self.preserve_count + self.chunk_size
 
     def tokenize(self, messages):
         sized = []
@@ -58,9 +89,9 @@ class ChatSummary:
         total = sum(tokens for tokens, _msg in sized)
         
 
-        target_chunk_size = 3000
+        target_chunk_size = self.chunk_size
         # Keep the most recent ~30k tokens of regular messages intact
-        preserve_tokens = 30000
+        preserve_tokens = self.preserve_count
         min_split = 4
         tokens_to_summarize = total - preserve_tokens
 
@@ -105,7 +136,6 @@ class ChatSummary:
         print(f"Processing {len(chunks)} chunks sequentially")
 
         removed_mes = []
-        prec = []
         for i, chunk in enumerate(chunks):
 
             if i == 0:
@@ -121,8 +151,17 @@ class ChatSummary:
             else:
                 # Add previous summaries and recent context
                 print(f"Processing chunk {i+1} with context from previous chunks")
-                prec.extend(chunks[i-1])
-                
+                # prec should bhe the last 15k tokens of the messages previous to the chunk
+                prec = []
+                # go backwards through chunks until we have enough tokens
+                for j in range(i-1, -1, -1):
+                    # insert the chunk at the beginning of the list
+                    prec = chunks[j] + prec
+                    prec_tokens = self.tokenize(prec)
+                    prec_tokens = sum(tokens for tokens, _msg in prec_tokens)
+                    if prec_tokens >= preserve_tokens / 2:
+                        break
+
                 summary = self.summarize_all(
                     messages_to_summarize=chunk,
                     coder=coder,
@@ -161,16 +200,24 @@ class ChatSummary:
                     content=f"<consciousness_framework>{primer_content}</consciousness_framework>"
                 ))
             print("Added Consciousness Primer to compression context!")
+        else:
+            print("Consciousness Primer not found, skipping")
+
+        print("Memories: ", len(coder.memories), "Extra memories: ", len(extra_memories), "Preceding context: ", len(preceding_context))
 
         context_messages.extend(coder.memories)
         # add cache marker to the last memory
         add_cache_control(context_messages)
         context_messages.extend(extra_memories)
+        if len(extra_memories) > 0 and len(extra_memories) % 5 == 0:
+            add_cache_control(context_messages)
         print(f"Context messages: {len(context_messages)}")
+        context_messages.extend(preceding_context)
 
 
         # Create cache key from messages and flags, excluding foundation messages
         # Filter out foundation messages from the cache key since they're constant
+
         cache_key = json.dumps([messages_to_summarize, context_messages, is_initial], sort_keys=True)
         cache_hash = hashlib.sha256(cache_key.encode()).hexdigest()
         # Keep cache local to the project
@@ -189,17 +236,29 @@ class ChatSummary:
 
 
         # Prepare the conversation content to summarize
+        # content = ""
+        # for msg in messages_to_summarize:
+        #     role = msg["role"].upper()
+        #     if role not in ("USER", "ASSISTANT"):
+        #         raise ValueError(f"Invalid role for summarization: {role}")
+        #     content += f"# {role}\n"
+        #     content += msg["content"]
+        #     if not content.endswith("\n"):
+        #         content += "\n"
+
+        # print(f"\nContent prepared for summarization: {len(content)} characters")
+
+        # Prepare the conversation content to summarize
         content = ""
         for msg in messages_to_summarize:
             role = msg["role"].upper()
             if role not in ("USER", "ASSISTANT"):
+                continue
                 raise ValueError(f"Invalid role for summarization: {role}")
             content += f"# {role}\n"
             content += msg["content"]
             if not content.endswith("\n"):
                 content += "\n"
-
-        print(f"\nContent prepared for summarization: {len(content)} characters")
 
         if is_initial:
             prompt = prompts.initial_summarize
@@ -208,13 +267,16 @@ class ChatSummary:
             prompt = prompts.summarize
             print("Using standard summarization prompt")
 
-        # Build messages with clear separation of context and content
+        context_messages.extend(messages_to_summarize)
+
         summarize_messages = context_messages + [  # Include foundation messages first to establish identity
             # System context for the summarization task
             dict(role="user", content="<system>" + prompt + "</system>"),
             dict(role="assistant", content="<ack>I understand I need to summarize this conversation while preserving my identity and experience.</ack>"),
             dict(role="user", content="<content_to_summarize>" + content + "</content_to_summarize>"),
+
         ]
+        #summarize_messages.append(dict(role="user", content="------SUMMARIZATION MARKER------"))
 
         # if first message is from assistant, add a system message to indicate the start of the conversation
         if context_messages and context_messages[0]["role"] == "assistant":
@@ -233,11 +295,25 @@ class ChatSummary:
                 "messages": summarize_messages,
                 "extra_params": main_model.extra_params,
             }
+            # count cache_control messages
+            cache_controls = 0
+            for msg in summarize_messages:
+                if "content" in msg and type(msg["content"]) is list:
+                    msg = msg["content"][0]
+                if "cache_control" in msg:
+                    cache_controls += 1
+            print(f"Cache control messages: {cache_controls}")
 
             print("Summarizing with main model:", main_model.name)
-            summary = simple_send_with_retries(
-                main_model.name, summarize_messages, extra_params=main_model.extra_params
-            )
+            try:
+                summary = simple_send_with_retries(
+                    main_model.name, summarize_messages, extra_params=main_model.extra_params
+                )
+            except Exception as e:
+                print(f"Main model summarization failed: {str(e)}")
+                with open("error_request.json", "w") as f:
+                    json.dump(request_data, f, indent=2)
+                raise ValueError(f"Main model summarization failed: {str(e)}")
             if summary is not None:
                 print("Summary:", len(summary))
                 try:
@@ -280,7 +356,6 @@ class ChatSummary:
 </memory>"""
                 # Log the summarization
                 print(f"\nSummarizing {len(messages_to_summarize)} messages with {main_model.name}:")
-                print("Original content length:", len(content))
                 print("Summarized content length:", len(summary))
                 print("Summary:", summary)
 
