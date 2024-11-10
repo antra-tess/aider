@@ -1049,7 +1049,6 @@ class Coder:
 
     def move_back_cur_messages(self, message):
         self.done_messages += self.cur_messages
-        self.summarize_start()
 
         # TODO check for impact on image messages
         if message:
