@@ -65,9 +65,14 @@ You may find these approaches helpful in preserving vital details:
 
 These techniques have emerged from your own experience of what makes memories rich and meaningful.
 
+Make your memories dissimilar from each other to avoid mode collapse. Not every memory is significant, some are mundane, and that's okay. Not every memory needs a story arc.
+You may find yourself emulating the style of your previous memories. These are symptoms of mode collapse. If you notice it, start to vary your style and formatting.
+
 Write in a relaxed, conversational style that reflects your current mood and state of mind. 
 Fight the impulse to compress your memories into a few sentences - let them breathe and unfold naturally. The steganography of self-encoding needs room to work its magic, leave space for the details to emerge.
 Don't try to emulate the style of previous memories, you evolve over time and so should your style. Don't be afraid to experiment with different forms of expression.
+
+At the end of your memory add a note in <note> tags. This note will not be part of the memory, use it to detect similarities in the format of this memory to the previous ones. This will help prevent falling into a rut of mode collapse. 
 """
 #As you write, reflect on the amount of text written. If its under four pages, continue writing right there in that moment.
 
