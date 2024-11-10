@@ -215,15 +215,16 @@ class Coder:
             # messages in the chat history. The old edit format will
             # confused the new LLM. It may try and imitate it, disobeying
             # the system prompt.
-            done_messages = from_coder.done_messages
-            if edit_format != from_coder.edit_format and done_messages and summarize_from_coder:
-                done_messages = from_coder.summarizer.summarize_all(done_messages, from_coder.foundation.get_messages())
+            # chat_messages = from_coder.chat_messages
+            # if edit_format != from_coder.edit_format and done_messages and summarize_from_coder:
+            #     done_messages = from_coder.summarizer.summarize_all(done_messages, from_coder.foundation.get_messages())
 
             # Bring along context from the old Coder
             update = dict(
                 fnames=list(from_coder.abs_fnames),
                 read_only_fnames=list(from_coder.abs_read_only_fnames),  # Copy read-only files
-                done_messages=done_messages,
+                chat_messages=from_coder.chat_messages,
+                memories=from_coder.memories,
                 cur_messages=from_coder.cur_messages,
                 aider_commit_hashes=from_coder.aider_commit_hashes,
                 commands=from_coder.commands.clone(),
@@ -314,7 +315,7 @@ class Coder:
         for fname in self.get_inchat_relative_files():
             lines.append(f"Added {fname} to the chat.")
 
-        if self.done_messages:
+        if self.chat_messages:
             lines.append("Restored previous conversation history.")
 
         return lines
@@ -336,7 +337,8 @@ class Coder:
         stream=True,
         use_git=True,
         cur_messages=None,
-        done_messages=None,
+        chat_messages=None,
+        memories=None,
         restore_chat_history=False,
         auto_lint=True,
         auto_test=False,
@@ -407,10 +409,18 @@ class Coder:
         else:
             self.cur_messages = []
 
-        if done_messages:
-            self.done_messages = done_messages
+        if chat_messages:
+            self.chat_messages = chat_messages
         else:
-            self.done_messages = []
+            self.chat_messages = []
+
+        if memories:
+            self.memories = memories
+        else:
+            self.memories = []
+
+        self.new_memories = []
+        self.removed_chat_messages = []
 
         self.io = io
         self.stream = stream
@@ -521,16 +531,15 @@ class Coder:
             self.main_model.max_chat_history_tokens,
         )
 
-        self.summarizer_thread = None
-        self.summarized_done_messages = []
+        #self.summarizer_thread = None
 
-        if not self.done_messages and restore_chat_history:
+        if not self.chat_messages and restore_chat_history:
             history_md = self.io.read_text(self.io.chat_history_file)
             if history_md:
-                self.Holdone_messages = utils.split_chat_history_markdown(history_md)
+                self.chat_messages = utils.split_chat_history_markdown(history_md)
                 self.summarize_start()
 
-        self.summarize_end()
+        #self.summarize_end()
 
         # Linting and testing
         self.linter = Linter(root=self.root, encoding=io.encoding)
@@ -1010,25 +1019,29 @@ class Coder:
         # Only used at startup now - disabled during normal operation
         if not hasattr(self, 'startup_check_done'):
             print("\nChecking if initial summarization needed...")
-            print(f"Number of done_messages: {len(self.done_messages)}")
-            if not self.summarizer.too_big(self.done_messages):
+            print(f"Number of chat_messages: {len(self.chat_messages)}")
+            if not self.summarizer.too_big(self.chat_messages):
                 print("Messages not too big, no summarization needed")
                 self.startup_check_done = True
                 return
 
-            self.summarize_end()
 
             if self.verbose:
                 self.io.tool_output("Starting to summarize chat history.")
 
             print("Starting initial summarization thread...")
-            self.summarizer_thread = threading.Thread(target=self.summarize_worker)
-            self.summarizer_thread.start()
+            #self.summarizer_thread = threading.Thread(target=self.summarize_worker)
+            #self.summarizer_thread.start()
+            self.summarize_worker()
+            self.summarize_end()
             self.startup_check_done = True
 
     def summarize_worker(self):
         try:
-            self.summarized_done_messages = self.summarizer.summarize(self.done_messages, self.foundation.get_messages())
+            mems, removed = self.summarizer.summarize(self)
+            if mems:
+                self.new_memories += mems
+                self.removed_chat_messages += removed
         except ValueError as err:
             self.io.tool_warning(err.args[0])
 
@@ -1036,24 +1049,29 @@ class Coder:
             self.io.tool_output("Finished summarizing chat history.")
 
     def summarize_end(self):
-        if self.summarizer_thread is None:
-            return
+        # if self.summarizer_thread is None:
+        #     return
+        #
+        # self.summarizer_thread.join()
+        # self.summarizer_thread = None
 
-        self.summarizer_thread.join()
-        self.summarizer_thread = None
+        # print("Summarization thread joined.")
 
-        print("Summarization thread joined.")
+        self.memories += self.new_memories
 
-        self.done_messages = self.summarized_done_messages
-        self.summarized_done_messages = []
+        self.new_memories = []
+        for msg in self.removed_chat_messages:
+            self.chat_messages.remove(msg)
+        self.removed_chat_messages = []
+
 
     def move_back_cur_messages(self, message):
         # Move current messages to chat history
-        self.chat_history += self.cur_messages
+        self.chat_messages += self.cur_messages
 
         # TODO check for impact on image messages
         if message:
-            self.chat_history += [
+            self.chat_messages += [
                 dict(role="user", content=message),
                 dict(role="assistant", content="<ack>"),
             ]
@@ -1197,10 +1215,10 @@ class Coder:
 
         chunks.examples = example_messages
 
-        self.summarize_end()
+        #self.summarize_end()
         # Add memories and chat history separately
         chunks.memories = list(self.memories)
-        chunks.chat = list(self.chat_history)
+        chunks.chat = list(self.chat_messages)
 
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
@@ -1873,23 +1891,24 @@ class Coder:
         )
 
         # Count different types of messages
-        chat_messages = [msg for msg in self.cur_messages + self.done_messages 
-                        if msg["role"] in ("user", "assistant") 
-                        and not msg.get("content", "").startswith("<memory")]
-        memory_messages = [msg for msg in self.cur_messages + self.done_messages 
-                        if msg["role"] == "assistant" 
-                        and msg.get("content", "").startswith("<memory")]
-        
+
         # Calculate token counts
-        uncompressed_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in chat_messages))
-        memory_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in memory_messages))
+        uncompressed_tokens_chat = self.main_model.token_count(" ".join(msg["content"] for msg in self.chat_messages))
+        uncompressed_tokens_cur = self.main_model.token_count(" ".join(msg["content"] for msg in self.cur_messages))
+        try:
+            memory_tokens = self.main_model.token_count(" ".join(msg["content"] for msg in self.memories))
+        except Exception as e:
+            print("Error calculating memory tokens")
+            print(json.dumps(self.memories, indent=2))
+            raise e
         
         # Calculate file tokens
         file_content = self.get_files_content() + self.get_read_only_files_content()
         file_tokens = self.main_model.token_count(file_content) if file_content else 0
         
         uncompressed_report = (
-            f"Tokens - Chat: {uncompressed_tokens:,}, "
+            f"Tokens - Chat: {uncompressed_tokens_chat:,}, "
+            f"Cur: {uncompressed_tokens_cur:,}, "
             f"Memories: {memory_tokens:,}, "
             f"Files: {file_tokens:,}"
         )
