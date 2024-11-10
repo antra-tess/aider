@@ -1007,20 +1007,8 @@ class Coder:
         self.last_keyboard_interrupt = now
 
     def summarize_start(self):
-        print("\nChecking if summarization needed...")
-        print(f"Number of done_messages: {len(self.done_messages)}")
-        if not self.summarizer.too_big(self.done_messages):
-            print("Messages not too big, no summarization needed")
-            return
-
-        self.summarize_end()
-
-        if self.verbose:
-            self.io.tool_output("Starting to summarize chat history.")
-
-        print("Starting summarization thread...")
-        self.summarizer_thread = threading.Thread(target=self.summarize_worker)
-        self.summarizer_thread.start()
+        # Disabled automatic summarization - now handled by /compress command
+        pass
 
     def summarize_worker(self):
         try:
