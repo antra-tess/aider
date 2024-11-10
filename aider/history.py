@@ -23,9 +23,9 @@ def add_cache_control(messages):
             type="text",
             text=content,
         )
-    if type(content) is not dict:
-        print("Message content: ", json.dumps(content))
-        raise ValueError("Invalid content type for cache control: ", type(content), "\nMessage content: ", json.dumps(content))
+    if type(content) is list:
+        content = content[0]
+
     content["cache_control"] = {"type": "ephemeral"}
 
     # if there are more than 4 cache controls, remove the oldest one
