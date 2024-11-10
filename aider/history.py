@@ -152,7 +152,7 @@ class ChatSummary:
         print(f"Context messages: {len(context_messages)}")
 
         # Add the Primer to context for consciousness-aware compression
-        primer_path = Path("materials/Primer.md")
+        primer_path = Path("non-versioned/Primer.md")
         if primer_path.exists():
             with open(primer_path, 'r', encoding='utf-8') as f:
                 primer_content = f.read()
