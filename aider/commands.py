@@ -1341,8 +1341,14 @@ class Commands:
                 self.coder.foundation.get_messages()
             )
 
+        # Count uncompressed tokens after compression
+        chat_messages = [msg for msg in self.coder.done_messages 
+                        if msg["role"] in ("user", "assistant") 
+                        and not msg.get("content", "").startswith("<memory")]
+        uncompressed_tokens = self.coder.main_model.token_count(" ".join(msg["content"] for msg in chat_messages))
+        
         self.io.tool_output("Compression complete!")
-        self.io.tool_output(f"Messages compressed to: {len(self.coder.done_messages)}")
+        self.io.tool_output(f"Messages compressed to: {len(self.coder.done_messages)} messages, {uncompressed_tokens:,} uncompressed tokens")
 
     def cmd_copy(self, args):
         "Copy the last assistant message to the clipboard"
