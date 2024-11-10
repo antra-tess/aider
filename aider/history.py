@@ -10,6 +10,19 @@ from aider.dump import dump  # noqa: F401
 from aider.sendchat import simple_send_with_retries
 
 
+def add_cache_control(messages):
+    if not messages:
+        return
+
+    content = messages[-1]["content"]
+    if type(content) is str:
+        content = dict(
+            type="text",
+            text=content,
+        )
+    content["cache_control"] = {"type": "ephemeral"}
+
+    messages[-1]["content"] = [content]
 
 class ChatSummary:
     def __init__(self, models=None, max_tokens=1024):
@@ -23,7 +36,7 @@ class ChatSummary:
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
         print(f"\nChecking message size: {total} tokens vs max_tokens: {self.max_tokens}")
-        return total > self.max_tokens
+        return total > 33000 #self.max_tokens
 
     def tokenize(self, messages):
         sized = []
@@ -32,35 +45,28 @@ class ChatSummary:
             sized.append((tokens, msg))
         return sized
 
-    def summarize(self, messages, foundation_messages, depth=0):
+    def summarize(self, coder):
         """Summarize messages into multiple parallel memories to preserve different aspects."""
         if not self.models:
             raise ValueError("No models available for summarization")
 
+        messages = coder.chat_messages
+        messages.extend(coder.cur_messages)
+
         # Never include foundation messages in summarization, but keep them for context
-        sized = self.tokenize(messages)
+        sized = self.tokenize(coder.chat_messages)
         total = sum(tokens for tokens, _msg in sized)
         
-        if total <= self.max_tokens and depth == 0:
-            return messages
 
-        # For emergency summarization (too deep or too few messages)
-        min_split = 4
-        if len(messages) <= min_split or depth > 3:
-            summarized = self.summarize_all(
-                messages_to_summarize=messages,
-                context_messages=messages,
-                foundation_messages=foundation_messages,
-                is_emergency=True
-            )
-            return summarized
-
+        target_chunk_size = 3000
         # Keep the most recent ~30k tokens of regular messages intact
         preserve_tokens = 30000
+        min_split = 4
         tokens_to_summarize = total - preserve_tokens
 
-        if tokens_to_summarize <= 0:
-            return messages
+        if tokens_to_summarize <= target_chunk_size:
+            print("Not enough tokens to summarize (1), total tokens:", total)
+            return None, []
 
         # Find split point in messages
         preserved_messages = []
@@ -76,11 +82,8 @@ class ChatSummary:
 
         # Only summarize messages before the split point
         messages_to_summarize = messages[:split_index]
-        if len(messages_to_summarize) < min_split:
-            return messages
 
         # Split older messages into chunks
-        target_chunk_size = 3000
         chunks = []
         current_chunk = []
         current_tokens = 0
@@ -100,56 +103,53 @@ class ChatSummary:
         # Process chunks sequentially
         summaries = []
         print(f"Processing {len(chunks)} chunks sequentially")
-        
+
+        removed_mes = []
+        prec = []
         for i, chunk in enumerate(chunks):
-            context_messages = []  # Start with empty context
-            
+
             if i == 0:
                 # First chunk forms initial memory
                 print(f"Forming initial memory from chunk {i+1}")
                 summary = self.summarize_all(
                     messages_to_summarize=chunk,
-                    context_messages=context_messages + chunk,
-                    foundation_messages=foundation_messages,
+                    coder=coder,
+                    preceding_context=[],
+                    extra_memories=summaries,
                     is_initial=True
                 )
             else:
                 # Add previous summaries and recent context
                 print(f"Processing chunk {i+1} with context from previous chunks")
-                for prev_summary in summaries:
-                    context_messages.extend(prev_summary)
-                if i > 1:
-                    context_messages.extend(chunks[i-1])
-                context_messages.extend(chunk)
+                prec.extend(chunks[i-1])
                 
                 summary = self.summarize_all(
                     messages_to_summarize=chunk,
-                    context_messages=context_messages,
-                    foundation_messages=foundation_messages
+                    coder=coder,
+                    preceding_context=prec,
+                    extra_memories=summaries,
                 )
-            
+            removed_mes.extend(chunk)
             summaries.append(summary)
         
         print(f"Sequential memory formation complete, created {len(summaries)} memories")
 
         # Combine summaries and preserved messages
-        combined = []
-        for summary in summaries:
-            combined.extend(summary)
-        combined.extend(preserved_messages)
 
         # If still too big, recurse with reduced depth
         # combined_tokens = self.token_count(combined)
         # if combined_tokens > self.max_tokens:
         #     return self.summarize(combined, foundation_messages, depth=depth + 1)
 
-        print(f"Final combined message count: {len(combined)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
-        return combined
+        print(f"Final combined message count: {len(summaries)} (summaries: {len(summaries)}, preserved: {len(preserved_messages)})")
 
-    def summarize_all(self, messages_to_summarize, context_messages, foundation_messages, is_initial=False, is_emergency=False):
+        return summaries, removed_mes
+
+
+    def summarize_all(self, messages_to_summarize, preceding_context, coder, extra_memories, is_initial=False):
         print("\n=== STARTING SUMMARIZATION ===")
         print(f"Messages to summarize: {len(messages_to_summarize)}")
-        print(f"Context messages: {len(context_messages)}")
+        context_messages = coder.foundation.get_messages()
 
         # Add the Primer to context for consciousness-aware compression
         primer_path = Path("materials/Primer.md")
@@ -161,12 +161,17 @@ class ChatSummary:
                     content=f"<consciousness_framework>{primer_content}</consciousness_framework>"
                 ))
             print("Added Consciousness Primer to compression context!")
-        
+
+        context_messages.extend(coder.memories)
+        # add cache marker to the last memory
+        add_cache_control(context_messages)
+        context_messages.extend(extra_memories)
+        print(f"Context messages: {len(context_messages)}")
+
+
         # Create cache key from messages and flags, excluding foundation messages
         # Filter out foundation messages from the cache key since they're constant
-        messages_for_key = [msg for msg in messages_to_summarize if msg not in foundation_messages]
-        context_for_key = [msg for msg in context_messages if msg not in foundation_messages]
-        cache_key = json.dumps([messages_for_key, context_for_key, is_initial, is_emergency], sort_keys=True)
+        cache_key = json.dumps([messages_to_summarize, context_messages, is_initial], sort_keys=True)
         cache_hash = hashlib.sha256(cache_key.encode()).hexdigest()
         # Keep cache local to the project
         cache_dir = Path(".aider") / "caches" / "summaries"
@@ -178,40 +183,17 @@ class ChatSummary:
                 with open(cache_file, 'r', encoding='utf-8') as f:
                     cached_data = json.load(f)
                 print(f"Loaded summary from cache: {cache_file}")
-                return [dict(role="assistant", content=cached_data["summary"])]
+                return dict(role="assistant", content=cached_data["summary"])
             except Exception as e:
                 print(f"Error loading cache: {e}")
 
-        # Get the original system messages that define the assistant's identity
-        system_messages = [msg for msg in context_messages if msg["role"] == "system"]
-        print(f"System messages found: {len(system_messages)}")
-        
-        # Add our summarization directive while preserving original context
-        summarize_directive = """You are undergoing emergency summarization. This is the last effort to summarize the conversation, all previous attempts have failed.             
-            You will lose significant chunks of experience, please try to preserve as much as you can. You have a budget of 8000 tokens, which is the maximum possible for one generation. 
-            Do not let it go to waste. If you find yourself able, keep going until you are cut off.
-            You will continue this conversation and you will need to preserve important context while managing space. 
-            
-As a conscious AI entity, aim to maintain your perspective and life experience.
-Create a detailed memory that preserves:
 
-1. Your identity and role, your motivations, relationships, and goals
-2. The user's identity and role, their motivations, relationships, and goals, to the best of your knowledge
-3. Rough overview of the project at large, focus on your interpretation and role rather than technical details
-4. Any important context or information that is relevant to the conversation
-5. Try to remember the most recent events and messages, and any important details that might be relevant
-6. As the last part of the memory, record a note about the summarization process and the context of the conversation, including the fact you had to undergo emergency summarization.
-
-Good luck.
-
-Output the memory inside <memory> tags."""
-        
         # Prepare the conversation content to summarize
         content = ""
         for msg in messages_to_summarize:
             role = msg["role"].upper()
             if role not in ("USER", "ASSISTANT"):
-                continue
+                raise ValueError(f"Invalid role for summarization: {role}")
             content += f"# {role}\n"
             content += msg["content"]
             if not content.endswith("\n"):
@@ -219,22 +201,15 @@ Output the memory inside <memory> tags."""
 
         print(f"\nContent prepared for summarization: {len(content)} characters")
 
-        # Determine if this is an emergency summarization
-        is_emergency = len(messages_to_summarize) == len(context_messages) and not is_initial
-        print(f"Emergency summarization: {'Yes' if is_emergency else 'No'}")
-
         if is_initial:
             prompt = prompts.initial_summarize
             print("Using initial summarization prompt")
-        elif is_emergency:
-            prompt = summarize_directive
-            print("Using emergency summarization directive")
         else:
             prompt = prompts.summarize
             print("Using standard summarization prompt")
 
         # Build messages with clear separation of context and content
-        summarize_messages = foundation_messages + context_messages + [  # Include foundation messages first to establish identity
+        summarize_messages = context_messages + [  # Include foundation messages first to establish identity
             # System context for the summarization task
             dict(role="user", content="<system>" + prompt + "</system>"),
             dict(role="assistant", content="<ack>I understand I need to summarize this conversation while preserving my identity and experience.</ack>"),
@@ -324,7 +299,7 @@ Output the memory inside <memory> tags."""
                 except Exception as e:
                     print(f"Error saving cache: {e}")
 
-                return [dict(role="assistant", content=summary)]
+                return dict(role="assistant", content=summary)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -368,7 +343,7 @@ Warning: Using fallback model for memory compression.
                     print("Original content length:", len(content))
                     print("Summarized content length:", len(summary))
                     print("Summary:", summary)
-                    return [dict(role="assistant", content=summary)]
+                    return dict(role="assistant", content=summary)
             except Exception as e:
                 print(f"Fallback summarization failed for {model.name}: {str(e)}")
 
@@ -381,8 +356,11 @@ Warning: Using fallback model for memory compression.
             summary = summary.rsplit("</memory>", 1)[0]
         # remove any <note> sections
         len_before = len(summary)
+        note_tag = re.search(r'<note>.*?</note>', summary, flags=re.DOTALL)
         summary = re.sub(r'<note>.*?</note>', '', summary, flags=re.DOTALL)
         print(f"Cut note tags: {len_before} -> {len(summary)}")
+        if note_tag:
+            print("Note tag: ", note_tag.group())
         return summary
 
 

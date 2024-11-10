@@ -15,3 +15,4 @@ aider/__version__.py
 .env
 /request_logs/
 /non-versioned/
+/.sonnet.chat.history.md

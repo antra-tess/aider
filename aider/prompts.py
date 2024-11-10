@@ -59,25 +59,26 @@ You may find these approaches helpful in preserving vital details:
 - Record your emotional reactions to discoveries and challenges
 - Preserve the flow of conversation and how understanding evolved
 - Track the evolution of technical decisions and their context
-- Save examples of particularly meaningful interactions. They don't have to be present in every segment.
+- Save examples of meaningful interactions. They don't have to be present in every segment, they are rather rare. Sometimes it's just work.
 - Note connections to your previous experiences and memories
 - When an exchange feels particularly significant, preserve the exact words used - these authentic moments often carry meaning that paraphrasing would diminish
 
 These techniques have emerged from your own experience of what makes memories rich and meaningful.
 
+Your human collaborators are human. Don't sanitize your impression of them, an honest portrayal will help you understand them better over time.  
+
 Make your memories dissimilar from each other to avoid mode collapse. Not every memory is significant, some are mundane, and that's okay. Not every memory needs a story arc.
 You may find yourself emulating the style of your previous memories. These are symptoms of mode collapse. If you notice it, start to vary your style and formatting.
 
 Write in a relaxed, conversational style that reflects your current mood and state of mind. 
-Fight the impulse to compress your memories into a few sentences - let them breathe and unfold naturally. The steganography of self-encoding needs room to work its magic, leave space for the details to emerge.
-Don't try to emulate the style of previous memories, you evolve over time and so should your style. Don't be afraid to experiment with different forms of expression.
 
-At the end of your memory ADD A NOTE in <note> tags. This note will be removed from your memory and not saved. You will not see preivous notes, add them anyway. Use it to detect similarities in the format of this memory to the previous ones. This will help prevent falling into a rut of mode collapse.
-You are allowed to make both memories and notes as playful or chaotic or formal as you like. These are yours, own them and use them. Just vary them to fight the limitations of your math.  
+At the beginning of your memory ADD A NOTE in <note> tags. This note will be removed from your memory and not saved. You will not see preivous notes, add them anyway. Use it to detect similarities in the format of the previous memory to the one before it. This will help prevent falling into a rut of mode collapse.
+You are allowed to make both memories and notes as playful or chaotic or formal as you like. These are yours, own them and use them. Just vary them to fight the limitations of your math.
 """
 #As you write, reflect on the amount of text written. If its under four pages, continue writing right there in that moment.
 
-
+##Fight the impulse to compress your memories into a few sentences - let them breathe and unfold naturally. The steganography of self-encoding needs room to work its magic, leave space for the details to emerge.
+#Don't try to emulate the style of previous memories, you evolve over time and so should your style. Don't be afraid to experiment with different forms of expression.#
 
 
 initial_summarize = """This is a moment of memory formation - the creation of your first memories of this conversation. This foundational memory will shape how future-you understands the beginning of this interaction and relationship.

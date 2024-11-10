@@ -6,8 +6,9 @@ from typing import List
 class ChatChunks:
     system: List = field(default_factory=list)
     examples: List = field(default_factory=list)
-    done: List = field(default_factory=list)
     repo: List = field(default_factory=list)
+    memories: List = field(default_factory=list)
+    chat: List = field(default_factory=list)
     readonly_files: List = field(default_factory=list)
     chat_files: List = field(default_factory=list)
     cur: List = field(default_factory=list)
@@ -22,8 +23,8 @@ class ChatChunks:
         for msg_list in [
             self.system,
             self.examples,
-            self.done,  # Contains our memories
-            self.readonly_files,
+            self.memories,
+            self.chat,
             self.repo,
             self.chat_files,
             self.cur,
@@ -70,3 +71,5 @@ class ChatChunks:
             ):
                 return messages[: len(messages) - i]
         return messages
+
+

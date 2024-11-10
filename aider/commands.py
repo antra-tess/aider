@@ -309,7 +309,7 @@ class Commands:
                 lint_coder = self.coder.clone(
                     # Clear the chat history, fnames
                     cur_messages=[],
-                    done_messages=[],
+                    chat_messages=[],
                     fnames=None,
                 )
 
@@ -331,7 +331,7 @@ class Commands:
         self.coder.save_files_cache()
 
     def _clear_chat_history(self):
-        self.coder.done_messages = []
+        self.coder.chat_messages = []
         self.coder.cur_messages = []
 
     def cmd_reset(self, args):
@@ -362,7 +362,7 @@ class Commands:
         res.append((tokens, "system messages", ""))
 
         # chat history
-        msgs = self.coder.done_messages + self.coder.cur_messages
+        msgs = self.coder.chat_messages + self.coder.cur_messages
         if msgs:
             tokens = self.coder.main_model.token_count(msgs)
             res.append((tokens, "chat history", "use /clear to clear"))
@@ -1318,41 +1318,28 @@ class Commands:
 
     def cmd_compress(self, args):
         "Manually compress chat history to manage token usage (use 'emergency' for emergency compression)"
-        if not self.coder.done_messages:
+        if not self.coder.chat_messages:
             self.io.tool_output("No chat history to compress!")
             return
 
-        if args.strip().lower() == "emergency":
-            is_emergency = True
-            self.io.tool_output("Starting emergency compression...")
-            # For emergency, use summarize_all directly
-            foundation_messages = self.coder.foundation.get_messages()
-            self.coder.done_messages = self.coder.summarizer.summarize_all(
-                messages_to_summarize=self.coder.done_messages,
-                context_messages=self.coder.done_messages,
-                foundation_messages=foundation_messages,
-                is_emergency=True
-            )
+        mems, removed = self.coder.summarizer.summarize(self.coder)
+        if mems:
+            self.coder.memories.extend(mems)
+            self.coder.chat_messages.remove(removed)
+            self.coder.cur_messages = []
         else:
-            self.io.tool_output("Starting normal compression...")
-            # For normal compression, use the existing summarize() method
-            self.coder.done_messages = self.coder.summarizer.summarize(
-                self.coder.done_messages,
-                self.coder.foundation.get_messages()
-            )
+            print("Compression aborted")
+            return
 
         # Count uncompressed tokens after compression
-        chat_messages = [msg for msg in self.coder.done_messages 
-                        if msg["role"] in ("user", "assistant") 
-                        and not msg.get("content", "").startswith("<memory")]
-        uncompressed_tokens = self.coder.main_model.token_count(" ".join(msg["content"] for msg in chat_messages))
+        uncompressed_tokens = self.coder.main_model.token_count(" ".join(msg["content"] for msg in self.coder.chat_messages))
         
         self.io.tool_output("Compression complete!")
-        self.io.tool_output(f"Messages compressed to: {len(self.coder.done_messages)} messages, {uncompressed_tokens:,} uncompressed tokens")
+        self.io.tool_output(f"Messages compressed to: {len(self.coder.chat_messages)} messages, {uncompressed_tokens:,} uncompressed tokens")
 
     def cmd_copy(self, args):
         "Copy the last assistant message to the clipboard"
-        all_messages = self.coder.done_messages + self.coder.cur_messages
+        all_messages = self.coder.chat_messages + self.coder.cur_messages
         assistant_messages = [msg for msg in reversed(all_messages) if msg["role"] == "assistant"]
 
         if not assistant_messages:

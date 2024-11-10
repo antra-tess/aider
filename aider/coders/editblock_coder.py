@@ -89,7 +89,7 @@ class EditBlockCoder(Coder):
             content = self.io.read_text(full_path)
 
             res += f"""
-## SearchReplaceNoExactMatch: This SEARCH block failed to exactly match lines in {path}
+## SearchReplaceNoExactMatch: This SEARCH block failed to exactly match lines in {path}. This can mean that you are looking at an outdated version of the file, check the floating section in your context.
 <<<<<<< SEARCH
 {original}=======
 {updated}>>>>>>> REPLACE
