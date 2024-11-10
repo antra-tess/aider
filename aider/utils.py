@@ -149,6 +149,7 @@ def split_chat_history_markdown(text, include_tool=False):
     assistant = []
     tool = []
     lines = text.splitlines(keepends=True)
+    seen_messages = set()  # Track unique messages by timestamp + content
 
     def append_msg(role, lines):
         lines = "".join(lines)
@@ -159,8 +160,20 @@ def split_chat_history_markdown(text, include_tool=False):
             if timestamp_match:
                 timestamp, content = timestamp_match.groups()
                 if role == "user":
-                    content = f'<human timestamp="{timestamp}">{content}</human>'
-                messages.append(dict(role=role, content=content))
+                    # Check if content is already wrapped in <human> tags
+                    human_match = re.match(r'^\s*<human>(.+?)</human>\s*$', content)
+                    if human_match:
+                        # Strip existing wrapping and use the inner content
+                        content = human_match.group(1)
+                    # Create new wrapped content with timestamp
+                    wrapped_content = f'<human timestamp="{timestamp}">{content}</human>'
+                    # Only add if we haven't seen this exact message before
+                    msg_key = (timestamp, content)
+                    if msg_key not in seen_messages:
+                        seen_messages.add(msg_key)
+                        messages.append(dict(role=role, content=wrapped_content))
+                else:
+                    messages.append(dict(role=role, content=content))
             else:
                 messages.append(dict(role=role, content=lines))
 
