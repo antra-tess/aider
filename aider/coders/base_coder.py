@@ -1198,9 +1198,9 @@ class Coder:
         chunks.examples = example_messages
 
         self.summarize_end()
-        # Preserve all messages, memories don't need special handling
-        # Add memories first, then chat history
-        chunks.done = list(self.memories) + list(self.chat_history)
+        # Add memories and chat history separately
+        chunks.memories = list(self.memories)
+        chunks.chat = list(self.chat_history)
 
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
