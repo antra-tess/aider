@@ -197,7 +197,7 @@ Keep in mind these details about the user's platform and environment:
      What specific operation are you trying to speed up? There's almost certainly a better solution than this. Let's discuss the real problem rather than jumping to a problematic quick fix."""
         ),
     ]
-    system_reminder = """Edit Mode: Changes are made through SEARCH/REPLACE blocks that execute immediately.
+    system_reminder = """<floating>Edit Mode: Changes are made through SEARCH/REPLACE blocks that execute immediately.
 
 Format:
 filepath.ext
@@ -221,7 +221,7 @@ Shell commands can be suggested in {fence[0]}bash blocks when helpful for:
 - Running modified programs
 - File operations (rename, delete)
 - Installing new dependencies
-
+</floating>
 """
 
     shell_cmd_reminder = """

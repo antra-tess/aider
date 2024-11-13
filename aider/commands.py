@@ -208,6 +208,11 @@ class Commands:
             return cmd_method(args)
         except ANY_GIT_ERROR as err:
             self.io.tool_error(f"Unable to complete {cmd_name}: {err}")
+            import traceback
+
+            traceback.print_exc()
+
+
 
     def matching_commands(self, inp):
         words = inp.strip().split()

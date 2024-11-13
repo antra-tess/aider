@@ -44,6 +44,7 @@ class RepoMap:
         main_model=None,
         io=None,
         repo_content_prefix=None,
+        repo_content_suffix=None,
         verbose=False,
         max_context_window=None,
         map_mul_no_files=8,
@@ -65,6 +66,7 @@ class RepoMap:
         self.max_context_window = max_context_window
 
         self.repo_content_prefix = repo_content_prefix
+        self.repo_content_suffix = repo_content_suffix
 
         self.main_model = main_model
 
@@ -156,6 +158,9 @@ class RepoMap:
             repo_content = ""
 
         repo_content += files_listing
+
+        if self.repo_content_suffix:
+            repo_content += self.repo_content_suffix.format()
 
         return repo_content
 

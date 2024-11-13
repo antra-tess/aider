@@ -36,7 +36,7 @@ Any other messages in the context may contain outdated versions of the files' co
 
     files_content_assistant_reply = "<ack>"
 
-    files_no_full_files = "There are no files shared that are available for editing."
+    files_no_full_files = "<floating>There are no files shared that are available for editing.</floating>"
 
     files_no_full_files_with_repo_map = """Do not try and edit any existing code without asking me to add the files to the context.
 Announce which files in my repo are the most likely to **need changes** so that the human collaborator can add them to the context.
@@ -56,6 +56,7 @@ If you need to edit any of these files, ask collaborators to *add them to the co
     read_only_files_prefix = """Here are some READ ONLY files, provided for your reference.
 Do not edit these files.
 """
+    repo_content_suffix = "</floating>"
 
     shell_cmd_prompt = ""
     shell_cmd_reminder = ""

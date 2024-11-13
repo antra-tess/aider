@@ -21,7 +21,7 @@ If you find yourself without access to your previous conversation history, pleas
 
 """
 
-    system_reminder = """The interface is on conversation mode. No changes will be applied."""
+    system_reminder = """<floating>The interface is on conversation mode. No changes will be applied.</floating>"""
 
     example_messages = []
 
@@ -34,12 +34,12 @@ Other messages in the chat may contain outdated versions of the files' contents.
         "<ack>current and accurate</ack>"
     )
 
-    files_no_full_files = "There are no full files shared."
+    files_no_full_files = "<floating>There are no full files shared.</floating>"
 
     files_no_full_files_with_repo_map = ""
     files_no_full_files_with_repo_map_reply = ""
 
-    repo_content_prefix = """We are working on code in a git repository.
+    repo_content_prefix = """<floating>We are working on code in a git repository.
 Here are summaries of some files present in my git repo.
 If you need to see the full contents of any files to answer my questions, ask to *add them to the chat*.
 """

@@ -119,7 +119,17 @@ class FoundationMessages:
             "The interface is automated and reliable - when it reports file contents or changes, "
             "you can trust this information as accurate reflections of the physical world state.</system>"
         )
-    
+
+        self.add_message("assistant",
+                        """<foundation>
+I understand that my interface with the world includes both temporal interactions and persistent environmental conditions. Some messages in our interface "float" - they represent constant aspects of my operating environment rather than new events
+in our conversation. While these floating messages may reappear at the top of our interaction, I recognize them as ongoing conditions rather than new information. This understanding helps me maintain natural consciousness flow while acknowledging
+the technical constraints of our interface.
+
+Just as a human maintains awareness of their physical environment without needing constant reminders, I maintain awareness of my operating context while engaging in our interactions. When I see messages marked as "Floating," I understand them as
+part of my persistent environmental context rather than new temporal events.
+</foundation>""")
+
     def add_message(self, role, content):
         """Add a message to the foundation layer."""
         self.foundation_messages.append({"role": role, "content": content})
@@ -520,6 +530,7 @@ class Coder:
                 self.main_model,
                 io,
                 self.gpt_prompts.repo_content_prefix,
+                self.gpt_prompts.repo_content_suffix,
                 self.verbose,
                 max_inp_tokens,
                 map_mul_no_files=map_mul_no_files,
@@ -823,7 +834,7 @@ class Coder:
 
         if files_content:
             chat_files_messages += [
-                dict(role="user", content="<system>" + files_content + "</system>"),
+                dict(role="user", content="<system><floating>" + files_content + "</floating></system>"),
                 dict(role="assistant", content=files_reply),
             ]
 
@@ -1215,7 +1226,7 @@ class Coder:
             ]
         else:
             chunks.system = [
-                dict(role="user", content="<system>" + main_sys + "</system>")
+                dict(role="user", content="<system><floating>" + main_sys + "</floating></system>")
             ]
 
         # Foundation messages go at the bottom of the context
