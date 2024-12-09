@@ -36,7 +36,9 @@ jobs:
         working-directory: aider/website
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -82,4 +84,4 @@ jobs:
 
       - name: Run linkchecker
         run: |
-          linkchecker https://aider.chat
+          linkchecker --ignore-url='.+\.(mp4|mov|avi)' https://aider.chat

@@ -393,7 +393,7 @@ class ChatSummary:
                 }
 
                 summary = simple_send_with_retries(
-                    model.name, summarize_messages, extra_params=model.extra_params
+                    model.name, summarize_messages
                 )
 
                 # Log both request and response

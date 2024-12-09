@@ -14,7 +14,6 @@ or review them below.
 {:toc}
 
 ## LLM keys
-{: .no_toc }
 
 {% include special-keys.md %}
 
@@ -25,18 +24,19 @@ from aider.args import get_md_help
 cog.out(get_md_help())
 ]]]-->
 ```
-usage: aider [-h] [--openai-api-key] [--anthropic-api-key] [--model]
-             [--opus] [--sonnet] [--haiku] [--4] [--4o] [--mini]
-             [--4-turbo] [--35turbo] [--deepseek] [--o1-mini]
-             [--o1-preview] [--list-models] [--openai-api-base]
+usage: aider [-h] [--model] [--opus] [--sonnet] [--haiku] [--4]
+             [--4o] [--mini] [--4-turbo] [--35turbo] [--deepseek]
+             [--o1-mini] [--o1-preview] [--openai-api-key]
+             [--anthropic-api-key] [--openai-api-base]
              [--openai-api-type] [--openai-api-version]
              [--openai-api-deployment-id] [--openai-organization-id]
+             [--set-env] [--api-key] [--list-models]
              [--model-settings-file] [--model-metadata-file]
-             [--verify-ssl | --no-verify-ssl] [--edit-format]
-             [--architect] [--weak-model] [--editor-model]
-             [--editor-edit-format]
+             [--alias] [--verify-ssl | --no-verify-ssl] [--timeout]
+             [--edit-format] [--architect] [--weak-model]
+             [--editor-model] [--editor-edit-format]
              [--show-model-warnings | --no-show-model-warnings]
-             [--max-chat-history-tokens] [--env-file]
+             [--max-chat-history-tokens]
              [--cache-prompts | --no-cache-prompts]
              [--cache-keepalive-pings] [--map-tokens]
              [--map-refresh] [--map-multiplier-no-files]
@@ -59,21 +59,26 @@ usage: aider [-h] [--openai-api-key] [--anthropic-api-key] [--model]
              [--attribute-commit-message-author | --no-attribute-commit-message-author]
              [--attribute-commit-message-committer | --no-attribute-commit-message-committer]
              [--commit] [--commit-prompt] [--dry-run | --no-dry-run]
-             [--skip-sanity-check-repo] [--lint] [--lint-cmd]
-             [--auto-lint | --no-auto-lint] [--test-cmd]
-             [--auto-test | --no-auto-test] [--test]
+             [--skip-sanity-check-repo]
+             [--watch-files | --no-watch-files] [--lint]
+             [--lint-cmd] [--auto-lint | --no-auto-lint]
+             [--test-cmd] [--auto-test | --no-auto-test] [--test]
              [--analytics | --no-analytics] [--analytics-log]
-             [--analytics-disable] [--file] [--read] [--vim]
-             [--chat-language] [--version] [--just-check-update]
+             [--analytics-disable] [--just-check-update]
              [--check-update | --no-check-update]
-             [--install-main-branch] [--upgrade] [--apply]
-             [--apply-clipboard-edits] [--yes-always] [-v]
-             [--show-repo-map] [--show-prompts] [--exit] [--message]
-             [--message-file] [--load] [--encoding] [-c]
+             [--show-release-notes | --no-show-release-notes]
+             [--install-main-branch] [--upgrade] [--version]
+             [--message] [--message-file]
              [--gui | --no-gui | --browser | --no-browser]
+             [--copy-paste | --no-copy-paste] [--apply]
+             [--apply-clipboard-edits] [--exit] [--show-repo-map]
+             [--show-prompts] [--voice-format] [--voice-language]
+             [--voice-input-device] [--file] [--read] [--vim]
+             [--chat-language] [--yes-always] [-v] [--load]
+             [--encoding] [-c] [--env-file]
              [--suggest-shell-commands | --no-suggest-shell-commands]
-             [--fancy-input | --no-fancy-input] [--voice-format]
-             [--voice-language]
+             [--fancy-input | --no-fancy-input]
+             [--detect-urls | --no-detect-urls] [--editor]
 
 ```
 
@@ -85,15 +90,7 @@ Aliases:
   - `-h`
   - `--help`
 
-## Main:
-
-### `--openai-api-key OPENAI_API_KEY`
-Specify the OpenAI API key  
-Environment variable: `OPENAI_API_KEY`  
-
-### `--anthropic-api-key ANTHROPIC_API_KEY`
-Specify the Anthropic API key  
-Environment variable: `ANTHROPIC_API_KEY`  
+## Main model:
 
 ### `--model MODEL`
 Specify the model to use for the main chat  
@@ -119,7 +116,7 @@ Aliases:
   - `-4`
 
 ### `--4o`
-Use gpt-4o-2024-08-06 model for the main chat  
+Use gpt-4o model for the main chat  
 Environment variable: `AIDER_4O`  
 
 ### `--mini`
@@ -151,7 +148,47 @@ Environment variable: `AIDER_O1_MINI`
 Use o1-preview model for the main chat  
 Environment variable: `AIDER_O1_PREVIEW`  
 
-## Model Settings:
+## API Keys and settings:
+
+### `--openai-api-key VALUE`
+Specify the OpenAI API key  
+Environment variable: `AIDER_OPENAI_API_KEY`  
+
+### `--anthropic-api-key VALUE`
+Specify the Anthropic API key  
+Environment variable: `AIDER_ANTHROPIC_API_KEY`  
+
+### `--openai-api-base VALUE`
+Specify the api base url  
+Environment variable: `AIDER_OPENAI_API_BASE`  
+
+### `--openai-api-type VALUE`
+(deprecated, use --set-env OPENAI_API_TYPE=<value>)  
+Environment variable: `AIDER_OPENAI_API_TYPE`  
+
+### `--openai-api-version VALUE`
+(deprecated, use --set-env OPENAI_API_VERSION=<value>)  
+Environment variable: `AIDER_OPENAI_API_VERSION`  
+
+### `--openai-api-deployment-id VALUE`
+(deprecated, use --set-env OPENAI_API_DEPLOYMENT_ID=<value>)  
+Environment variable: `AIDER_OPENAI_API_DEPLOYMENT_ID`  
+
+### `--openai-organization-id VALUE`
+(deprecated, use --set-env OPENAI_ORGANIZATION=<value>)  
+Environment variable: `AIDER_OPENAI_ORGANIZATION_ID`  
+
+### `--set-env ENV_VAR_NAME=value`
+Set an environment variable (to control API settings, can be used multiple times)  
+Default: []  
+Environment variable: `AIDER_SET_ENV`  
+
+### `--api-key PROVIDER=KEY`
+Set an API key for a provider (eg: --api-key provider=<key> sets PROVIDER_API_KEY=<key>)  
+Default: []  
+Environment variable: `AIDER_API_KEY`  
+
+## Model settings:
 
 ### `--list-models MODEL`
 List known models which match the (partial) MODEL name  
@@ -159,26 +196,6 @@ Environment variable: `AIDER_LIST_MODELS`
 Aliases:
   - `--list-models MODEL`
   - `--models MODEL`
-
-### `--openai-api-base OPENAI_API_BASE`
-Specify the api base url  
-Environment variable: `OPENAI_API_BASE`  
-
-### `--openai-api-type OPENAI_API_TYPE`
-Specify the api_type  
-Environment variable: `OPENAI_API_TYPE`  
-
-### `--openai-api-version OPENAI_API_VERSION`
-Specify the api_version  
-Environment variable: `OPENAI_API_VERSION`  
-
-### `--openai-api-deployment-id OPENAI_API_DEPLOYMENT_ID`
-Specify the deployment_id  
-Environment variable: `OPENAI_API_DEPLOYMENT_ID`  
-
-### `--openai-organization-id OPENAI_ORGANIZATION_ID`
-Specify the OpenAI organization ID  
-Environment variable: `OPENAI_ORGANIZATION_ID`  
 
 ### `--model-settings-file MODEL_SETTINGS_FILE`
 Specify a file with aider model settings for unknown models  
@@ -190,6 +207,10 @@ Specify a file with context window and costs for unknown models
 Default: .aider.model.metadata.json  
 Environment variable: `AIDER_MODEL_METADATA_FILE`  
 
+### `--alias ALIAS:MODEL`
+Add a model alias (can be used multiple times)  
+Environment variable: `AIDER_ALIAS`  
+
 ### `--verify-ssl`
 Verify the SSL cert when connecting to models (default: True)  
 Default: True  
@@ -197,6 +218,10 @@ Environment variable: `AIDER_VERIFY_SSL`
 Aliases:
   - `--verify-ssl`
   - `--no-verify-ssl`
+
+### `--timeout VALUE`
+Timeout in seconds for API calls (default: None)  
+Environment variable: `AIDER_TIMEOUT`  
 
 ### `--edit-format EDIT_FORMAT`
 Specify what edit format the LLM should use (default depends on model)  
@@ -233,12 +258,7 @@ Aliases:
 Soft limit on tokens for chat history, after which summarization begins. If unspecified, defaults to the model's max_chat_history_tokens.  
 Environment variable: `AIDER_MAX_CHAT_HISTORY_TOKENS`  
 
-### `--env-file ENV_FILE`
-Specify the .env file to load (default: .env in git root)  
-Default: .env  
-Environment variable: `AIDER_ENV_FILE`  
-
-## Cache Settings:
+## Cache settings:
 
 ### `--cache-prompts`
 Enable caching of prompts (default: False)  
@@ -253,7 +273,7 @@ Number of times to ping at 5min intervals to keep prompt cache warm (default: 0)
 Default: 0  
 Environment variable: `AIDER_CACHE_KEEPALIVE_PINGS`  
 
-## Repomap Settings:
+## Repomap settings:
 
 ### `--map-tokens VALUE`
 Suggested number of tokens to use for repo map, use 0 to disable (default: 1024)  
@@ -293,7 +313,7 @@ Aliases:
 Log the conversation with the LLM to this file (for example, .aider.llm.history)  
 Environment variable: `AIDER_LLM_HISTORY_FILE`  
 
-## Output Settings:
+## Output settings:
 
 ### `--dark-mode`
 Use colors suitable for a dark terminal background (default: False)  
@@ -371,7 +391,7 @@ Show diffs when committing changes (default: False)
 Default: False  
 Environment variable: `AIDER_SHOW_DIFFS`  
 
-## Git Settings:
+## Git settings:
 
 ### `--git`
 Enable/disable looking for a git repo (default: True)  
@@ -469,6 +489,14 @@ Skip the sanity check for the git repository (default: False)
 Default: False  
 Environment variable: `AIDER_SKIP_SANITY_CHECK_REPO`  
 
+### `--watch-files`
+Enable/disable watching files for ai coding comments (default: False)  
+Default: False  
+Environment variable: `AIDER_WATCH_FILES`  
+Aliases:
+  - `--watch-files`
+  - `--no-watch-files`
+
 ## Fixing and committing:
 
 ### `--lint`
@@ -503,15 +531,14 @@ Aliases:
   - `--no-auto-test`
 
 ### `--test`
-Run tests and fix problems found  
+Run tests, fix problems found and then exit  
 Default: False  
 Environment variable: `AIDER_TEST`  
 
 ## Analytics:
 
 ### `--analytics`
-Enable/disable analytics for one session (default: False)  
-Default: False  
+Enable/disable analytics for current session (default: random)  
 Environment variable: `AIDER_ANALYTICS`  
 Aliases:
   - `--analytics`
@@ -526,7 +553,120 @@ Permanently disable analytics
 Default: False  
 Environment variable: `AIDER_ANALYTICS_DISABLE`  
 
-## Other Settings:
+## Upgrading:
+
+### `--just-check-update`
+Check for updates and return status in the exit code  
+Default: False  
+Environment variable: `AIDER_JUST_CHECK_UPDATE`  
+
+### `--check-update`
+Check for new aider versions on launch  
+Default: True  
+Environment variable: `AIDER_CHECK_UPDATE`  
+Aliases:
+  - `--check-update`
+  - `--no-check-update`
+
+### `--show-release-notes`
+Show release notes on first run of new version (default: None, ask user)  
+Environment variable: `AIDER_SHOW_RELEASE_NOTES`  
+Aliases:
+  - `--show-release-notes`
+  - `--no-show-release-notes`
+
+### `--install-main-branch`
+Install the latest version from the main branch  
+Default: False  
+Environment variable: `AIDER_INSTALL_MAIN_BRANCH`  
+
+### `--upgrade`
+Upgrade aider to the latest version from PyPI  
+Default: False  
+Environment variable: `AIDER_UPGRADE`  
+Aliases:
+  - `--upgrade`
+  - `--update`
+
+### `--version`
+Show the version number and exit  
+
+## Modes:
+
+### `--message COMMAND`
+Specify a single message to send the LLM, process reply then exit (disables chat mode)  
+Environment variable: `AIDER_MESSAGE`  
+Aliases:
+  - `--message COMMAND`
+  - `--msg COMMAND`
+  - `-m COMMAND`
+
+### `--message-file MESSAGE_FILE`
+Specify a file containing the message to send the LLM, process reply, then exit (disables chat mode)  
+Environment variable: `AIDER_MESSAGE_FILE`  
+Aliases:
+  - `--message-file MESSAGE_FILE`
+  - `-f MESSAGE_FILE`
+
+### `--gui`
+Run aider in your browser (default: False)  
+Default: False  
+Environment variable: `AIDER_GUI`  
+Aliases:
+  - `--gui`
+  - `--no-gui`
+  - `--browser`
+  - `--no-browser`
+
+### `--copy-paste`
+Enable automatic copy/paste of chat between aider and web UI (default: False)  
+Default: False  
+Environment variable: `AIDER_COPY_PASTE`  
+Aliases:
+  - `--copy-paste`
+  - `--no-copy-paste`
+
+### `--apply FILE`
+Apply the changes from the given file instead of running the chat (debug)  
+Environment variable: `AIDER_APPLY`  
+
+### `--apply-clipboard-edits`
+Apply clipboard contents as edits using the main model's editor format  
+Default: False  
+Environment variable: `AIDER_APPLY_CLIPBOARD_EDITS`  
+
+### `--exit`
+Do all startup activities then exit before accepting user input (debug)  
+Default: False  
+Environment variable: `AIDER_EXIT`  
+
+### `--show-repo-map`
+Print the repo map and exit (debug)  
+Default: False  
+Environment variable: `AIDER_SHOW_REPO_MAP`  
+
+### `--show-prompts`
+Print the system prompts and exit (debug)  
+Default: False  
+Environment variable: `AIDER_SHOW_PROMPTS`  
+
+## Voice settings:
+
+### `--voice-format VOICE_FORMAT`
+Audio format for voice recording (default: wav). webm and mp3 require ffmpeg  
+Default: wav  
+Environment variable: `AIDER_VOICE_FORMAT`  
+
+### `--voice-language VOICE_LANGUAGE`
+Specify the language for voice using ISO 639-1 code (default: auto)  
+Default: en  
+Environment variable: `AIDER_VOICE_LANGUAGE`  
+
+### `--voice-input-device VOICE_INPUT_DEVICE`
+Specify the input device name for voice recording  
+Environment variable: `AIDER_VOICE_INPUT_DEVICE`  
+
+## Other settings:
 
 ### `--file FILE`
 specify a file to edit (can be used multiple times)  
@@ -545,44 +685,6 @@ Environment variable: `AIDER_VIM`
 Specify the language to use in the chat (default: None, uses system settings)  
 Environment variable: `AIDER_CHAT_LANGUAGE`  
 
-### `--version`
-Show the version number and exit  
-
-### `--just-check-update`
-Check for updates and return status in the exit code  
-Default: False  
-Environment variable: `AIDER_JUST_CHECK_UPDATE`  
-
-### `--check-update`
-Check for new aider versions on launch  
-Default: True  
-Environment variable: `AIDER_CHECK_UPDATE`  
-Aliases:
-  - `--check-update`
-  - `--no-check-update`
-
-### `--install-main-branch`
-Install the latest version from the main branch  
-Default: False  
-Environment variable: `AIDER_INSTALL_MAIN_BRANCH`  
-
-### `--upgrade`
-Upgrade aider to the latest version from PyPI  
-Default: False  
-Environment variable: `AIDER_UPGRADE`  
-Aliases:
-  - `--upgrade`
-  - `--update`
-
-### `--apply FILE`
-Apply the changes from the given file instead of running the chat (debug)  
-Environment variable: `AIDER_APPLY`  
-
-### `--apply-clipboard-edits`
-Apply clipboard contents as edits using the main model's editor format  
-Default: False  
-Environment variable: `AIDER_APPLY_CLIPBOARD_EDITS`  
-
 ### `--yes-always`
 Always say yes to every confirmation  
 Environment variable: `AIDER_YES_ALWAYS`  
@@ -594,36 +696,6 @@ Environment variable: `AIDER_VERBOSE`
 Aliases:
   - `-v`
   - `--verbose`
-
-### `--show-repo-map`
-Print the repo map and exit (debug)  
-Default: False  
-Environment variable: `AIDER_SHOW_REPO_MAP`  
-
-### `--show-prompts`
-Print the system prompts and exit (debug)  
-Default: False  
-Environment variable: `AIDER_SHOW_PROMPTS`  
-
-### `--exit`
-Do all startup activities then exit before accepting user input (debug)  
-Default: False  
-Environment variable: `AIDER_EXIT`  
-
-### `--message COMMAND`
-Specify a single message to send the LLM, process reply then exit (disables chat mode)  
-Environment variable: `AIDER_MESSAGE`  
-Aliases:
-  - `--message COMMAND`
-  - `--msg COMMAND`
-  - `-m COMMAND`
-
-### `--message-file MESSAGE_FILE`
-Specify a file containing the message to send the LLM, process reply, then exit (disables chat mode)  
-Environment variable: `AIDER_MESSAGE_FILE`  
-Aliases:
-  - `--message-file MESSAGE_FILE`
-  - `-f MESSAGE_FILE`
 
 ### `--load LOAD_FILE`
 Load and execute /commands from a file on launch  
@@ -640,15 +712,10 @@ Aliases:
   - `-c CONFIG_FILE`
   - `--config CONFIG_FILE`
 
-### `--gui`
-Run aider in your browser (default: False)  
-Default: False  
-Environment variable: `AIDER_GUI`  
-Aliases:
-  - `--gui`
-  - `--no-gui`
-  - `--browser`
-  - `--no-browser`
+### `--env-file ENV_FILE`
+Specify the .env file to load (default: .env in git root)  
+Default: .env  
+Environment variable: `AIDER_ENV_FILE`  
 
 ### `--suggest-shell-commands`
 Enable/disable suggesting shell commands (default: True)  
@@ -666,15 +733,15 @@ Aliases:
   - `--fancy-input`
   - `--no-fancy-input`
 
-## Voice Settings:
+### `--detect-urls`
+Enable/disable detection and offering to add URLs to chat (default: True)  
+Default: True  
+Environment variable: `AIDER_DETECT_URLS`  
+Aliases:
+  - `--detect-urls`
+  - `--no-detect-urls`
 
-### `--voice-format VOICE_FORMAT`
-Audio format for voice recording (default: wav). webm and mp3 require ffmpeg  
-Default: wav  
-Environment variable: `AIDER_VOICE_FORMAT`  
-
-### `--voice-language VOICE_LANGUAGE`
-Specify the language for voice using ISO 639-1 code (default: auto)  
-Default: en  
-Environment variable: `AIDER_VOICE_LANGUAGE`  
+### `--editor VALUE`
+Specify which editor to use for the /editor command  
+Environment variable: `AIDER_EDITOR`  
 <!--[[[end]]]-->

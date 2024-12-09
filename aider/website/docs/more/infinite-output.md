@@ -55,8 +55,8 @@ model_list = "\n".join(f"- {model}" for model in sorted(prefill_models))
 
 cog.out(model_list)
 ]]]-->
+- anthropic.claude-3-5-haiku-20241022-v1:0
 - anthropic.claude-3-5-sonnet-20241022-v2:0
-- anthropic/claude-3-5-sonnet-20241022
 - claude-3-5-haiku-20241022
 - claude-3-5-sonnet-20240620
 - claude-3-5-sonnet-20241022
@@ -88,12 +88,19 @@ cog.out(model_list)
 - mistral/open-mixtral-8x7b
 - mistral/pixtral-12b-2409
 - openrouter/anthropic/claude-3.5-sonnet
+- us.anthropic.claude-3-5-haiku-20241022-v1:0
 - us.anthropic.claude-3-5-sonnet-20241022-v2:0
+- vertex_ai/claude-3-5-haiku
 - vertex_ai/claude-3-5-haiku@20241022
+- vertex_ai/claude-3-5-sonnet
+- vertex_ai/claude-3-5-sonnet-v2
 - vertex_ai/claude-3-5-sonnet-v2@20241022
 - vertex_ai/claude-3-5-sonnet@20240620
+- vertex_ai/claude-3-haiku
 - vertex_ai/claude-3-haiku@20240307
+- vertex_ai/claude-3-opus
 - vertex_ai/claude-3-opus@20240229
+- vertex_ai/claude-3-sonnet
 - vertex_ai/claude-3-sonnet@20240229
 <!--[[[end]]]-->
 

@@ -10,6 +10,12 @@ description: Release notes and stats on aider writing its own code.
 
 {% include blame.md %}
 
+The above 
+[stats are based on the git commit history](/docs/faq.html#how-are-the-aider-wrote-xx-of-code-stats-computed)
+of the aider repo.
+
+## Release notes
+
 <!--[[[cog
 # This page is a copy of HISTORY.md, adding the front matter above.
 text = open("HISTORY.md").read()
@@ -18,6 +24,111 @@ cog.out(text)
 ]]]-->
 
 
+### main branch
+
+- [Aider works with LLM web chat UIs with `--copy-paste` mode](https://aider.chat/docs/usage/copypaste.html).
+- Better error messages when missing dependencies for Gemini and Bedrock models
+- Added `--api-key provider=key` and `--set-env VAR=value` flags for setting API keys and environment variables
+- Control-D now properly exits the program
+- Fixed shell environment handling when running commands
+- Reorganized command line arguments with improved help messages and grouping
+- Aider wrote 72% of the code in this release.
+
+### Aider v0.67.0
+
+- [Use aider in your IDE or editor](https://aider.chat/docs/usage/watch.html).
+  - Run `aider --watch-files` and it will watch for instructions you add to your source files.
+  - One-liner `# ...` or `// ...` comments that start or end with "AI" are instructions to aider.
+  - When aider sees "AI!" it reads and follows all the instructions in AI comments.
+- Support for new Amazon Bedrock Nova models.
+- When `/run` or `/test` have non-zero exit codes, pre-fill "Fix that" into the next message prompt.
+- `/diff` now invokes `git diff` to use your preferred diff tool.
+- Added Ctrl-Z support for process suspension.
+- Spinner now falls back to ASCII art if fancy symbols throw unicode errors.
+- `--read` now expands `~` home dirs.
+- Enabled exception capture in analytics.
+- [Aider wrote 61% of the code in this release.](https://aider.chat/HISTORY.html)
+
+### Aider v0.66.0
+
+- PDF support for Sonnet and Gemini models.
+- Added `--voice-input-device` to select audio input device for voice recording, by @preynal.
+- Added `--timeout` option to configure API call timeouts.
+- Set cwd to repo root when running shell commands.
+- Added Ctrl-Up/Down keyboard shortcuts for per-message history navigation.
+- Improved error handling for failed .gitignore file operations.
+- Improved error handling for input history file permissions.
+- Improved error handling for analytics file access.
+- Removed spurious warning about disabling pretty in VSCode.
+- Removed broken support for Dart.
+- Bugfix when scraping URLs found in chat messages.
+- Better handling of __version__ import errors.
+- Improved `/drop` command to support substring matching for non-glob patterns.
+- Aider wrote 82% of the code in this release.
+
+### Aider v0.65.1
+
+- Bugfix to `--alias`.
+
+### Aider v0.65.0
+
+- Added `--alias` config to define [custom model aliases](https://aider.chat/docs/config/model-aliases.html).
+- Added `--[no-]detect-urls` flag to disable detecting and offering to scrape URLs found in the chat.
+- Ollama models now default to an 8k context window.
+- Added [RepoMap support for Dart language](https://aider.chat/docs/languages.html) by @malkoG.
+- Ask 2.5% of users if they want to opt-in to [analytics](https://aider.chat/docs/more/analytics.html).
+- Skip suggesting files that share names with files already in chat.
+- `/editor` returns and prefill the file content into the prompt, so you can use `/editor` to compose messages that start with `/commands`, etc.
+- Enhanced error handling for analytics.
+- Improved handling of UnknownEditFormat exceptions with helpful documentation links.
+- Bumped dependencies to pick up grep-ast 0.4.0 for Dart language support.
+- Aider wrote 81% of the code in this release.
+
+### Aider v0.64.1
+
+- Disable streaming for o1 on OpenRouter.
+
+### Aider v0.64.0
+
+- Added [`/editor` command](https://aider.chat/docs/usage/commands.html) to open system editor for writing prompts, by @thehunmonkgroup.
+- Full support for `gpt-4o-2024-11-20`.
+- Stream o1 models by default.
+- `/run` and suggested shell commands are less mysterious and now confirm that they "Added XX lines of output to the chat."
+- Ask 1% of users if they want to opt-in to [analytics](https://aider.chat/docs/more/analytics.html).
+- Added support for [optional multiline input tags](https://aider.chat/docs/usage/commands.html#entering-multi-line-chat-messages) with matching closing tags.
+- Improved [model settings configuration](https://aider.chat/docs/config/adv-model-settings.html#global-extra-params) with support for global `extra_params` for `litellm.completion()`.
+- Architect mode now asks to add files suggested by the LLM.
+- Fixed bug in fuzzy model name matching.
+- Added Timeout exception to handle API provider timeouts.
+- Added `--show-release-notes` to control release notes display on first run of new version.
+- Save empty dict to cache file on model metadata download failure, to delay retry.
+- Improved error handling and code formatting.
+- Aider wrote 74% of the code in this release.
+
+###  Aider v0.63.2
+
+- Fixed bug in fuzzy model name matching when litellm provider info is missing.
+- Modified model metadata file loading to allow override of resource file.
+- Allow recursive loading of dirs using `--read`.
+- Updated dependency versions to pick up litellm fix for ollama models.
+- Added exponential backoff retry when writing files to handle editor file locks.
+- Updated Qwen 2.5 Coder 32B model configuration.
+
+### Aider v0.63.1
+
+- Fixed bug in git ignored file handling.
+- Improved error handling for git operations.
+
+### Aider v0.63.0
+
+- Support for Qwen 2.5 Coder 32B.
+- `/web` command just adds the page to the chat, without triggering an LLM response.
+- Improved prompting for the user's preferred chat language.
+- Improved handling of LiteLLM exceptions.
+- Bugfix for double-counting tokens when reporting cache stats.
+- Bugfix for the LLM creating new files.
+- Other small bug fixes.
+- Aider wrote 55% of the code in this release.
 
 ### Aider v0.62.0
 

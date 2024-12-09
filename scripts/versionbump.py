@@ -124,7 +124,10 @@ def main():
     for cmd in git_commands:
         print(f"Running: {' '.join(cmd)}")
         if not dry_run:
-            subprocess.run(cmd, check=True)
+            subprocess.run(
+                cmd,
+                check=True,
+            )
 
     new_dev_version = f"{incremented_version}.dev"
     updated_dev_content = re.sub(
@@ -151,8 +154,8 @@ def main():
         if not dry_run:
             subprocess.run(cmd, check=True)
 
-    # Remove aider/__version__.py if it exists
-    version_file = "aider/__version__.py"
+    # Remove aider/_version.py if it exists
+    version_file = "aider/_version.py"
     if os.path.exists(version_file):
         print(f"Removing {version_file}")
         if not dry_run:

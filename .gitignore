@@ -11,8 +11,11 @@ _site
 .jekyll-cache/
 .jekyll-metadata
 aider/__version__.py
+aider/_version.py
 .venv/
 .env
 /request_logs/
 /non-versioned/
 /.sonnet.chat.history.md
+.#*
+.gitattributes
