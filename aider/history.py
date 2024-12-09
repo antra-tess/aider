@@ -307,7 +307,7 @@ class ChatSummary:
             print("Summarizing with main model:", main_model.name)
             try:
                 summary = simple_send_with_retries(
-                    main_model.name, summarize_messages, extra_params=main_model.extra_params
+                    main_model, summarize_messages
                 )
             except Exception as e:
                 print(f"Main model summarization failed: {str(e)}")
@@ -393,7 +393,7 @@ class ChatSummary:
                 }
 
                 summary = simple_send_with_retries(
-                    model.name, summarize_messages
+                    model, summarize_messages
                 )
 
                 # Log both request and response

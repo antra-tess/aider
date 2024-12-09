@@ -1,6 +1,7 @@
 import hashlib
 import json
 import time
+from pathlib import Path
 
 from aider.dump import dump  # noqa: F401
 from aider.exceptions import LiteLLMExceptions
@@ -134,6 +135,6 @@ def simple_send_with_retries(model, messages):
             print(f"Retrying in {retry_delay:.1f} seconds...")
             time.sleep(retry_delay)
             continue
-        except AttributeError:
+        except AttributeError as e:
             print(f"Error in simple_send_with_retries: {e}")
             return None

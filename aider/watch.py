@@ -6,7 +6,6 @@ from typing import Optional
 from grep_ast import TreeContext
 from pathspec import PathSpec
 from pathspec.patterns import GitWildMatchPattern
-from watchfiles import watch
 
 from aider.dump import dump  # noqa
 
