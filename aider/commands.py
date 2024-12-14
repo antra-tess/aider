@@ -4,7 +4,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from aider.io import pipe_editor
+from aider.editor import pipe_editor
 from collections import OrderedDict
 from os.path import expanduser
 from pathlib import Path
