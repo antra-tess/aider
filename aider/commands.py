@@ -858,6 +858,7 @@ class Commands:
                 if abs_fname in self.coder.abs_fnames:
                     self.coder.abs_fnames.remove(abs_fname)
                     self.io.tool_output(f"Removed {matched_file} from the chat")
+                    self.coder.save_files_cache()
 
     def cmd_git(self, args):
         "Run a git command (output excluded from chat)"
