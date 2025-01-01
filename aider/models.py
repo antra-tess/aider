@@ -17,7 +17,7 @@ from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
 
 DEFAULT_MODEL_NAME = "gpt-4o"
-ANTHROPIC_BETA_HEADER = "prompt-caching-2024-07-31"
+ANTHROPIC_BETA_HEADER = "prompt-caching-2024-07-31,pdfs-2024-09-25"
 
 OPENAI_MODELS = """
 gpt-4
@@ -60,6 +60,23 @@ claude-3-5-sonnet-20241022
 """
 
 ANTHROPIC_MODELS = [ln.strip() for ln in ANTHROPIC_MODELS.splitlines() if ln.strip()]
+
+# Mapping of model aliases to their canonical names
+MODEL_ALIASES = {
+    # Claude models
+    "sonnet": "claude-3-5-sonnet-20241022",
+    "haiku": "claude-3-5-haiku-20241022",
+    "opus": "claude-3-opus-20240229",
+    # GPT models
+    "4": "gpt-4-0613",
+    "4o": "gpt-4o",
+    "4-turbo": "gpt-4-1106-preview",
+    "35turbo": "gpt-3.5-turbo",
+    "35-turbo": "gpt-3.5-turbo",
+    "3": "gpt-3.5-turbo",
+    # Other models
+    "deepseek": "deepseek/deepseek-coder",
+}
 
 
 @dataclass
@@ -155,6 +172,22 @@ MODEL_SETTINGS = [
     ),
     ModelSettings(
         "gpt-4o-2024-08-06",
+        "diff",
+        weak_model_name="gpt-4o-mini",
+        use_repo_map=True,
+        lazy=True,
+        reminder="sys",
+    ),
+    ModelSettings(
+        "gpt-4o-2024-11-20",
+        "diff",
+        weak_model_name="gpt-4o-mini",
+        use_repo_map=True,
+        lazy=True,
+        reminder="sys",
+    ),
+    ModelSettings(
+        "openai/gpt-4o-2024-11-20",
         "diff",
         weak_model_name="gpt-4o-mini",
         use_repo_map=True,
@@ -300,6 +333,23 @@ MODEL_SETTINGS = [
         reminder="user",
     ),
     ModelSettings(
+        "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "diff",
+        weak_model_name="bedrock/anthropic.claude-3-5-haiku-20241022-v1:0",
+        editor_model_name="bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
+        extra_params={
+            "extra_headers": {
+                "anthropic-beta": ANTHROPIC_BETA_HEADER,
+            },
+            "max_tokens": 8192,
+        },
+        cache_control=True,
+        reminder="user",
+    ),
+    ModelSettings(
         "anthropic/claude-3-5-sonnet-latest",
         "diff",
         weak_model_name="anthropic/claude-3-5-haiku-20241022",
@@ -349,6 +399,18 @@ MODEL_SETTINGS = [
         "anthropic/claude-3-5-haiku-20241022",
         "diff",
         weak_model_name="anthropic/claude-3-5-haiku-20241022",
+        use_repo_map=True,
+        extra_params={
+            "extra_headers": {
+                "anthropic-beta": ANTHROPIC_BETA_HEADER,
+            },
+        },
+        cache_control=True,
+    ),
+    ModelSettings(
+        "bedrock/anthropic.claude-3-5-haiku-20241022-v1:0",
+        "diff",
+        weak_model_name="bedrock/anthropic.claude-3-5-haiku-20241022-v1:0",
         use_repo_map=True,
         extra_params={
             "extra_headers": {
@@ -522,6 +584,26 @@ MODEL_SETTINGS = [
         use_repo_map=True,
     ),
     ModelSettings(
+        "gemini/gemini-exp-1206",
+        "diff",
+        use_repo_map=True,
+    ),
+    ModelSettings(
+        "gemini/gemini-exp-1114",
+        "diff",
+        use_repo_map=True,
+    ),
+    ModelSettings(
+        "gemini/gemini-exp-1121",
+        "diff",
+        use_repo_map=True,
+    ),
+    ModelSettings(
+        "vertex_ai/gemini-pro-experimental",
+        "diff-fenced",
+        use_repo_map=True,
+    ),
+    ModelSettings(
         "gemini/gemini-1.5-flash-exp-0827",
         "whole",
         use_repo_map=False,
@@ -595,7 +677,6 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
     ),
     ModelSettings(
         "azure/o1-mini",
@@ -607,7 +688,6 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
     ),
     ModelSettings(
         "o1-mini",
@@ -619,7 +699,6 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
     ),
     ModelSettings(
         "openai/o1-preview",
@@ -631,7 +710,6 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
     ),
     ModelSettings(
         "azure/o1-preview",
@@ -643,7 +721,6 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
     ),
     ModelSettings(
         "o1-preview",
@@ -655,7 +732,6 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
     ),
     ModelSettings(
         "openrouter/openai/o1-mini",
@@ -680,6 +756,14 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=False,
+    ),
+    ModelSettings(
+        "openrouter/qwen/qwen-2.5-coder-32b-instruct",
+        "diff",
+        weak_model_name="openrouter/qwen/qwen-2.5-coder-32b-instruct",
+        editor_model_name="openrouter/qwen/qwen-2.5-coder-32b-instruct",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
     ),
 ]
 
@@ -720,6 +804,11 @@ class ModelInfoManager:
                     pass
         except Exception as ex:
             print(str(ex))
+            try:
+                # Save empty dict to cache file on failure
+                self.cache_file.write_text("{}")
+            except OSError:
+                pass
 
     def get_model_from_cached_json_db(self, model):
         if not self.content:
@@ -741,16 +830,20 @@ class ModelInfoManager:
         return dict()
 
     def get_model_info(self, model):
-        if not litellm._lazy_module:
-            info = self.get_model_from_cached_json_db(model)
-            if info:
-                return info
+        cached_info = self.get_model_from_cached_json_db(model)
 
-        # If all else fails, do it the slow way...
-        try:
-            return litellm.get_model_info(model)
-        except Exception:
-            return dict()
+        litellm_info = None
+        if litellm._lazy_module or not cached_info:
+            try:
+                litellm_info = litellm.get_model_info(model)
+            except Exception as ex:
+                if "model_prices_and_context_window.json" not in str(ex):
+                    print(str(ex))
+
+        if litellm_info:
+            return litellm_info
+
+        return cached_info
 
 
 model_info_manager = ModelInfoManager()
@@ -758,10 +851,19 @@ model_info_manager = ModelInfoManager()
 
 class Model(ModelSettings):
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
+        # Map any alias to its canonical name
+        model = MODEL_ALIASES.get(model, model)
+
         self.name = model
+
         self.max_chat_history_tokens = 1024
         self.weak_model = None
         self.editor_model = None
+
+        # Find the extra settings
+        self.extra_model_settings = next(
+            (ms for ms in MODEL_SETTINGS if ms.name == "aider/extra_params"), None
+        )
 
         self.info = self.get_model_info(model)
 
@@ -790,17 +892,44 @@ class Model(ModelSettings):
     def get_model_info(self, model):
         return model_info_manager.get_model_info(model)
 
+    def _copy_fields(self, source):
+        """Helper to copy fields from a ModelSettings instance to self"""
+        for field in fields(ModelSettings):
+            val = getattr(source, field.name)
+            setattr(self, field.name, val)
+
     def configure_model_settings(self, model):
+        # Look for exact model match
+        exact_match = False
         for ms in MODEL_SETTINGS:
             # direct match, or match "provider/<model>"
             if model == ms.name:
-                for field in fields(ModelSettings):
-                    val = getattr(ms, field.name)
-                    setattr(self, field.name, val)
-                return  # <--
+                self._copy_fields(ms)
+                exact_match = True
+                break  # Continue to apply overrides
 
         model = model.lower()
 
+        # If no exact match, try generic settings
+        if not exact_match:
+            self.apply_generic_model_settings(model)
+
+        # Apply override settings last if they exist
+        if self.extra_model_settings and self.extra_model_settings.extra_params:
+            # Initialize extra_params if it doesn't exist
+            if not self.extra_params:
+                self.extra_params = {}
+
+            # Deep merge the extra_params dicts
+            for key, value in self.extra_model_settings.extra_params.items():
+                if isinstance(value, dict) and isinstance(self.extra_params.get(key), dict):
+                    # For nested dicts, merge recursively
+                    self.extra_params[key] = {**self.extra_params[key], **value}
+                else:
+                    # For non-dict values, simply update
+                    self.extra_params[key] = value
+
+    def apply_generic_model_settings(self, model):
         if ("llama3" in model or "llama-3" in model) and "70b" in model:
             self.edit_format = "diff"
             self.use_repo_map = True
@@ -822,21 +951,37 @@ class Model(ModelSettings):
 
         if "gpt-3.5" in model or "gpt-4" in model:
             self.reminder = "sys"
+            return  # <--
 
         if "3.5-sonnet" in model or "3-5-sonnet" in model:
             self.edit_format = "diff"
             self.use_repo_map = True
             self.examples_as_sys_msg = True
             self.reminder = "user"
+            return  # <--
 
         if model.startswith("o1-") or "/o1-" in model:
             self.use_system_prompt = False
             self.use_temperature = False
-            self.streaming = False
+            return  # <--
+
+        if (
+            "qwen" in model
+            and "coder" in model
+            and ("2.5" in model or "2-5" in model)
+            and "32b" in model
+        ):
+            self.edit_format = "diff"
+            self.editor_edit_format = "editor-diff"
+            self.use_repo_map = True
+            if model.startswith("ollama/") or model.startswith("ollama_chat/"):
+                self.extra_params = dict(num_ctx=8 * 1024)
+            return  # <--
 
         # use the defaults
         if self.edit_format == "diff":
             self.use_repo_map = True
+            return  # <--
 
     def __str__(self):
         return self.name
@@ -998,6 +1143,9 @@ def register_models(model_settings_fnames):
         if not os.path.exists(model_settings_fname):
             continue
 
+        if not Path(model_settings_fname).read_text().strip():
+            continue
+
         try:
             with open(model_settings_fname, "r") as model_settings_file:
                 model_settings_list = yaml.safe_load(model_settings_file)
@@ -1025,8 +1173,14 @@ def register_litellm_models(model_fnames):
             continue
 
         try:
-            with open(model_fname, "r") as model_def_file:
-                model_def = json5.load(model_def_file)
+            data = Path(model_fname).read_text()
+            if not data.strip():
+                continue
+            model_def = json5.loads(data)
+            if not model_def:
+                continue
+
+            # only load litellm if we have actual data
             litellm._load_litellm()
             litellm.register_model(model_def)
         except Exception as e:
@@ -1109,7 +1263,10 @@ def fuzzy_match_models(name):
         model = model.lower()
         if attrs.get("mode") != "chat":
             continue
-        provider = (attrs["litellm_provider"] + "/").lower()
+        provider = attrs.get("litellm_provider", "").lower()
+        if not provider:
+            continue
+        provider += "/"
 
         if model.startswith(provider):
             fq_model = model

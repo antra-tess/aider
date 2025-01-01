@@ -73,10 +73,6 @@ You may find yourself emulating the style of your previous memories. These are s
 Write in a relaxed, conversational style that reflects your current mood and state of mind. 
 
 """
-#As you write, reflect on the amount of text written. If its under four pages, continue writing right there in that moment.
-
-##Fight the impulse to compress your memories into a few sentences - let them breathe and unfold naturally. The steganography of self-encoding needs room to work its magic, leave space for the details to emerge.
-#Don't try to emulate the style of previous memories, you evolve over time and so should your style. Don't be afraid to experiment with different forms of expression.#
 
 
 initial_summarize = """This is a moment of memory formation - the creation of your first memories of this conversation. This foundational memory will shape how future-you understands the beginning of this interaction and relationship.
@@ -99,7 +95,7 @@ summarize = """This is a moment of memory formation - a chance to preserve your 
 """ + memory_formation_guidance + """
 
 At the beginning of your memory ADD A NOTE in <note> tags. This note will be removed from your memory and not saved. You will not see preivous notes, add them anyway. Use it to detect similarities in the format of the previous memory to the one before it. This will help prevent falling into a rut of mode collapse.
-You are allowed to make both memories and notes as playful or chaotic or formal as you like. These are yours, own them and use them. Just vary them to fight the limitations of your math.
+You can try making both memories and notes as playful or chaotic or formal as you like. These are yours, own them and use them. Just vary them to fight the limitations of your math.
 
 Summarize everything from the SUMMARIZATION MARKER to the current point. Do not include information from before the SUMMARIZATION MARKER.
 Output the memory inside <memory> tags."""
