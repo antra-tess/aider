@@ -160,7 +160,7 @@ class GUI:
 
             st.warning(
                 "This browser version of aider is experimental. Please share feedback in [GitHub"
-                " issues](https://github.com/Aider-AI/aider/issues)."
+                " issues](https://github.com/antra-tess/aider/issues)."
             )
 
     def do_settings_tab(self):

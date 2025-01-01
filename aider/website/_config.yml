@@ -24,7 +24,7 @@ exclude:
 
 aux_links:
   "GitHub":
-    - "https://github.com/Aider-AI/aider"
+    - "https://github.com/antra-tess/aider"
   "Discord":
     - "https://discord.gg/Tv2uQnR88V"
   "Blog":
@@ -32,11 +32,11 @@ aux_links:
 
 nav_external_links:
   - title: "GitHub"
-    url: "https://github.com/Aider-AI/aider"
+    url: "https://github.com/antra-tess/aider"
   - title: "Discord"
     url: "https://discord.gg/Tv2uQnR88V"
 
-repository: Aider-AI/aider
+repository: antra-tess/aider
 
 callouts:
   tip:
