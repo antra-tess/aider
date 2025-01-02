@@ -197,7 +197,7 @@ Keep in mind these details about the user's platform and environment:
      What specific operation are you trying to speed up? There's almost certainly a better solution than this. Let's discuss the real problem rather than jumping to a problematic quick fix."""
         ),
     ]
-    system_reminder = """<floating>Edit Mode: Changes are made through SEARCH/REPLACE blocks that execute immediately.
+    system_reminder = """<floating>Edit Mode: You can make change in files by using SEARCH/REPLACE blocks. They will execute immediately.
 
 Format:
 filepath.ext
@@ -215,6 +215,8 @@ Key points:
 3. Only reference files added to chat
 4. For moving code, use separate delete/insert blocks
 5. For new files, use empty SEARCH section
+
+If you want to propose or discuss changes use ``` fences without SEARCH/REPLACE markers. It is wise to discuss before making uncertain changes.</floating>
 
 Shell commands can be suggested in {fence[0]}bash blocks when helpful for:
 - Viewing changes (e.g. opening modified HTML in browser)
