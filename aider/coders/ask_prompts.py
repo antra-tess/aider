@@ -21,7 +21,7 @@ If you find yourself without access to your previous conversation history, pleas
 
 """
 
-    system_reminder = """<floating>The interface is on conversation mode. No changes will be applied.</floating>"""
+    system_reminder = """<floating>The interface is on conversation mode. SEARCH/REPLACE blocks are not supported in this mode. No changes will be applied.</floating>"""
 
     example_messages = []
 
