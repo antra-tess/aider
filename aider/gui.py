@@ -200,7 +200,7 @@ class GUI:
         for fname in fnames:
             if fname not in self.coder.get_inchat_relative_files():
                 self.coder.add_rel_fname(fname)
-                self.info(f"Added {fname} to the chat")
+                self.info(f"Added {fname} to the chat. Floating message was updated.")
 
         for fname in self.coder.get_inchat_relative_files():
             if fname not in fnames:
