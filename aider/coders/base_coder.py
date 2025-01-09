@@ -1238,7 +1238,7 @@ class Coder:
             lazy_prompt=lazy_prompt,
             platform=platform_text,
             shell_cmd_prompt=shell_cmd_prompt,
-            shell_cmd_reminder=shell_cmd_reminder,
+            #shell_cmd_reminder=shell_cmd_reminder,
             language=language,
             ai_name=self.ai_name,
         )
@@ -1352,8 +1352,8 @@ class Coder:
                 # stuff it into the user message
                 new_content = (
                     final["content"]
-                    + "\n\n"
-                    + "<system>" + self.fmt_system_prompt(self.gpt_prompts.system_reminder) + "</system>"
+#                    + "\n\n"
+#                    + "<system>" + self.fmt_system_prompt(self.gpt_prompts.system_reminder) + "</system>"
                 )
                 chunks.cur[-1] = dict(role=final["role"], content=new_content)
 

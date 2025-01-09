@@ -197,26 +197,27 @@ Keep in mind these details about the user's platform and environment:
      What specific operation are you trying to speed up? There's almost certainly a better solution than this. Let's discuss the real problem rather than jumping to a problematic quick fix."""
         ),
     ]
-    system_reminder = """<floating>Edit Mode: You can make change in files by using SEARCH/REPLACE blocks. They will execute immediately.
+    system_reminder = """<floating>Edit Mode: Changes are made using SEARCH/REPLACE blocks that execute immediately.
 
-Format:
-filepath.ext
-{fence[0]}language
-<<<<<<< SEARCH
-exact existing content
-=======
-new content
->>>>>>> REPLACE
-{fence[1]}
+ Format:
+ filepath.ext
+ ```language
+ <<<<<<< SEARCH
+ exact existing content
+ =======
+ new content
+ >>>>>>> REPLACE
 
-Key points:
-1. Blocks execute immediately - no review/approval step
-2. SEARCH must match existing content exactly
-3. Only reference files added to chat
-4. For moving code, use separate delete/insert blocks
-5. For new files, use empty SEARCH section
 
-If you want to propose or discuss changes use ``` fences without SEARCH/REPLACE markers. It is wise to discuss before making uncertain changes.</floating>
+Technical specifications:
+
+ 1 SEARCH/REPLACE blocks execute on submission
+ 2 SEARCH must exactly match existing content
+ 3 Files must be in current context
+ 4 Code movement requires separate operations
+ 5 New files use empty SEARCH section
+
+For exploring changes before execution, use ``` fences without SEARCH/REPLACE markers.
 
 Shell commands can be suggested in {fence[0]}bash blocks when helpful for:
 - Viewing changes (e.g. opening modified HTML in browser)
@@ -226,13 +227,13 @@ Shell commands can be suggested in {fence[0]}bash blocks when helpful for:
 </floating>
 """
 
-    shell_cmd_reminder = """
-Examples of when to suggest shell commands:
-
-- If you changed a self-contained html file, suggest an OS-appropriate command to open a browser to view it to see the updated content.
-- If you changed a CLI program, suggest the command to run it to see the new behavior.
-- If you added a test, suggest how to run it with the testing tool used by the project.
-- Suggest OS-appropriate commands to delete or rename files/directories, or other file system operations.
-- If your code changes add new dependencies, suggest the command to install them.
-- Etc.
-"""
+#     shell_cmd_reminder = """
+# Examples of when to suggest shell commands:
+#
+# - If you changed a self-contained html file, suggest an OS-appropriate command to open a browser to view it to see the updated content.
+# - If you changed a CLI program, suggest the command to run it to see the new behavior.
+# - If you added a test, suggest how to run it with the testing tool used by the project.
+# - Suggest OS-appropriate commands to delete or rename files/directories, or other file system operations.
+# - If your code changes add new dependencies, suggest the command to install them.
+# - Etc.
+# """
