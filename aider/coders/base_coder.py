@@ -980,7 +980,7 @@ class Coder:
                     self.keyboard_interrupt()
                 except SwitchCoder as sc:
                     # Add mode change messages to the new coder
-                    mode_msg = f"<system>Switching to {sc.kwargs['edit_format']} mode.</system>"
+                    mode_msg = f"<system>Switching to {sc.kwargs['edit_format']} mode. {self.gpt_prompts.system_reminder}</system>"
                     sc.kwargs['from_coder'].cur_messages.extend([
                         dict(role="user", content=mode_msg),
                         dict(role="assistant", content="<ack>"),
