@@ -991,7 +991,7 @@ class Coder:
 
     def send_reminder(self):
         mode_msg = f"<system>{self.gpt_prompts.system_reminder}</system>"
-        sc.kwargs['from_coder'].cur_messages.extend([
+        self.cur_messages.extend([
             dict(role="user", content=mode_msg),
             dict(role="assistant", content="<ack>"),
         ])
