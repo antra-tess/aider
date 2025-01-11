@@ -97,7 +97,7 @@ def send_completion(
     return hash_object, res
 
 
-def simple_send_with_retries(model, messages):
+def simple_send_with_retries(model, messages, **kwargs):
     litellm_ex = LiteLLMExceptions()
 
     retry_delay = 0.125
@@ -111,6 +111,7 @@ def simple_send_with_retries(model, messages):
                 "temperature": None if not model.use_temperature else 0,
                 "extra_params": model.extra_params,
             }
+            kwargs.update(kwargs)
 
             _hash, response = send_completion(**kwargs)
             if not response or not hasattr(response, "choices") or not response.choices:
