@@ -1361,7 +1361,10 @@ class Commands:
         except Exception as e:
             self.io.tool_error(f"Error saving commands to file: {e}")
 
-    def cmd_compress(self, args):
+    def cmd_move_back(self, args):
+        self.coder.move_back_cur_messages("File contents")
+
+    def cmd_compress(self, args: object) -> object:
         "Manually compress chat history to manage token usage (use 'emergency' for emergency compression)"
         if not self.coder.chat_messages:
             self.io.tool_output("No chat history to compress!")

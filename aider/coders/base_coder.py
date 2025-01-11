@@ -1305,7 +1305,6 @@ class Coder:
 
         chunks.examples = example_messages
 
-        #self.summarize_end()
         # Add memories and chat history separately
         chunks.memories = list(self.memories)
         chunks.chat = list(self.chat_messages)
@@ -1580,8 +1579,11 @@ class Coder:
 
             if not saved_message and hasattr(self.gpt_prompts, "files_content_gpt_edits_no_repo"):
                 saved_message = "<system>" + self.gpt_prompts.files_content_gpt_edits_no_repo + "</system>"
+            else:
+                self.cur_messages += [dict(role="user", content=saved_message)]
+                self.cur_messages += [dict(role="assistant", content="<ack>")]
 
-            self.move_back_cur_messages(saved_message)
+            #self.move_back_cur_messages(saved_message)
 
         if self.reflected_message:
             return

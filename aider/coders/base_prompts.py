@@ -1,9 +1,9 @@
 class CoderPrompts:
     system_reminder = ""
 
-    files_content_gpt_edits = "The changes were committed with git hash {hash} & commit msg: {message}"
+    files_content_gpt_edits = "<system>The changes were committed with git hash {hash} & commit msg: {message}</system>"
 
-    files_content_gpt_edits_no_repo = "Files have been updated."
+    files_content_gpt_edits_no_repo = "<system>Files have been updated.</system>"
 
     def __init__(self, ai_name="Ariadne"):
         self.ai_name = ai_name
