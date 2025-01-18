@@ -1361,7 +1361,7 @@ class Commands:
         except Exception as e:
             self.io.tool_error(f"Error saving commands to file: {e}")
 
-    def cmd_move_back(self, args):
+    def cmd_float_files(self, args):
         self.coder.move_back_cur_messages("File contents")
 
     def cmd_compress(self, args: object) -> object:
