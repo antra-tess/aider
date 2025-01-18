@@ -103,6 +103,7 @@ def simple_send_with_retries(model, messages, **kwargs):
     retry_delay = 0.125
     while True:
         try:
+            old_kwargs = kwargs
             kwargs = {
                 "model_name": model.name,
                 "messages": messages,
@@ -111,7 +112,7 @@ def simple_send_with_retries(model, messages, **kwargs):
                 "temperature": None if not model.use_temperature else 0,
                 "extra_params": model.extra_params,
             }
-            kwargs.update(kwargs)
+            kwargs['extra_params'].update(old_kwargs)
 
             _hash, response = send_completion(**kwargs)
             if not response or not hasattr(response, "choices") or not response.choices:

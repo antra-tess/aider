@@ -193,6 +193,8 @@ class GitRepo:
             if max_tokens and num_tokens > max_tokens:
                 continue
             commit_message = simple_send_with_retries(model, messages, max_tokens=256)
+            if len(commit_message) > 256:
+                commit_message = commit_message[:256]
             if commit_message:
                 break
 
