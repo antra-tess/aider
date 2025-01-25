@@ -44,7 +44,6 @@ class RepoMap:
         main_model=None,
         io=None,
         repo_content_prefix=None,
-        repo_content_suffix=None,
         verbose=False,
         max_context_window=None,
         map_mul_no_files=8,
@@ -66,7 +65,6 @@ class RepoMap:
         self.max_context_window = max_context_window
 
         self.repo_content_prefix = repo_content_prefix
-        self.repo_content_suffix = repo_content_suffix
 
         self.main_model = main_model
 
@@ -153,14 +151,11 @@ class RepoMap:
             other = ""
 
         if self.repo_content_prefix:
-            repo_content = "<system>" + self.repo_content_prefix.format(other=other) + "</system>"
+            repo_content = self.repo_content_prefix.format(other=other)
         else:
             repo_content = ""
 
         repo_content += files_listing
-
-        if self.repo_content_suffix:
-            repo_content += self.repo_content_suffix.format()
 
         return repo_content
 
@@ -610,7 +605,7 @@ class RepoMap:
 
         self.tree_cache = dict()
 
-        middle = min(max_map_tokens // 25, num_tags)
+        middle = min(int(max_map_tokens // 25), num_tags)
         while lower_bound <= upper_bound:
             # dump(lower_bound, middle, upper_bound)
 
@@ -633,7 +628,7 @@ class RepoMap:
             else:
                 upper_bound = middle - 1
 
-            middle = (lower_bound + upper_bound) // 2
+            middle = int((lower_bound + upper_bound) // 2)
 
         spin.end()
         return best_tree

@@ -2,14 +2,11 @@ import itertools
 import os
 import platform
 import shlex
-import shutil
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
-
-import git
 
 from aider.dump import dump  # noqa: F401
 
@@ -74,6 +71,8 @@ class GitTemporaryDirectory(ChdirTemporaryDirectory):
 
 
 def make_repo(path=None):
+    import git
+
     if not path:
         path = "."
     repo = git.Repo.init(path)
@@ -113,7 +112,7 @@ def format_messages(messages, title=None):
         output.append(f"{title.upper()} {'*' * 50}")
 
     for msg in messages:
-        output.append("")
+        output.append("-------")
         role = msg["role"].upper()
         content = msg.get("content")
         if isinstance(content, list):  # Handle list content (e.g., image messages)
@@ -223,25 +222,9 @@ def split_chat_history_markdown(text, include_tool=False):
     return messages
 
 
-# Copied from pip, MIT license
-# https://github.com/pypa/pip/blob/b989e6ef04810bbd4033a3683020bd4ddcbdb627/src/pip/_internal/utils/entrypoints.py#L73
-def get_best_invocation_for_this_python() -> str:
-    """Try to figure out the best way to invoke the current Python."""
-    exe = sys.executable
-    exe_name = os.path.basename(exe)
-
-    # Try to use the basename, if it's the first executable.
-    found_executable = shutil.which(exe_name)
-    if found_executable and os.path.samefile(found_executable, exe):
-        return exe_name
-
-    # Use the full executable name, because we couldn't find something simpler.
-    return exe
-
-
 def get_pip_install(args):
     cmd = [
-        get_best_invocation_for_this_python(),
+        sys.executable,
         "-m",
         "pip",
         "install",
@@ -346,12 +329,15 @@ class Spinner:
 
 
 def find_common_root(abs_fnames):
-    if len(abs_fnames) == 1:
-        return safe_abs_path(os.path.dirname(list(abs_fnames)[0]))
-    elif abs_fnames:
-        return safe_abs_path(os.path.commonpath(list(abs_fnames)))
-    else:
-        return safe_abs_path(os.getcwd())
+    try:
+        if len(abs_fnames) == 1:
+            return safe_abs_path(os.path.dirname(list(abs_fnames)[0]))
+        elif abs_fnames:
+            return safe_abs_path(os.path.commonpath(list(abs_fnames)))
+    except OSError:
+        pass
+
+    return safe_abs_path(os.getcwd())
 
 
 def format_tokens(count):

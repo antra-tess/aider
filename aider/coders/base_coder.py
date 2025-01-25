@@ -578,7 +578,6 @@ class Coder:
                 self.main_model,
                 io,
                 self.gpt_prompts.repo_content_prefix,
-                self.gpt_prompts.repo_content_suffix,
                 self.verbose,
                 max_inp_tokens,
                 map_mul_no_files=map_mul_no_files,

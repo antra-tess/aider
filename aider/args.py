@@ -106,7 +106,7 @@ def get_parser(default_config_files, git_root):
         const=gpt_3_model_name,
         help=f"Use {gpt_3_model_name} model for the main chat",
     )
-    deepseek_model = "deepseek/deepseek-coder"
+    deepseek_model = "deepseek/deepseek-chat"
     group.add_argument(
         "--deepseek",
         action="store_const",
@@ -139,6 +139,10 @@ def get_parser(default_config_files, git_root):
     )
     group.add_argument(
         "--anthropic-api-key",
+        help="Specify the Anthropic API key",
+    )
+    group.add_argument(
+        "--deepseek-api-key",
         help="Specify the Anthropic API key",
     )
     group.add_argument(
@@ -287,7 +291,7 @@ def get_parser(default_config_files, git_root):
         "--map-tokens",
         type=int,
         default=None,
-        help="Suggested number of tokens to use for repo map, use 0 to disable (default: 1024)",
+        help="Suggested number of tokens to use for repo map, use 0 to disable",
     )
     group.add_argument(
         "--map-refresh",
@@ -427,7 +431,8 @@ def get_parser(default_config_files, git_root):
         default="default",
         help=(
             "Set the markdown code theme (default: default, other options include monokai,"
-            " solarized-dark, solarized-light)"
+            " solarized-dark, solarized-light, or a Pygments builtin style,"
+            " see https://pygments.org/styles for available themes)"
         ),
     )
     group.add_argument(
@@ -772,6 +777,12 @@ def get_parser(default_config_files, git_root):
         help="Specify the encoding for input and output (default: utf-8)",
     )
     group.add_argument(
+        "--line-endings",
+        choices=["platform", "lf", "crlf"],
+        default="platform",
+        help="Line endings to use when writing files (default: platform)",
+    )
+    group.add_argument(
         "-c",
         "--config",
         is_config_file=True,
@@ -800,6 +811,12 @@ def get_parser(default_config_files, git_root):
         action=argparse.BooleanOptionalAction,
         default=True,
         help="Enable/disable fancy input with history and completion (default: True)",
+    )
+    group.add_argument(
+        "--multiline",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Enable/disable multi-line input mode with Meta-Enter to submit (default: False)",
     )
     group.add_argument(
         "--detect-urls",

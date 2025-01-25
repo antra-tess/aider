@@ -1361,6 +1361,10 @@ class Commands:
         except Exception as e:
             self.io.tool_error(f"Error saving commands to file: {e}")
 
+    def cmd_multiline_mode(self, args):
+        "Toggle multiline mode (swaps behavior of Enter and Meta+Enter)"
+        self.io.toggle_multiline_mode()
+
     def cmd_float_files(self, args):
         self.coder.move_back_cur_messages("File contents")
 

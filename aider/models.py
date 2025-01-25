@@ -75,7 +75,9 @@ MODEL_ALIASES = {
     "35-turbo": "gpt-3.5-turbo",
     "3": "gpt-3.5-turbo",
     # Other models
-    "deepseek": "deepseek/deepseek-coder",
+    "deepseek": "deepseek/deepseek-chat",
+    "r1": "deepseek/deepseek-reasoner",
+    "flash": "gemini/gemini-2.0-flash-exp",
 }
 
 
@@ -610,6 +612,42 @@ MODEL_SETTINGS = [
         send_undo_reply=False,
     ),
     ModelSettings(
+        "gemini/gemini-2.0-flash-exp",
+        "diff",
+        use_repo_map=True,
+        send_undo_reply=False,
+    ),
+    ModelSettings(
+        "openrouter/deepseek/deepseek-r1",
+        "diff",
+        weak_model_name="openrouter/deepseek/deepseek-chat",
+        editor_model_name="openrouter/deepseek/deepseek-chat",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
+        use_temperature=False,
+        reminder="user",
+        caches_by_default=True,
+        extra_params={
+            "max_tokens": 8192,
+        },
+    ),
+    ModelSettings(
+        "deepseek/deepseek-reasoner",
+        "diff",
+        weak_model_name="deepseek/deepseek-chat",
+        editor_model_name="deepseek/deepseek-chat",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
+        use_temperature=False,
+        reminder="user",
+        caches_by_default=True,
+        extra_params={
+            "max_tokens": 8192,
+        },
+    ),
+    ModelSettings(
         "deepseek/deepseek-chat",
         "diff",
         use_repo_map=True,
@@ -653,6 +691,13 @@ MODEL_SETTINGS = [
     ),
     ModelSettings(
         "openrouter/deepseek/deepseek-coder",
+        "diff",
+        use_repo_map=True,
+        examples_as_sys_msg=True,
+        reminder="sys",
+    ),
+    ModelSettings(
+        "openrouter/deepseek/deepseek-chat",
         "diff",
         use_repo_map=True,
         examples_as_sys_msg=True,
@@ -756,6 +801,39 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=False,
+    ),
+    ModelSettings(
+        "openrouter/openai/o1",
+        "diff",
+        weak_model_name="openrouter/openai/gpt-4o-mini",
+        editor_model_name="openrouter/openai/gpt-4o",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        streaming=False,
+        use_temperature=False,
+        # extra_params=dict(extra_body=dict(reasoning_effort="high")),
+    ),
+    ModelSettings(
+        "openai/o1",
+        "diff",
+        weak_model_name="openai/gpt-4o-mini",
+        editor_model_name="openai/gpt-4o",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        streaming=False,
+        use_temperature=False,
+        # extra_params=dict(extra_body=dict(reasoning_effort="high")),
+    ),
+    ModelSettings(
+        "o1",
+        "diff",
+        weak_model_name="gpt-4o-mini",
+        editor_model_name="gpt-4o",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        streaming=False,
+        use_temperature=False,
+        # extra_params=dict(extra_body=dict(reasoning_effort="high")),
     ),
     ModelSettings(
         "openrouter/qwen/qwen-2.5-coder-32b-instruct",
@@ -1135,6 +1213,15 @@ class Model(ModelSettings):
             return validate_variables(["GROQ_API_KEY"])
 
         return res
+
+    def get_repo_map_tokens(self):
+        map_tokens = 1024
+        max_inp_tokens = self.info.get("max_input_tokens")
+        if max_inp_tokens:
+            map_tokens = max_inp_tokens / 8
+            map_tokens = min(map_tokens, 4096)
+            map_tokens = max(map_tokens, 1024)
+        return map_tokens
 
 
 def register_models(model_settings_fnames):

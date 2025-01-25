@@ -12,11 +12,12 @@ from pathlib import Path
 from prompt_toolkit.completion import Completer, Completion, ThreadedCompleter
 from prompt_toolkit.cursor_shapes import ModalCursorShapeConfig
 from prompt_toolkit.enums import EditingMode
-from prompt_toolkit.filters import Condition
+from prompt_toolkit.filters import Condition, is_searching
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.output.vt100 import is_dumb_terminal
 from prompt_toolkit.shortcuts import CompleteStyle, PromptSession
 from prompt_toolkit.styles import Style
 from pygments.lexers import MarkdownLexer, guess_lexer_for_filename
@@ -197,16 +198,20 @@ class InputOutput:
         completion_menu_current_bg_color=None,
         code_theme="default",
         encoding="utf-8",
+        line_endings="platform",
         dry_run=False,
         llm_history_file=None,
         editingmode=EditingMode.EMACS,
         fancy_input=True,
         file_watcher=None,
+        multiline_mode=False,
+        root=".",
     ):
         self.placeholder = None
         self.interrupted = False
         self.never_prompts = set()
         self.editingmode = editingmode
+        self.multiline_mode = multiline_mode
         no_color = os.environ.get("NO_COLOR")
         if no_color is not None and no_color != "":
             pretty = False
@@ -240,14 +245,29 @@ class InputOutput:
             self.chat_history_file = None
 
         self.encoding = encoding
+        valid_line_endings = {"platform", "lf", "crlf"}
+        if line_endings not in valid_line_endings:
+            raise ValueError(
+                f"Invalid line_endings value: {line_endings}. "
+                f"Must be one of: {', '.join(valid_line_endings)}"
+            )
+        self.newline = (
+            None if line_endings == "platform" else "\n" if line_endings == "lf" else "\r\n"
+        )
         self.dry_run = dry_run
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.append_chat_history(f"\n# aider chat started at {current_time}\n\n")
 
         self.prompt_session = None
+        self.is_dumb_terminal = is_dumb_terminal()
+
+        if self.is_dumb_terminal:
+            self.pretty = False
+            fancy_input = False
+
         if fancy_input:
-            # Initialize PromptSession
+            # Initialize PromptSession only if we have a capable terminal
             session_kwargs = {
                 "input": self.input,
                 "output": self.output,
@@ -266,8 +286,11 @@ class InputOutput:
                 self.tool_error(f"Can't initialize prompt toolkit: {err}")  # non-pretty
         else:
             self.console = Console(force_terminal=False, no_color=True)  # non-pretty
+            if self.is_dumb_terminal:
+                self.tool_output("Detected dumb terminal, disabling fancy input and pretty output.")
 
         self.file_watcher = file_watcher
+        self.root = root
 
     def _get_style(self):
         style_dict = {}
@@ -329,10 +352,6 @@ class InputOutput:
         try:
             with open(str(filename), "r", encoding=self.encoding) as f:
                 return f.read()
-        except OSError as err:
-            if not silent:
-                self.tool_error(f"{filename}: unable to read: {err}")
-            return
         except FileNotFoundError:
             if not silent:
                 self.tool_error(f"{filename}: file not found error")
@@ -340,6 +359,10 @@ class InputOutput:
         except IsADirectoryError:
             if not silent:
                 self.tool_error(f"{filename}: is a directory")
+            return
+        except OSError as err:
+            if not silent:
+                self.tool_error(f"{filename}: unable to read: {err}")
             return
         except UnicodeError as e:
             if not silent:
@@ -362,7 +385,7 @@ class InputOutput:
         delay = initial_delay
         for attempt in range(max_retries):
             try:
-                with open(str(filename), "w", encoding=self.encoding) as f:
+                with open(str(filename), "w", encoding=self.encoding, newline=self.newline) as f:
                     f.write(content)
                 return  # Successfully wrote the file
             except PermissionError as err:
@@ -412,6 +435,8 @@ class InputOutput:
             show = self.format_files_for_input(rel_fnames, rel_read_only_fnames)
         if edit_format:
             show += edit_format
+        if self.multiline_mode:
+            show += (" " if edit_format else "") + "multi"
         show += "> "
 
         inp = ""
@@ -456,9 +481,25 @@ class InputOutput:
             "Navigate forward through history"
             event.current_buffer.history_forward()
 
-        @kb.add("escape", "c-m", eager=True)
+        @kb.add("enter", eager=True, filter=~is_searching)
         def _(event):
-            event.current_buffer.insert_text("\n")
+            "Handle Enter key press"
+            if self.multiline_mode:
+                # In multiline mode, Enter adds a newline
+                event.current_buffer.insert_text("\n")
+            else:
+                # In normal mode, Enter submits
+                event.current_buffer.validate_and_handle()
+
+        @kb.add("escape", "enter", eager=True, filter=~is_searching)  # This is Alt+Enter
+        def _(event):
+            "Handle Alt+Enter key press"
+            if self.multiline_mode:
+                # In multiline mode, Alt+Enter submits
+                event.current_buffer.validate_and_handle()
+            else:
+                # In normal mode, Alt+Enter adds a newline
+                event.current_buffer.insert_text("\n")
 
         while True:
             if multiline_input:
@@ -485,6 +526,7 @@ class InputOutput:
                         complete_style=CompleteStyle.MULTI_COLUMN,
                         style=style,
                         key_bindings=kb,
+                        complete_while_typing=True,
                     )
                 else:
                     line = input(show)
@@ -606,7 +648,7 @@ class InputOutput:
 
         hist = f"  \n{prefix} ".join(hist)
         hist = f"\n{prefix} [{timestamp}] {hist}\n\n"
-        self.append_chat_history(hist)
+        self.append_chat_history(hist, linebreak=True)
 
         # Return timestamped content for message
         if not inp.startswith("<system>"):
@@ -641,6 +683,9 @@ class InputOutput:
         group=None,
         allow_never=False,
     ):
+        # Temporarily disable multiline mode for yes/no prompts
+        orig_multiline = self.multiline_mode
+        self.multiline_mode = False
         self.num_user_asks += 1
 
         question_id = (question, subject)
@@ -698,6 +743,7 @@ class InputOutput:
                     res = self.prompt_session.prompt(
                         question,
                         style=style,
+                        complete_while_typing=False,
                     )
                 else:
                     res = input(question)
@@ -738,9 +784,15 @@ class InputOutput:
         hist = f"{question.strip()} {res}"
         self.append_chat_history(hist, linebreak=True, blockquote=True)
 
+        # Restore original multiline mode
+        self.multiline_mode = orig_multiline
+
         return is_yes
 
     def prompt_ask(self, question, default="", subject=None):
+        # Temporarily disable multiline mode for prompts
+        orig_multiline = self.multiline_mode
+        self.multiline_mode = False
         self.num_user_asks += 1
 
         if subject:
@@ -755,7 +807,12 @@ class InputOutput:
             res = "no"
         else:
             if self.prompt_session:
-                res = self.prompt_session.prompt(question + " ", default=default, style=style)
+                res = self.prompt_session.prompt(
+                    question + " ",
+                    default=default,
+                    style=style,
+                    complete_while_typing=True,
+                )
             else:
                 res = input(question + " ")
 
@@ -763,6 +820,9 @@ class InputOutput:
         self.append_chat_history(hist, linebreak=True, blockquote=True)
         if self.yes in (True, False):
             self.tool_output(hist)
+
+        # Restore original multiline mode
+        self.multiline_mode = orig_multiline
 
         return res
 
@@ -775,9 +835,17 @@ class InputOutput:
                 hist = message.strip() if strip else message
                 self.append_chat_history(hist, linebreak=True, blockquote=True)
 
-        message = Text(message)
+        if not isinstance(message, Text):
+            message = Text(message)
         style = dict(style=color) if self.pretty and color else dict()
-        self.console.print(message, **style)
+        try:
+            self.console.print(message, **style)
+        except UnicodeEncodeError:
+            # Fallback to ASCII-safe output
+            if isinstance(message, Text):
+                message = message.plain
+            message = str(message).encode("ascii", errors="replace").decode("ascii")
+            self.console.print(message, **style)
 
     def tool_error(self, message="", strip=True):
         self.num_error_outputs += 1
@@ -833,6 +901,18 @@ class InputOutput:
     def print(self, message=""):
         print(message)
 
+    def toggle_multiline_mode(self):
+        """Toggle between normal and multiline input modes"""
+        self.multiline_mode = not self.multiline_mode
+        if self.multiline_mode:
+            self.tool_output(
+                "Multiline mode: Enabled. Enter inserts newline, Alt-Enter submits text"
+            )
+        else:
+            self.tool_output(
+                "Multiline mode: Disabled. Alt-Enter inserts newline, Enter submits text"
+            )
+
     def append_chat_history(self, text, linebreak=False, blockquote=False, strip=True):
         if blockquote:
             if strip:
@@ -874,7 +954,13 @@ class InputOutput:
         editable_files = [f for f in sorted(rel_fnames) if f not in rel_read_only_fnames]
 
         if read_only_files:
-            files_with_label = ["Readonly:"] + read_only_files
+            # Use shorter of abs/rel paths for readonly files
+            ro_paths = []
+            for rel_path in read_only_files:
+                abs_path = os.path.abspath(os.path.join(self.root, rel_path))
+                ro_paths.append(abs_path if len(abs_path) < len(rel_path) else rel_path)
+
+            files_with_label = ["Readonly:"] + ro_paths
             read_only_output = StringIO()
             Console(file=read_only_output, force_terminal=False).print(Columns(files_with_label))
             read_only_lines = read_only_output.getvalue().splitlines()

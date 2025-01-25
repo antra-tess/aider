@@ -2,7 +2,18 @@ import os
 import time
 from pathlib import Path, PurePosixPath
 
-import git
+try:
+    import git
+
+    ANY_GIT_ERROR = [
+        git.exc.ODBError,
+        git.exc.GitError,
+        git.exc.InvalidGitRepositoryError,
+    ]
+except ImportError:
+    git = None
+    ANY_GIT_ERROR = []
+
 import pathspec
 
 from aider import prompts, utils
@@ -10,15 +21,16 @@ from aider.sendchat import simple_send_with_retries
 
 from .dump import dump  # noqa: F401
 
-ANY_GIT_ERROR = (
-    git.exc.ODBError,
-    git.exc.GitError,
+ANY_GIT_ERROR += [
     OSError,
     IndexError,
     BufferError,
     TypeError,
     ValueError,
-)
+    AttributeError,
+    AssertionError,
+]
+ANY_GIT_ERROR = tuple(ANY_GIT_ERROR)
 
 
 class GitRepo:
@@ -278,9 +290,17 @@ class GitRepo:
                 files = self.tree_files[commit]
             else:
                 try:
-                    for blob in commit.tree.traverse():
-                        if blob.type == "blob":  # blob is a file
-                            files.add(blob.path)
+                    iterator = commit.tree.traverse()
+                    while True:
+                        try:
+                            blob = next(iterator)
+                            if blob.type == "blob":  # blob is a file
+                                files.add(blob.path)
+                        except IndexError:
+                            self.io.tool_warning(f"GitRepo: read error skipping {blob.path}")
+                            continue
+                        except StopIteration:
+                            break
                 except ANY_GIT_ERROR as err:
                     self.git_repo_error = err
                     self.io.tool_error(f"Unable to list files in git repo: {err}")
@@ -352,8 +372,8 @@ class GitRepo:
 
     def ignored_file_raw(self, fname):
         if self.subtree_only:
-            fname_path = Path(self.normalize_path(fname))
             try:
+                fname_path = Path(self.normalize_path(fname))
                 cwd_path = Path.cwd().resolve().relative_to(Path(self.root).resolve())
             except ValueError:
                 # Issue #1524

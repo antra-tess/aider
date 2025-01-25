@@ -23,6 +23,7 @@ class ChatChunks:
         for msg_list in [
             self.system,
             self.examples,
+            self.readonly_files,
             self.memories,
             self.chat,
             self.repo,
