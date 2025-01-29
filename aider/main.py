@@ -1029,9 +1029,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             # Handle any message that came with the switch
             if switch.kwargs.get("with_message"):
                 message = switch.kwargs["with_message"]
+                is_command = switch.kwargs.get("is_command", False)
                 if not message.startswith("<system>"):
                     message = "<human>" + message + "</human>"
-                coder.run(with_message=message)
+                coder.run(with_message=message, is_command=is_command)
 
 
 def is_first_run_of_new_version(io, verbose=False):

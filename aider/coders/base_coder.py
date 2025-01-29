@@ -222,6 +222,7 @@ class Coder:
         from_coder=None,
         summarize_from_coder=True,
         with_message=None,
+        is_command=False,
         **kwargs,
     ):
         import aider.coders as coders
@@ -963,10 +964,10 @@ class Coder:
         if self.repo:
             self.commit_before_message.append(self.repo.get_head_commit_sha())
 
-    def run(self, with_message=None, preproc=True):
+    def run(self, with_message=None, preproc=True, is_command=False):
         try:
             if with_message:
-                self.io.user_input(with_message)
+                self.io.user_input(with_message, is_command=is_command)
                 self.run_one(with_message, preproc)
                 return self.partial_response_content
             while True:
@@ -1428,8 +1429,7 @@ class Coder:
         self.event("message_send_starting")
 
         # Get timestamped content from io
-        timestamped_inp = self.io.user_input(inp, log_only=True)
-
+        timestamped_inp = inp
         # Add the message to cur_messages
         self.cur_messages += [
             dict(role="user", content=timestamped_inp),
