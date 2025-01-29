@@ -1429,7 +1429,7 @@ class Coder:
         self.event("message_send_starting")
 
         # Get timestamped content from io
-        timestamped_inp = inp
+        timestamped_inp = self.io.format_user_message(inp)
         # Add the message to cur_messages
         self.cur_messages += [
             dict(role="user", content=timestamped_inp),
