@@ -911,7 +911,7 @@ class InputOutput:
         self.multiline_mode = not self.multiline_mode
         if self.multiline_mode:
             self.tool_output(
-                "Multiline mode: Enabled. Enter inserts newline, Alt-Enter submits text"
+                "Multiline mode: Enabled. Enter inserts newline, Alt-Enter (or Esc-Enter in cmd.exe) submits text"
             )
         else:
             self.tool_output(
