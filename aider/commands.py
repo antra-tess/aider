@@ -1089,6 +1089,7 @@ class Commands:
             from_coder=coder,
             show_announcements=False,
             with_message=args.strip(),
+            is_command=True,
         )
 
     def get_help_md(self):

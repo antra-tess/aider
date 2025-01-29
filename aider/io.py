@@ -631,7 +631,14 @@ class InputOutput:
 
         self.console.print(Text(inp), **style)
 
-    def user_input(self, inp, log_only=True):
+    def format_user_message(self, inp):                                                                                                                                
+        """Format a user message with timestamp and tags without writing to history"""                                                                                 
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")                                                                                                       
+        if not inp.startswith("<system>"):                                                                                                                             
+            return f'<human timestamp="{timestamp}">{inp}</human>'                                                                                                     
+        return inp  
+
+    def user_input(self, inp, log_only=True, is_command=False):
         if not log_only:
             self.display_user_input(inp)
 
@@ -640,20 +647,18 @@ class InputOutput:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Write timestamped version to history
-        prefix = "####"
-        if inp:
-            hist = inp.splitlines()
-        else:
-            hist = ["<blank>"]
+        if not is_command:
+            prefix = "####"
+            if inp:
+                hist = inp.splitlines()
+            else:
+                hist = ["<blank>"]
 
-        hist = f"  \n{prefix} ".join(hist)
-        hist = f"\n{prefix} [{timestamp}] {hist}\n\n"
-        self.append_chat_history(hist, linebreak=True)
+            hist = f"  \n{prefix} ".join(hist)
+            hist = f"\n{prefix} [{timestamp}] {hist}\n\n"
+            self.append_chat_history(hist, linebreak=True)
 
-        # Return timestamped content for message
-        if not inp.startswith("<system>"):
-            inp = f'<human timestamp="{timestamp}">{inp}</human>'
-        return inp
+        return self.format_user_message(inp)
 
     # OUTPUT
 

@@ -148,14 +148,19 @@ def send_completion(
 
     # Create logs directory and prepare request data
     logs_dir = ensure_request_logs_dir()
+    
+    # Track only original values that undergo transformation
+    original_params = {}
+    if functions is not None:
+        original_params["functions"] = functions
+    if extra_params is not None:
+        original_params["extra_params"] = extra_params
+    if "deepseek-reasoner" in model_name and messages:
+        original_params["messages"] = messages
+
     request_data = {
-        "model": model_name,
-        "messages": messages,
-        "functions": functions,
-        "stream": stream,
-        "temperature": temperature,
-        "extra_params": extra_params,
-        "kwargs": kwargs
+        "original_params": original_params,
+        "kwargs": kwargs  # final API parameters
     }
 
     res = litellm.completion(**kwargs)
