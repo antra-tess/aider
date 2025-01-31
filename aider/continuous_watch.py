@@ -11,23 +11,35 @@ from aider.io import FileChangeType
 
 
 class ContinuousFileWatcher:
-    """Watches source files continuously for changes and AI comments."""
+    """Watches source files continuously for changes and AI comments.
+    Implements the singleton pattern to ensure only one watcher exists."""
 
+    _instance = None
+    _initialized = False
+    
     # Reuse the existing AI comment pattern - it's well tested
     ai_comment_pattern = re.compile(r"(?:#|//|--) *(ai\b.*|ai\b.*|.*\bai[?!]?) *$", re.IGNORECASE)
 
-    def __init__(self, root, io_handler, gitignores=None, verbose=False, coder=None):
-        self.root = Path(root) if root else Path.cwd()
-        self.io = io_handler
-        self.coder = coder
-        self.verbose = verbose
-        self.stop_event = threading.Event()
-        self.watcher_thread = None
-        
-        # Load gitignore patterns like the original watcher
-        self.gitignore_spec = load_gitignores(
-            [Path(g) for g in gitignores] if gitignores else []
-        )
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, root=None, io_handler=None, gitignores=None, verbose=False, coder=None):
+        # Only initialize once
+        if not self._initialized and io_handler is not None:
+            self.root = Path(root) if root else Path.cwd()
+            self.io = io_handler
+            self.coder = coder
+            self.verbose = verbose
+            self.stop_event = threading.Event()
+            self.watcher_thread = None
+            
+            # Load gitignore patterns like the original watcher
+            self.gitignore_spec = load_gitignores(
+                [Path(g) for g in gitignores] if gitignores else []
+            )
+            self._initialized = True
 
     def start_continuous_watch(self):
         """Start the background watching thread"""

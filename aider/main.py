@@ -894,15 +894,16 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         )
         coder.file_watcher = file_watcher
     
+    # Get or create the singleton continuous watcher
     continuous_watcher = ContinuousFileWatcher(
-        coder,
+        root=str(Path.cwd()) if args.subtree_only else None,
         gitignores=ignores,
         verbose=args.verbose,
         io_handler=io,
-        root=str(Path.cwd()) if args.subtree_only else None,
+        coder=coder,
     )
     coder.continuous_watcher = continuous_watcher
-    coder.continuous_watcher.start_continuous_watch()
+    continuous_watcher.start_continuous_watch()
 
 
     if args.copy_paste:
