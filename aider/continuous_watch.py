@@ -7,10 +7,11 @@ from watchfiles import watch
 
 from aider.dump import dump  # noqa
 from aider.watch import load_gitignores
+from aider.io import FileChangeType
 
 
 class ContinuousFileWatcher:
-    """Watches source files continuously for changes and AI comments"""
+    """Watches source files continuously for changes and AI comments. Watches this? And watches this?"""
 
     # Reuse the existing AI comment pattern - it's well tested
     ai_comment_pattern = re.compile(r"(?:#|//|--) *(ai\b.*|ai\b.*|.*\bai[?!]?) *$", re.IGNORECASE)
@@ -95,7 +96,7 @@ class ContinuousFileWatcher:
         if not line_nums:
             return None, None, None
         return line_nums, comments, has_action
-
+ 
     def _watch_loop(self):
         """Main watching loop that runs in background thread"""
         try:
@@ -116,11 +117,11 @@ class ContinuousFileWatcher:
                     
                     # Convert watchfiles change type to our enum
                     if change_type == 1:  # watchfiles.Change.added
-                        change_type = "created"
+                        change_type = FileChangeType.CREATED
                     elif change_type == 2:  # watchfiles.Change.modified
-                        change_type = "modified"
+                        change_type = FileChangeType.MODIFIED
                     elif change_type == 3:  # watchfiles.Change.deleted
-                        change_type = "deleted"
+                        change_type = FileChangeType.DELETED
                     
                     # Get relative path for display
                     rel_path = Path(path).relative_to(self.root)
