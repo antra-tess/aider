@@ -1022,6 +1022,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         try:
             coder.run()
             analytics.event("exit", reason="Completed main CLI coder.run")
+            if 'continuous_watcher' in locals():
+                continuous_watcher.stop()
             return
         except SwitchCoder as switch:
             kwargs = dict(io=io, from_coder=coder)
