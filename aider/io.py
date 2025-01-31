@@ -895,11 +895,18 @@ class InputOutput:
     def notify_file_change(self, filename, change_type):                                                                                
         timestamp = datetime.now().strftime("%H:%M:%S")                                                                                                                                                                                      
         message = f"[{timestamp}] {filename}: {change_type}"                                                                                  
-
-        print()                                                                                                                                                                                                                                                                             
-        print(message)
-        print()
-        # A
+        # Use different colors based on change type                                                                                                                    
+        color = None                                                                                                                                                   
+        if change_type == FileChangeType.MODIFIED:                                                                                                                     
+            color = self.tool_warning_color                                                                                                  
+        elif change_type == FileChangeType.CREATED:                                                                                                                    
+            color = self.assistant_output_color                                                                                                        
+        elif change_type == FileChangeType.DELETED:                                                                                                                    
+            color = self.tool_error_color                                                                                                               
+        elif change_type == FileChangeType.AI_COMMENT:                                                                                                                 
+            color = self.user_input_color                                                                                                  
+        # test again...                                                                               
+        self.tool_output("\n" + message + "\n", color=color)   
 
     def assistant_output(self, message, pretty=None):
         show_resp = message
