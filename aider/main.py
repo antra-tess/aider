@@ -28,6 +28,7 @@ from aider.copypaste import ClipboardWatcher
 from aider.format_settings import format_settings, scrub_sensitive_info
 from aider.history import ChatSummary
 from aider.io import InputOutput
+from aider.continuous_watch import ContinuousFileWatcher
 from aider.llm import litellm  # noqa: F401; properly init litellm on launch
 from aider.models import ModelSettings
 from aider.repo import ANY_GIT_ERROR, GitRepo
@@ -882,6 +883,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         ignores.append(str(Path(git_root) / ".gitignore"))
     if args.aiderignore:
         ignores.append(args.aiderignore)
+
+    # Initialize continuous file watcher
+    continuous_watcher = ContinuousFileWatcher(
+        root=str(Path.cwd()) if args.subtree_only else git_root,
+        io_handler=io,
+        gitignores=ignores,
+        verbose=args.verbose
+    )
+    continuous_watcher.start_continuous_watch()
 
     if args.watch_files:
         file_watcher = FileWatcher(
