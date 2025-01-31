@@ -1,4 +1,5 @@
 import re
+import os
 import threading
 from pathlib import Path
 from typing import Optional
@@ -10,6 +11,7 @@ from watchfiles import watch
 
 from aider.dump import dump  # noqa
 from aider.watch_prompts import watch_ask_prompt, watch_code_prompt
+from aider.io import FileChangeType
 
 
 def load_gitignores(gitignore_paths: list[Path]) -> Optional[PathSpec]:
@@ -150,18 +152,49 @@ class FileWatcher:
             _, _, action = self.get_ai_comments(fname)
             if action in ("!", "?"):
                 has_action = action
-
-            if fname in self.coder.abs_fnames:
-                continue
-            if self.analytics:
-                self.analytics.event("ai-comments file-add")
-            self.coder.abs_fnames.add(fname)
             rel_fname = self.coder.get_rel_fname(fname)
-            if not added:
-                self.io.tool_output()
-                added = True
-            self.io.tool_output(f"Added {rel_fname} to the chat")
+            if not os.path.exists(fname):                                                                                                                              
+                self.io.notify_file_change(                                                                                                                            
+                    filename=rel_fname,                                                                                                                                
+                    change_type=FileChangeType.DELETED,                                                                                                                
+                    ai_action=action                                                                                                                                   
+                )                                                                                                                                                      
+                if fname in self.coder.abs_fnames:                                                                                                                     
+                    self.coder.abs_fnames.remove(fname)                                                                                                                
+                continue                             
+            if fname in self.coder.abs_fnames:
+                self.io.notify_file_change(                                                                                                                            
+                    filename=rel_fname,                                                                                                                                
+                    change_type=FileChangeType.MODIFIED,                                                                                                               
+                    ai_action=action                                                                                                                                   
+                )
+            else:
+                if self.analytics:
+                    self.analytics.event("ai-comments file-add")
+                self.coder.abs_fnames.add(fname)
+                if os.path.exists(fname):
+                    self.io.notify_file_change(                                                                                                                            
+                        filename=rel_fname,                                                                                                                                
+                        change_type=FileChangeType.ADDED,                                                                                                                
+                        ai_action=action                                                                                                                                   
+                    )
+                else:
+                    self.io.notify_file_change(                                                                                                                                 
+                        filename=rel_fname,                                                                                                                                     
+                        change_type=FileChangeType.CREATED,                                                                                                                  
+                        ai_action=action                                                                                                                                        
+                    )
+                if not added:
+                    # self.io.tool_output()
+                    added = True
+                # self.io.tool_output(f"Added {rel_fname} to the chat")
 
+        if has_action:                                                                                                                                                 
+            self.io.notify_file_change(                                                                                                                            
+                filename=rel_fname,                                                                                                                                
+                change_type=FileChangeType.AI_COMMENT,                                                                                                             
+                ai_action=action                                                                                                                                   
+            )      
         if not has_action:
             if added:
                 self.io.tool_output(

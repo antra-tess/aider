@@ -43,6 +43,13 @@ class ConfirmGroup:
         if items is not None:
             self.show_group = len(items) > 1
 
+@dataclass                                                                                                                                                         
+class FileChangeType:                                                                                                                                              
+    MODIFIED = "modified"                                                                                                                                          
+    CREATED = "created"                                                                                                                                            
+    DELETED = "deleted"                                                                                                                                            
+    AI_COMMENT = "ai comment added"  
+    ADDED = "added to chat"
 
 class AutoCompleter(Completer):
     def __init__(
@@ -859,7 +866,7 @@ class InputOutput:
     def tool_warning(self, message="", strip=True):
         self._tool_message(message, strip, self.tool_warning_color)
 
-    def tool_output(self, *messages, log_only=False, bold=False):
+    def tool_output(self, *messages, log_only=False, bold=False, color=None):
         if messages:
             hist = " ".join(messages)
             hist = f"{hist.strip()}"
@@ -871,7 +878,9 @@ class InputOutput:
         messages = list(map(Text, messages))
         style = dict()
         if self.pretty:
-            if self.tool_output_color:
+            if color:
+                style['color'] = color
+            elif self.tool_output_color:
                 style["color"] = self.tool_output_color
             style["reverse"] = bold
 
@@ -882,6 +891,48 @@ class InputOutput:
         mdargs = dict(style=self.assistant_output_color, code_theme=self.code_theme)
         mdStream = MarkdownStream(mdargs=mdargs)
         return mdStream
+    
+    def notify_file_change(self, filename, change_type, ai_action=None):                                                                                           
+        timestamp = datetime.now().strftime("%H:%M:%S")                                                                                                            
+                                                                                                                                                                
+        # Visual indicators and colors                                                                                                                                 
+        change_styles = {                                                                                                                                              
+            FileChangeType.MODIFIED: ("📝", "yellow"),                                                                                                                 
+            FileChangeType.CREATED: ("✨", "green"),                                                                                                                   
+            FileChangeType.DELETED: ("🗑️", "red"),
+            FileChangeType.ADDED: ("📎", "blue"),                                                                                                         
+            FileChangeType.AI_COMMENT: ("🤖", "blue")                                                                                                                  
+        }                                                                                                                                               
+        icon, color = change_styles.get(change_type, ("ℹ️", None))                                                                                                            
+                                                                                                                                                                
+        # Make AI actions more noticeable                                                                                                                          
+        ai_indicator = ""                                                                                                                                          
+        if ai_action:                                                                                                                                              
+            if "!" in ai_action:                                                                                                                                   
+                ai_indicator = " 🔴 Action requested!"                                                                                                             
+            elif "?" in ai_action:                                                                                                                                 
+                ai_indicator = " 🟡 Question raised?"                                                                                                              
+                                                                                                                                                                
+        message = f"{icon} [{timestamp}] {filename}: {change_type}{ai_indicator}"                                                                                  
+                                                                                                                                                                
+        self.rule()  # Add visual separator                                                                                                                            
+        self.tool_output(message, color=color, bold=bool(ai_indicator))                                                                                                
+                                                                                                                                                                        
+        if ai_indicator:                                                                                                                                               
+            hint = "Use /diff to see changes" if change_type == FileChangeType.MODIFIED else "Check file for AI comments"                                              
+            self.tool_output(hint)
+        if self.cur_messages: # <ack> for active conversation                                                                                                  
+            self.cur_messages.extend([                                                                                                                                 
+                dict(                                                                                                                                                  
+                    role="user",                                                                                                                                       
+                    content=f"<system timestamp={timestamp}>File {filename} was {change_type}{' with ' + ai_action if ai_action else ''}</system>"                                           
+                ),                                                                                                                                                     
+                dict(                                                                                                                                                  
+                    role="assistant",                                                                                                                                  
+                    content="<ack>"                                                                                                                                    
+                )                                                                                                                                                      
+            ])                                                                                                                                                         
+                        
 
     def assistant_output(self, message, pretty=None):
         show_resp = message
