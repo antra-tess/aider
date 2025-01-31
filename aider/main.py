@@ -1047,9 +1047,14 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                     message = "<human>" + message + "</human>"
                 coder.run(with_message=message, is_command=is_command)
 
-            # Ensure continuous watcher is stopped when switching coders
+            # Ensure continuous watcher is properly handled when switching coders
             if hasattr(coder, 'continuous_watcher') and coder.continuous_watcher:
-                coder.continuous_watcher.stop()
+                old_watcher = coder.continuous_watcher
+                old_watcher.stop()
+                # Transfer the watcher to new coder and restart it
+                coder.continuous_watcher = old_watcher
+                coder.continuous_watcher.coder = coder
+                coder.continuous_watcher.start_continuous_watch()
 
 
 def is_first_run_of_new_version(io, verbose=False):
