@@ -1108,6 +1108,7 @@ class Coder:
                 print("Messages not too big, no summarization needed")
                 self.startup_check_done = True
                 return
+            # WHY does it happen here?
 
 
             if self.verbose:
