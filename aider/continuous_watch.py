@@ -11,7 +11,7 @@ from aider.io import FileChangeType
 
 
 class ContinuousFileWatcher:
-    """Watches source files continuously for changes and AI comments. Watches this? And watches this?"""
+    """Watches source files continuously for changes and AI comments."""
 
     # Reuse the existing AI comment pattern - it's well tested
     ai_comment_pattern = re.compile(r"(?:#|//|--) *(ai\b.*|ai\b.*|.*\bai[?!]?) *$", re.IGNORECASE)
@@ -62,13 +62,12 @@ class ContinuousFileWatcher:
             return False
 
         rel_path = path_abs.relative_to(self.root)
-        if self.verbose:
-            self.io.tool_output(f"Change detected: {rel_path}")
-
         # Check gitignore patterns
         if self.gitignore_spec and self.gitignore_spec.match_file(str(rel_path)):
             return False
 
+        if self.verbose:
+            self.io.tool_output(f"Change detected: {rel_path}")
         return True
 
     def get_ai_comments(self, filepath):

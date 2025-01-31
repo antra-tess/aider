@@ -34,6 +34,7 @@ from aider.repo import ANY_GIT_ERROR, GitRepo
 from aider.report import report_uncaught_exceptions
 from aider.versioncheck import check_version, install_from_main_branch, install_upgrade
 from aider.watch import FileWatcher
+from aider.continuous_watch import ContinuousFileWatcher
 
 from .dump import dump  # noqa: F401
 
@@ -892,6 +893,17 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             root=str(Path.cwd()) if args.subtree_only else None,
         )
         coder.file_watcher = file_watcher
+    
+    continuous_watcher = ContinuousFileWatcher(
+        coder,
+        gitignores=ignores,
+        verbose=args.verbose,
+        io_handler=io,
+        root=str(Path.cwd()) if args.subtree_only else None,
+    )
+    coder.continuous_watcher = continuous_watcher
+    coder.continuous_watcher.start_continuous_watch()
+
 
     if args.copy_paste:
         analytics.event("copy-paste mode")
