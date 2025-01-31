@@ -895,15 +895,15 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         coder.file_watcher = file_watcher
     
     # Get or create the singleton continuous watcher
-    continious_watcher = ContinuousFileWatcher(
+    continuous_watcher = ContinuousFileWatcher(
         root=str(Path.cwd()) if args.subtree_only else None,
         gitignores=ignores,
         verbose=args.verbose,
         io_handler=io,
         coder=coder,
     )
-    coder.continious_watcher = continious_watcher
-    continious_watcher.start_continuous_watch()
+    coder.continuous_watcher = continuous_watcher
+    continuous_watcher.start_continuous_watch()
 
 
     if args.copy_paste:
@@ -1048,8 +1048,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
                 coder.run(with_message=message, is_command=is_command)
 
             # Ensure continuous watcher is stopped when switching coders
-            if hasattr(coder, 'continious_watcher') and coder.continious_watcher:
-                coder.continious_watcher.stop()
+            if hasattr(coder, 'continuous_watcher') and coder.continuous_watcher:
+                coder.continuous_watcher.stop()
 
 
 def is_first_run_of_new_version(io, verbose=False):
