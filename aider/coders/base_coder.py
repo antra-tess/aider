@@ -404,8 +404,6 @@ class Coder:
         ignore_mentions=None,
         file_watcher=None,
         auto_copy_context=False,
-        subtree_only=False,
-        aiderignore=None,
     ):
         self.ai_name = ai_name
 
@@ -434,12 +432,12 @@ class Coder:
         # Initialize continuous watcher
         from aider.continuous_watch import ContinuousFileWatcher
         if repo:
-            root = repo.root if not subtree_only else str(Path.cwd())
+            root = repo.root if not repo.subtree_only else str(Path.cwd())
             ignores = []
             if repo:
                 ignores.append(str(Path(repo.root) / ".gitignore"))
-            if aiderignore:
-                ignores.append(aiderignore)
+            if repo.aider_ignore_file:
+                ignores.append(repo.aider_ignore_file)
             self.continuous_watcher = ContinuousFileWatcher(
                 root=root,
                 io_handler=io,
