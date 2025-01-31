@@ -68,6 +68,27 @@ class ChatSummary:
         total = sum(tokens for tokens, _msg in sized)
         print(f"\nChecking message size: {total} tokens vs max_tokens: {self.max_tokens}")
         return total > self.preserve_count + self.chunk_size
+        
+    def check_conversation_needs_compression(self, coder):                                                                                                             
+        """Check if current conversation segment needs compression"""                                                                                                  
+        if len(coder.cur_messages) < 4:  # Need minimum context to compress                                                                                            
+            return False                                                                                                                                               
+                                                                                                                                                                        
+        current_size = sum(self.token_count(msg) for msg in coder.cur_messages)                                                                                        
+                                                                                                                                                                        
+        # Check if we're approaching chunk size limit                                                                                                                  
+        if current_size >= self.chunk_size * 0.8:                                                                                                                      
+            try:                                                                                                                                                       
+                mems, removed = self.summarize(coder)                                                                                                                  
+                if mems:                                                                                                                                               
+                    coder.memories.extend(mems)                                                                                                                        
+                    # Don't remove messages yet - they're still part of current conversation                                                                           
+                    coder.io.tool_output("Created new memory from recent conversation")                                                                                
+                    return True                                                                                                                                        
+            except ValueError as err:                                                                                                                                  
+                coder.io.tool_warning(f"Memory creation failed: {err}")                                                                                                
+                                                                                                                                                                        
+        return False    
 
     def tokenize(self, messages):
         sized = []

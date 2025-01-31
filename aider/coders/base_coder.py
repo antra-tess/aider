@@ -1572,6 +1572,9 @@ class Coder:
 
         self.update_cur_messages()
 
+        # Check if we need compression before proceeding                                                                                                               
+        self.summarizer.check_conversation_needs_compression(self) 
+
         if edited:
             self.aider_edited_files.update(edited)
             saved_message = self.auto_commit(edited)
