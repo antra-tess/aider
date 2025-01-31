@@ -212,6 +212,7 @@ class Coder:
     ignore_mentions = None
     chat_language = None
     file_watcher = None
+    continuous_watcher = None
 
     @classmethod
     def create(
