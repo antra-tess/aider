@@ -16,9 +16,10 @@ class ContinuousFileWatcher:
     # Reuse the existing AI comment pattern - it's well tested
     ai_comment_pattern = re.compile(r"(?:#|//|--) *(ai\b.*|ai\b.*|.*\bai[?!]?) *$", re.IGNORECASE)
 
-    def __init__(self, root, io_handler, gitignores=None, verbose=False):
+    def __init__(self, root, io_handler, gitignores=None, verbose=False, coder=None):
         self.root = Path(root) if root else Path.cwd()
         self.io = io_handler
+        self.coder = coder
         self.verbose = verbose
         self.stop_event = threading.Event()
         self.watcher_thread = None
@@ -126,12 +127,26 @@ class ContinuousFileWatcher:
                     # Get relative path for display
                     rel_path = Path(path).relative_to(self.root)
                     
-                    # Notify through IO system
+                    # Notify through IO system for visual feedback
                     self.io.notify_file_change(
                         filename=str(rel_path),
                         change_type=change_type,
                         ai_action=ai_action
                     )
+                    
+                    # Update coder's conversation state if available
+                    if self.coder and hasattr(self.coder, 'cur_messages'):
+                        timestamp = datetime.now().strftime("%H:%M:%S")
+                        self.coder.cur_messages.extend([
+                            dict(
+                                role="user",
+                                content=f"<system timestamp={timestamp}>File {rel_path} was {change_type}{' with ' + ai_action if ai_action else ''}</system>"
+                            ),
+                            dict(
+                                role="assistant",
+                                content="<ack>"
+                            )
+                        ])
                     
         except Exception as e:
             if self.verbose:

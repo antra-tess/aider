@@ -442,7 +442,8 @@ class Coder:
                 root=root,
                 io_handler=io,
                 gitignores=ignores,
-                verbose=verbose
+                verbose=verbose,
+                coder=self
             )
             self.continuous_watcher.start_continuous_watch()
 
