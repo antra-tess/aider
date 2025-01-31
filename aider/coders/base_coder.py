@@ -429,6 +429,23 @@ class Coder:
         if self.file_watcher:
             self.file_watcher.coder = self
 
+        # Initialize continuous watcher
+        from aider.continuous_watch import ContinuousFileWatcher
+        if repo:
+            root = repo.root if not args.subtree_only else str(Path.cwd())
+            ignores = []
+            if repo:
+                ignores.append(str(Path(repo.root) / ".gitignore"))
+            if args.aiderignore:
+                ignores.append(args.aiderignore)
+            self.continuous_watcher = ContinuousFileWatcher(
+                root=root,
+                io_handler=io,
+                gitignores=ignores,
+                verbose=verbose
+            )
+            self.continuous_watcher.start_continuous_watch()
+
         self.suggest_shell_commands = suggest_shell_commands
         self.detect_urls = detect_urls
 
