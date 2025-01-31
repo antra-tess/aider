@@ -892,38 +892,14 @@ class InputOutput:
         mdStream = MarkdownStream(mdargs=mdargs)
         return mdStream
     
-    def notify_file_change(self, filename, change_type, ai_action=None):                                                                                
-        timestamp = datetime.now().strftime("%H:%M:%S")                                                                                                            
-                                                                                                                                                                
-        # Visual indicators and colors for different change types                                                                                               
-        change_styles = {                                                                                              
-            FileChangeType.MODIFIED: ("📝", "yellow"),                                                                                                                 
-            FileChangeType.CREATED: ("✨", "green"),                                                                                                                   
-            FileChangeType.DELETED: ("🗑️", "red"),
-            FileChangeType.ADDED: ("📎", "blue"),                                                                                                         
-            FileChangeType.AI_COMMENT: ("🤖", "blue")                                                                                                                  
-        }                                                                                                                                               
-        icon, color = change_styles.get(change_type, ("ℹ️", None))                                                                                                            
-                                                                                                                                                                
-        # Make AI actions more noticeable                                                                                                                          
-        ai_indicator = ""                                                                                                                                          
-        if ai_action:                                                                                                                                              
-            if "!" in ai_action:                                                                                                                                   
-                ai_indicator = " 🔴 Action requested!"                                                                                                             
-            elif "?" in ai_action:                                                                                                                                 
-                ai_indicator = " 🟡 Question raised?"                                                                                                              
-                                                                                                                                                                
-        message = f"{icon} [{timestamp}] {filename}: {change_type}{ai_indicator}"                                                                                  
-                                                                                                                                                                
-        self.rule()  # Add visual separator                                                                                                                            
-        self.tool_output(message, color=color, bold=bool(ai_indicator))
-        
-        self.rule()  # Add visual separator                                                                           
-                                                                                                                                                                        
-        if ai_indicator:                                                                                                                                               
-            hint = "Use /diff to see changes" if change_type == FileChangeType.MODIFIED else "Check file for AI comments"                                              
-            self.tool_output(hint)
-                        
+    def notify_file_change(self, filename, change_type):                                                                                
+        timestamp = datetime.now().strftime("%H:%M:%S")                                                                                                                                                                                      
+        message = f"[{timestamp}] {filename}: {change_type}"                                                                                  
+
+        print()                                                                                                                                                                                                                                                                             
+        print(message)
+        print()
+        # A
 
     def assistant_output(self, message, pretty=None):
         show_resp = message

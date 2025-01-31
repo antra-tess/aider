@@ -63,7 +63,7 @@ def load_gitignores(gitignore_paths: list[Path]) -> Optional[PathSpec]:
 
 
 class FileWatcher:
-    """Watches source files for changes and AI comments"""
+    """Watches source files for changes and AI comments."""
 
     # Compiled regex pattern for AI comments
     ai_comment_pattern = re.compile(r"(?:#|//|--) *(ai\b.*|ai\b.*|.*\bai[?!]?) *$", re.IGNORECASE)
@@ -102,13 +102,14 @@ class FileWatcher:
 
         if self.verbose:
             dump("ok", rel_path)
+        return True
 
         # Check if file contains AI markers
-        try:
-            comments, _, _ = self.get_ai_comments(str(path_abs))
-            return bool(comments)
-        except Exception:
-            return
+        # try:
+        #     comments, _, _ = self.get_ai_comments(str(path_abs))
+        #     return bool(comments)
+        # except Exception:
+        #     return
 
     def start(self):
         """Start watching for file changes"""
@@ -152,49 +153,18 @@ class FileWatcher:
             _, _, action = self.get_ai_comments(fname)
             if action in ("!", "?"):
                 has_action = action
-            rel_fname = self.coder.get_rel_fname(fname)
-            if not os.path.exists(fname):                                                                                                                              
-                self.io.notify_file_change(                                                                                                                            
-                    filename=rel_fname,                                                                                                                                
-                    change_type=FileChangeType.DELETED,                                                                                                                
-                    ai_action=action                                                                                                                                   
-                )                                                                                                                                                      
-                if fname in self.coder.abs_fnames:                                                                                                                     
-                    self.coder.abs_fnames.remove(fname)                                                                                                                
-                continue                             
+            rel_fname = self.coder.get_rel_fname(fname)                         
             if fname in self.coder.abs_fnames:
-                self.io.notify_file_change(                                                                                                                            
-                    filename=rel_fname,                                                                                                                                
-                    change_type=FileChangeType.MODIFIED,                                                                                                               
-                    ai_action=action                                                                                                                                   
-                )
+                continue
             else:
                 if self.analytics:
                     self.analytics.event("ai-comments file-add")
                 self.coder.abs_fnames.add(fname)
-                if os.path.exists(fname):
-                    self.io.notify_file_change(                                                                                                                            
-                        filename=rel_fname,                                                                                                                                
-                        change_type=FileChangeType.ADDED,                                                                                                                
-                        ai_action=action                                                                                                                                   
-                    )
-                else:
-                    self.io.notify_file_change(                                                                                                                                 
-                        filename=rel_fname,                                                                                                                                     
-                        change_type=FileChangeType.CREATED,                                                                                                                  
-                        ai_action=action                                                                                                                                        
-                    )
                 if not added:
-                    # self.io.tool_output()
+                    self.io.tool_output()
                     added = True
-                # self.io.tool_output(f"Added {rel_fname} to the chat")
-
-        if has_action:                                                                                                                                                 
-            self.io.notify_file_change(                                                                                                                            
-                filename=rel_fname,                                                                                                                                
-                change_type=FileChangeType.AI_COMMENT,                                                                                                             
-                ai_action=action                                                                                                                                   
-            )      
+                self.io.tool_output(f"Added {rel_fname} to the chat")
+      
         if not has_action:
             if added:
                 self.io.tool_output(

@@ -942,8 +942,8 @@ class Commands:
 
     def cmd_exit(self, args):
         "Exit the application"
-        if self.coder.continuous_watcher:
-            self.coder.continuous_watcher.stop()
+        if self.coder.continious_watcher:
+            self.coder.continious_watcher.stop()
         self.coder.event("exit", reason="/exit")
         sys.exit()
 

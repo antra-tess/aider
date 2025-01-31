@@ -212,7 +212,7 @@ class Coder:
     ignore_mentions = None
     chat_language = None
     file_watcher = None
-    continuous_watcher = None
+    continious_watcher = None
 
     @classmethod
     def create(
@@ -268,6 +268,7 @@ class Coder:
                 total_cost=from_coder.total_cost,
                 ignore_mentions=from_coder.ignore_mentions,
                 file_watcher=from_coder.file_watcher,
+                continious_watcher=from_coder.continious_watcher,
             )
             use_kwargs.update(update)  # override to complete the switch
             use_kwargs.update(kwargs)  # override passed kwargs
@@ -403,6 +404,7 @@ class Coder:
         detect_urls=True,
         ignore_mentions=None,
         file_watcher=None,
+        continious_watcher=None,
         auto_copy_context=False,
     ):
         self.ai_name = ai_name
@@ -425,27 +427,16 @@ class Coder:
 
         self.spend_limit = spend_limit
 
+        print("here happens what?")
         self.file_watcher = file_watcher
         if self.file_watcher:
             self.file_watcher.coder = self
+        self.continious_watcher = continious_watcher
+        if self.continious_watcher:
+            self.continious_watcher.coder = self
+            self.continious_watcher.start_continuous_watch()
 
-        # Initialize continuous watcher
-        from aider.continuous_watch import ContinuousFileWatcher
-        if repo:
-            root = repo.root if not repo.subtree_only else str(Path.cwd())
-            ignores = []
-            if repo:
-                ignores.append(str(Path(repo.root) / ".gitignore"))
-            if repo.aider_ignore_file:
-                ignores.append(repo.aider_ignore_file)
-            self.continuous_watcher = ContinuousFileWatcher(
-                root=root,
-                io_handler=io,
-                gitignores=ignores,
-                verbose=verbose,
-                coder=self
-            )
-            self.continuous_watcher.start_continuous_watch()
+        print("here happens?")
 
         self.suggest_shell_commands = suggest_shell_commands
         self.detect_urls = detect_urls
@@ -1112,6 +1103,8 @@ class Coder:
         if self.last_keyboard_interrupt and now - self.last_keyboard_interrupt < thresh:
             self.io.tool_warning("\n\n^C KeyboardInterrupt")
             self.event("exit", reason="Control-C")
+            if self.continious_watcher:
+                self.continious_watcher.stop()
             sys.exit()
 
         self.io.tool_warning("\n\n^C again to exit")

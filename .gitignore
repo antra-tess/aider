@@ -15,6 +15,7 @@ aider/_version.py
 .venv/
 .env
 /request_logs/
+/request_logs
 /non-versioned/
 /.sonnet.chat.history.md
 .#*

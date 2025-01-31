@@ -82,33 +82,6 @@ class ContinuousFileWatcher:
             self.io.tool_output(f"Change detected: {rel_path}")
         return True
 
-    def get_ai_comments(self, filepath):
-        """Extract AI comment line numbers, comments and action status from a file
-        Reused from original FileWatcher"""
-        line_nums = []
-        comments = []
-        has_action = None  # None, "!" or "?"
-        content = self.io.read_text(filepath, silent=True)
-        if not content:
-            return None, None, None
-
-        for i, line in enumerate(content.splitlines(), 1):
-            if match := self.ai_comment_pattern.search(line):
-                comment = match.group(0).strip()
-                if comment:
-                    line_nums.append(i)
-                    comments.append(comment)
-                    comment = comment.lower()
-                    comment = comment.lstrip("/#-")
-                    comment = comment.strip()
-                    if comment.startswith("ai!") or comment.endswith("ai!"):
-                        has_action = "!"
-                    elif comment.startswith("ai?") or comment.endswith("ai?"):
-                        has_action = "?"
-        if not line_nums:
-            return None, None, None
-        return line_nums, comments, has_action
- 
     def _watch_loop(self):
         """Main watching loop that runs in background thread"""
         try:
@@ -119,13 +92,9 @@ class ContinuousFileWatcher:
             ):
                 if not changes:
                     continue
-                    
                 for change_type, path in changes:
                     if not self.filter_func(change_type, path):
                         continue
-                        
-                    # Check for AI comments in changed file
-                    _, _, ai_action = self.get_ai_comments(path)
                     
                     # Convert watchfiles change type to our enum
                     if change_type == 1:  # watchfiles.Change.added
@@ -137,12 +106,11 @@ class ContinuousFileWatcher:
                     
                     # Get relative path for display
                     rel_path = Path(path).relative_to(self.root)
-                    
+
                     # Notify through IO system for visual feedback
                     self.io.notify_file_change(
                         filename=str(rel_path),
                         change_type=change_type,
-                        ai_action=ai_action
                     )
                     
                     # Update coder's conversation state if available
@@ -151,7 +119,7 @@ class ContinuousFileWatcher:
                         self.coder.cur_messages.extend([
                             dict(
                                 role="user",
-                                content=f"<system timestamp={timestamp}>File {rel_path} was {change_type}{' with ' + ai_action if ai_action else ''}</system>"
+                                content=f"<system timestamp={timestamp}>File {rel_path} was {change_type}</system>"
                             ),
                             dict(
                                 role="assistant",
