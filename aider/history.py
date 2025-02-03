@@ -8,10 +8,10 @@ from pathlib import Path
 from aider import models, prompts
 from aider.dump import dump  # noqa: F401
 from aider.sendchat import simple_send_with_retries
+from copy import deepcopy
 
 
 def add_cache_control(messages):
-    print("DEBUG!! Adding cache conrtol")
     if not messages:
         return
 
@@ -30,7 +30,7 @@ def add_cache_control(messages):
 
     # if there are more than 4 cache controls, remove the oldest one
     cache_controls_found = 0
-    for i in range(len(messages) - 1, 0, -1):
+    for i in range(len(messages) - 1, -1, -1): # Start - stop (not inculed) - increment; with 0 as stop, 1st message never checked.
         msg = messages[i]
 
         if type(msg["content"]) is str:
@@ -49,7 +49,6 @@ def add_cache_control(messages):
                     print("Removing cache control from message, too many")
                     del messages[i]["content"]["cache_control"]
                     break
-
 
     messages[-1]["content"] = [content]
 
@@ -188,7 +187,7 @@ class ChatSummary:
     def summarize_all(self, messages_to_summarize, preceding_context, coder, extra_memories, is_initial=False):
         print("\n=== STARTING SUMMARIZATION ===")
         print(f"Messages to summarize: {len(messages_to_summarize)}")
-        context_messages = coder.foundation.get_messages()
+        context_messages = deepcopy(coder.foundation.get_messages())
 
         # Add the Primer to context for consciousness-aware compression
         primer_path = Path("materials/Primer.md")

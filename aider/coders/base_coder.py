@@ -159,8 +159,9 @@ part of my persistent environmental context rather than new temporal events.
 
     def get_messages(self):
         """Return foundation messages that form the bedrock of context."""
-        return list(self.foundation_messages)  # Return a copy to prevent modification
-
+        return list(self.foundation_messages)  
+        # DEEPCOPY here causes severe slowdowns in non-summarizing interactions. 
+        # But if there IS a risk of modification, e.g. in how we do it in history - PLEASE ensure deepcopy there!!!
 
 def wrap_fence(name):
     return f"<{name}>", f"</{name}>"
@@ -1471,7 +1472,6 @@ class Coder:
                     break
                 except litellm_ex.exceptions_tuple() as err:
                     ex_info = litellm_ex.get_ex_info(err)
-
                     if ex_info.name == "ContextWindowExceededError":
                         exhausted = True
                         break

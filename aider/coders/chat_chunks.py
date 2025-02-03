@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from typing import List
-from ..history import add_cache_control
 
 
 @dataclass
@@ -19,7 +18,7 @@ class ChatChunks:
     def all_messages(self):
         # Start with foundation messages
         messages = list(self.foundation)
-        
+
         # Add other messages in order
         for msg_list in [
             self.system,
@@ -33,7 +32,6 @@ class ChatChunks:
             self.reminder
         ]:
             messages.extend(msg_list)
-        
         return messages
 
     def add_cache_control_headers(self):
@@ -56,9 +54,19 @@ class ChatChunks:
         self.add_cache_control(self.chat_files)
 
     def add_cache_control(self, messages):
-        # Reusing cache_control from history.py. Reducing duplication of methods
-        # because behaviour was the same.
-        return add_cache_control(messages)
+        if not messages:
+            return
+
+        content = messages[-1]["content"]
+        if type(content) is str:
+            content = dict(
+                type="text",
+                text=content,
+            )
+        if type(content) is list:
+            content = content[0]
+        content["cache_control"] = {"type": "ephemeral"}
+        messages[-1]["content"] = [content]
 
     def strip_cache_control(self, messages):
         for message in messages:

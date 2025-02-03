@@ -194,7 +194,6 @@ def simple_send_with_retries(model, messages, **kwargs):
                 "extra_params": model.extra_params,
             }
             kwargs['extra_params'].update(old_kwargs)
-
             _hash, response = send_completion(**kwargs)
             if not response or not hasattr(response, "choices") or not response.choices:
                 return None
