@@ -30,7 +30,7 @@ def add_cache_control(messages):
 
     # if there are more than 4 cache controls, remove the oldest one
     cache_controls_found = 0
-    for i in range(len(messages) - 1, 0, -1):
+    for i in range(len(messages) - 1, -1, -1): # Start - stop (not inculed) - increment; with 0 as stop, 1st message never checked.
         msg = messages[i]
 
         if type(msg["content"]) is str:
@@ -49,7 +49,6 @@ def add_cache_control(messages):
                     print("Removing cache control from message, too many")
                     del messages[i]["content"]["cache_control"]
                     break
-
 
     messages[-1]["content"] = [content]
 
