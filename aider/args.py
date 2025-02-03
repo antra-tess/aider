@@ -275,14 +275,14 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--cache-prompts",
         action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Enable caching of prompts (default: False)",
+        default=True,
+        help="Enable caching of prompts (default: True)",
     )
     group.add_argument(
         "--cache-keepalive-pings",
         type=int,
-        default=0,
-        help="Number of times to ping at 5min intervals to keep prompt cache warm (default: 0)",
+        default=2,
+        help="Number of times to ping at 5min intervals to keep prompt cache warm (default: 2)",
     )
 
     ##########
@@ -332,8 +332,8 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--restore-chat-history",
         action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Restore the previous chat history messages (default: False)",
+        default=True,
+        help="Restore the previous chat history messages (default: Trues)",
     )
     group.add_argument(
         "--llm-history-file",
@@ -347,8 +347,8 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--dark-mode",
         action="store_true",
-        help="Use colors suitable for a dark terminal background (default: False)",
-        default=False,
+        help="Use colors suitable for a dark terminal background (default: True)",
+        default=True,
     )
     group.add_argument(
         "--light-mode",
