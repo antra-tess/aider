@@ -2106,10 +2106,13 @@ class Coder:
 
         # Calculate token counts
         uncompressed_tokens_chat = self.main_model.token_count(" ".join(msg["content"] for msg in self.chat_messages))
-        tokens_list_culprits = [msg['content'] for msg in self.cur_messages if not isinstance(msg['content'], str)]
-        if tokens_list_culprits:
-            assert False, tokens_list_culprits
-        uncompressed_tokens_cur = self.main_model.token_count(" ".join(msg["content"] for msg in self.cur_messages))
+        cur_messages_uncached = []
+        for msg in self.cur_messages:
+            if isinstance(msg['content'], dict):
+                cur_messages_uncached.append(msg['content']['text'])
+            else:
+                cur_messages_uncached.append(msg['content'])    
+        uncompressed_tokens_cur = self.main_model.token_count(" ".join(cur_messages_uncached))
         try:
             # content can be a list of dicts or a string
             memory_tokens = sum(
