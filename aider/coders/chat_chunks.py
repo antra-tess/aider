@@ -14,6 +14,7 @@ class ChatChunks:
     cur: List = field(default_factory=list)
     reminder: List = field(default_factory=list)
     foundation: List = field(default_factory=list)  # Foundation messages that form the bedrock of context
+    latest_changes: List = field(default_factory=list)  # Track recent file changes
 
     def all_messages(self):
         # Start with foundation messages
@@ -29,6 +30,7 @@ class ChatChunks:
             self.repo,
             self.chat_files,
             self.cur,
+            self.latest_changes,  # Add latest changes just before reminder
             self.reminder
         ]:
             messages.extend(msg_list)
