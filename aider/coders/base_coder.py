@@ -241,7 +241,6 @@ class Coder:
 
     def check_files_for_changes(self):
         """Check if any tracked files have changed based on their hash"""
-        print("DEBUG: Checking files for changes")
         for fname in self.abs_fnames:
             current_hash = self.store_file_hash(fname)
             if current_hash is None:
@@ -249,7 +248,11 @@ class Coder:
                 
             if fname in self.file_hashes:
                 if current_hash != self.file_hashes[fname]:
-                    print(f"DEBUG: Detected change in {self.get_rel_fname(fname)}")
+                    rel_fname = self.get_rel_fname(fname)
+                    if fname in self.recent_changes:
+                        self.io.tool_output(f"Detected new changes in {rel_fname}")
+                    else:
+                        self.io.tool_output(f"Added {rel_fname} to recent changes spotlight")
                     self.add_to_recent_changes(fname)
             
             self.file_hashes[fname] = current_hash
