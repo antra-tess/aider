@@ -38,6 +38,20 @@ from .chat_chunks import ChatChunks
 from ..exceptions import LiteLLMExceptions
 
 
+class ChangedFile:
+    """Tracks a recently modified file and its spotlight duration"""
+    def __init__(self, abs_path, remaining_messages=5):
+        self.abs_path = abs_path
+        self.remaining_messages = remaining_messages
+        self.timestamp = time.time()
+        self.content = None  # Will store current content
+    
+    def refresh(self, remaining_messages=5):
+        """Refresh the spotlight timer when file is modified again"""
+        self.remaining_messages = remaining_messages
+        self.timestamp = time.time()
+
+
 class UnknownEditFormat(ValueError):
     def __init__(self, edit_format, valid_formats):
         self.edit_format = edit_format
