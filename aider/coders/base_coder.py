@@ -927,7 +927,7 @@ class Coder:
             files_content += self.get_files_content()
             files_reply = self.gpt_prompts.files_content_assistant_reply
         elif has_tracked_files:  # All files are in spotlight
-            files_content = self.gpt_prompts.files_content_prefix + "\nAll tracked files are currently in recent changes spotlight."
+            files_content = self.gpt_prompts.files_in_recent_changes
             files_reply = self.gpt_prompts.files_content_assistant_reply
         elif self.get_repo_map() and self.gpt_prompts.files_no_full_files_with_repo_map:
             files_content = self.gpt_prompts.files_no_full_files_with_repo_map
@@ -1365,7 +1365,7 @@ class Coder:
             
             if changes_content:
                 chunks.latest_changes = [
-                    dict(role="user", content=f"<system>Recently modified files:\n{changes_content}</system>"),
+                    dict(role="user", content=f"<system>Recently modified files:\n<spotlight>{changes_content}</spotlight></system>"),
                     dict(role="assistant", content="<ack>")
                 ]
 
