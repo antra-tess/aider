@@ -248,11 +248,6 @@ class Coder:
                 
             if fname in self.file_hashes:
                 if current_hash != self.file_hashes[fname]:
-                    rel_fname = self.get_rel_fname(fname)
-                    if fname in self.recent_changes:
-                        self.io.tool_output(f"Detected new changes in {rel_fname}")
-                    else:
-                        self.io.tool_output(f"Added {rel_fname} to recent changes spotlight")
                     self.add_to_recent_changes(fname)
             
             self.file_hashes[fname] = current_hash
@@ -266,7 +261,7 @@ class Coder:
             self.recent_changes[abs_path] = ChangedFile(abs_path, self.spotlight_duration)
 
     def update_recent_changes(self):
-        print("DEBUG: Updating recent changes counters") 
+        print(f"DEBUG: Updating recent changes counters. Allowed depth: {self.spotlight_duration}") 
         """Update counters and remove expired changes"""
         expired = []
         for path, change in self.recent_changes.items():
@@ -470,7 +465,11 @@ class Coder:
         ignore_mentions=None,
         file_watcher=None,
         auto_copy_context=False,
+        spotlight_duration=0,
+        recent_changes={},
+        file_hashes={},
     ):
+        self.spotlight_duration = spotlight_duration
         self.ai_name = ai_name
 
         # Fill in a dummy Analytics if needed, but it is never .enable()'d
