@@ -39,19 +39,6 @@ from .chat_chunks import ChatChunks
 from ..exceptions import LiteLLMExceptions
 
 
-class ChangedFile:
-    """Tracks a recently modified file and its spotlight duration"""
-    def __init__(self, abs_path, remaining_messages=5):
-        self.abs_path = abs_path
-        self.remaining_messages = remaining_messages
-        self.timestamp = time.time()
-    
-    def refresh(self, remaining_messages=5):
-        """Refresh the spotlight timer when file is modified again"""
-        self.remaining_messages = remaining_messages
-        self.timestamp = time.time()
-
-
 class UnknownEditFormat(ValueError):
     def __init__(self, edit_format, valid_formats):
         self.edit_format = edit_format
@@ -256,13 +243,14 @@ class Coder:
             self.file_hashes[fname] = current_hash
             
         if changed_files:
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             changes_content = ""
             for rel_fname, content in changed_files:
                 changes_content += f"\n{rel_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
             
             # Add the changes message to current messages
             self.cur_messages.extend([
-                dict(role="user", content=f"<system>Recently modified files:\n<spotlight>{changes_content}</spotlight></system>"),
+                dict(role="user", content=f"<system>Recently modified files:\n<spotlight timestamp={timestamp}>{changes_content}</spotlight></system>"),
                 dict(role="assistant", content="<ack>")
             ])
 
@@ -320,7 +308,6 @@ class Coder:
                 total_cost=from_coder.total_cost,
                 ignore_mentions=from_coder.ignore_mentions,
                 file_watcher=from_coder.file_watcher,
-                recent_changes=deepcopy(from_coder.recent_changes),  # Deep copy to ensure independent tracking
                 spotlight_duration=from_coder.spotlight_duration,  # Preserve spotlight duration setting
                 file_hashes=from_coder.file_hashes.copy(),  # Copy file hashes to new coder
             )
@@ -460,7 +447,6 @@ class Coder:
         file_watcher=None,
         auto_copy_context=False,
         spotlight_duration=0,
-        recent_changes={},
         file_hashes={},
     ):
         self.ai_name = ai_name
@@ -740,9 +726,6 @@ class Coder:
             if abs_fname in self.file_hashes:
                 del self.file_hashes[abs_fname]
             
-            if abs_fname in self.recent_changes:
-                del self.recent_changes[abs_fname]
-            
             self.save_files_cache()
             return True
 
@@ -952,15 +935,10 @@ class Coder:
 
     def get_chat_files_messages(self):
         chat_files_messages = []
-        # Check if we have any files tracked at all (including those in spotlight)
-        has_tracked_files = bool(set(self.abs_fnames) | set(self.recent_changes.keys()))
         
         if self.abs_fnames:  # Has files not in spotlight
             files_content = self.gpt_prompts.files_content_prefix
             files_content += self.get_files_content()
-            files_reply = self.gpt_prompts.files_content_assistant_reply
-        elif has_tracked_files:  # All files are in spotlight
-            files_content = self.gpt_prompts.files_in_recent_changes
             files_reply = self.gpt_prompts.files_content_assistant_reply
         elif self.get_repo_map() and self.gpt_prompts.files_no_full_files_with_repo_map:
             files_content = self.gpt_prompts.files_no_full_files_with_repo_map
@@ -1387,33 +1365,12 @@ class Coder:
         chunks.memories = list(self.memories)
         chunks.chat = list(self.chat_messages)
 
-        # Handle recent changes before other file content
-        if self.recent_changes:
-            changes_content = ""
-            for abs_path in self.recent_changes:
-                rel_path = self.get_rel_fname(abs_path)
-                content = self.io.read_text(abs_path)
-                if content is not None:  # Only include if we can read the file
-                    changes_content += f"\n{rel_path}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
-            
-            if changes_content:
-                chunks.latest_changes = [
-                    dict(role="user", content=f"<system>Recently modified files:\n<spotlight>{changes_content}</spotlight></system>"),
-                    dict(role="assistant", content="<ack>")
-                ]
-
         # Get repo messages but exclude recently changed files
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
 
-        # Get chat files but exclude recently changed files
-        original_abs_fnames = self.abs_fnames
-        remaining_files = set(original_abs_fnames) - set(self.recent_changes.keys())
-        if original_abs_fnames:
-            self.abs_fnames = remaining_files
-            chunks.chat_files = self.get_chat_files_messages()
-            self.abs_fnames = original_abs_fnames  # Restore original set
-
+        chunks.chat_files = self.get_chat_files_messages()
+ 
         # Initialize prompts with assistant name
         if hasattr(self, 'gpt_prompts'):
             self.gpt_prompts = self.gpt_prompts.__class__(ai_name=self.ai_name)
@@ -1531,9 +1488,6 @@ class Coder:
 
         # Check for any files that changed since last message
         self.check_files_for_changes()
-
-        # Update counters for recent changes before new message
-        self.update_recent_changes()
 
         # Get timestamped content from io
         timestamped_inp = self.io.format_user_message(inp)
@@ -2343,13 +2297,6 @@ class Coder:
             edited = set(edit[0] for edit in edits)
 
             self.apply_edits(edits)
-            
-            # Update hashes and spotlight for edited files
-            for path in edited:
-                if path:  # Some edits might have None as path
-                    abs_path = self.abs_root_path(path)
-                    self.file_hashes[abs_path] = self.store_file_hash(abs_path)
-                    self.add_to_recent_changes(abs_path)
         except ValueError as err:
             self.num_malformed_responses += 1
 
@@ -2380,7 +2327,6 @@ class Coder:
                 self.io.tool_output(f"Did not apply edit to {path} (--dry-run)")
             else:
                 self.io.tool_output(f"Applied edit to {path}")
-            self.add_to_recent_changes(path)
 
         return edited
 
