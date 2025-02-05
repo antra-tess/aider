@@ -330,6 +330,7 @@ class Coder:
                 file_watcher=from_coder.file_watcher,
                 recent_changes=deepcopy(from_coder.recent_changes),  # Deep copy to ensure independent tracking
                 spotlight_duration=from_coder.spotlight_duration,  # Preserve spotlight duration setting
+                file_hashes=from_coder.file_hashes.copy(),  # Copy file hashes to new coder
             )
             use_kwargs.update(update)  # override to complete the switch
             use_kwargs.update(kwargs)  # override passed kwargs
@@ -2334,6 +2335,13 @@ class Coder:
             edited = set(edit[0] for edit in edits)
 
             self.apply_edits(edits)
+            
+            # Update hashes and spotlight for edited files
+            for path in edited:
+                if path:  # Some edits might have None as path
+                    abs_path = self.abs_root_path(path)
+                    self.file_hashes[abs_path] = self.store_file_hash(abs_path)
+                    self.add_to_recent_changes(abs_path)
         except ValueError as err:
             self.num_malformed_responses += 1
 
