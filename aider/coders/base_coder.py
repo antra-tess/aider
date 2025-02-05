@@ -231,6 +231,7 @@ class Coder:
     recent_changes = {}  # Maps paths to ChangedFile objects
 
     def add_to_recent_changes(self, abs_path):
+        print(f"DEBUG: ADDING/REFRESHING SPOTLIGHT {self.get_rel_fname(abs_path)}")
         """Add or refresh a file in recent changes spotlight"""
         if abs_path in self.recent_changes:
             self.recent_changes[abs_path].refresh(self.spotlight_duration)
@@ -238,9 +239,11 @@ class Coder:
             self.recent_changes[abs_path] = ChangedFile(abs_path, self.spotlight_duration)
 
     def update_recent_changes(self):
+        print("DEBUG: Updating recent changes counters") 
         """Update counters and remove expired changes"""
         expired = []
         for path, change in self.recent_changes.items():
+            print(f"DEBUG: File {self.get_rel_fname(path)} has {change.remaining_messages} messages left in spotlight")   
             change.remaining_messages -= 1
             if change.remaining_messages <= 0:
                 expired.append(path)
@@ -1366,9 +1369,11 @@ class Coder:
 
         # Get chat files but exclude recently changed files
         original_abs_fnames = self.abs_fnames
-        self.abs_fnames = set(original_abs_fnames) - set(self.recent_changes.keys())
-        chunks.chat_files = self.get_chat_files_messages()
-        self.abs_fnames = original_abs_fnames  # Restore original set
+        remaining_files = set(original_abs_fnames) - set(self.recent_changes.keys())
+        if original_abs_fnames:
+            self.abs_fnames = remaining_files
+            chunks.chat_files = self.get_chat_files_messages()
+            self.abs_fnames = original_abs_fnames  # Restore original set
 
         # Initialize prompts with assistant name
         if hasattr(self, 'gpt_prompts'):
