@@ -1345,9 +1345,30 @@ class Coder:
         chunks.memories = list(self.memories)
         chunks.chat = list(self.chat_messages)
 
+        # Handle recent changes before other file content
+        if self.recent_changes:
+            changes_content = ""
+            for abs_path in self.recent_changes:
+                rel_path = self.get_rel_fname(abs_path)
+                content = self.io.read_text(abs_path)
+                if content is not None:  # Only include if we can read the file
+                    changes_content += f"\n{rel_path}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
+            
+            if changes_content:
+                chunks.latest_changes = [
+                    dict(role="user", content=f"<system>Recently modified files:</system>{changes_content}"),
+                    dict(role="assistant", content="<ack>")
+                ]
+
+        # Get repo messages but exclude recently changed files
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
+
+        # Get chat files but exclude recently changed files
+        original_abs_fnames = self.abs_fnames
+        self.abs_fnames = set(original_abs_fnames) - set(self.recent_changes.keys())
         chunks.chat_files = self.get_chat_files_messages()
+        self.abs_fnames = original_abs_fnames  # Restore original set
 
         # Initialize prompts with assistant name
         if hasattr(self, 'gpt_prompts'):
