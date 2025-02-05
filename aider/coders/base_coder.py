@@ -241,6 +241,7 @@ class Coder:
 
     def check_files_for_changes(self):
         """Check if any tracked files have changed based on their hash"""
+        changed_files = []
         for fname in self.abs_fnames:
             current_hash = self.store_file_hash(fname)
             if current_hash is None:
@@ -248,9 +249,29 @@ class Coder:
                 
             if fname in self.file_hashes:
                 if current_hash != self.file_hashes[fname]:
-                    self.add_to_recent_changes(fname)
+                    rel_fname = self.get_rel_fname(fname)
+                    content = self.io.read_text(fname)
+                    if content is not None:
+                        changed_files.append((rel_fname, content))
+                    self.io.tool_output(f"Detected changes in {rel_fname}")
             
             self.file_hashes[fname] = current_hash
+            
+        if changed_files:
+            changes_content = ""
+            for rel_fname, content in changed_files:
+                changes_content += f"\n{rel_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
+            
+            # Insert the changes message before the last user message
+            if self.cur_messages and self.cur_messages[-1]["role"] == "user":
+                self.cur_messages.insert(-1, dict(
+                    role="user",
+                    content=f"<system>Recently modified files:\n{changes_content}</system>"
+                ))
+                self.cur_messages.insert(-1, dict(
+                    role="assistant",
+                    content="<ack>"
+                ))
 
     def add_to_recent_changes(self, abs_path):
         """Add or refresh a file in recent changes spotlight"""
