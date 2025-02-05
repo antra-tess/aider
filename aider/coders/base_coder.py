@@ -2326,6 +2326,7 @@ class Coder:
                 self.io.tool_output(f"Did not apply edit to {path} (--dry-run)")
             else:
                 self.io.tool_output(f"Applied edit to {path}")
+            self.add_to_recent_changes(path)
 
         return edited
 
