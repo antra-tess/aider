@@ -267,25 +267,57 @@ class Coder:
                 changes_content += f"\n{rel_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
                 new_spotlight_files.add(self.abs_root_path(rel_fname))
             
-            # Replace any previous spotlight messages for these files with references
+            # Handle previous spotlight messages that contain any of our modified files
             new_messages = []
             i = 0
             while i < len(self.cur_messages):
                 msg = self.cur_messages[i]
                 if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]:
-                    # Check if this spotlight contains any of our new files
+                    # Extract content and files from this spotlight message
+                    lines = msg["content"].split("\n")
+                    spotlight_files = {}  # Maps filenames to their content blocks
+                    current_file = None
+                    current_content = []
+                    
+                    for line in lines:
+                        if self.fence[0] in line:  # Start of a content block
+                            current_content = []
+                        elif self.fence[1] in line:  # End of a content block
+                            if current_file:
+                                spotlight_files[current_file] = "\n".join(current_content)
+                            current_file = None
+                        elif current_file is None and line.strip() and self.fence[0] not in line:
+                            current_file = line.strip()  # This is a filename line
+                        elif current_file:
+                            current_content.append(line)
+                    
+                    # Check which files in this spotlight are being modified
                     superseded_files = []
-                    for fname in new_spotlight_files:
-                        rel_fname = self.get_rel_fname(fname)
-                        if rel_fname in msg["content"]:
-                            superseded_files.append(rel_fname)
+                    remaining_files = {}
+                    for fname, content in spotlight_files.items():
+                        abs_fname = self.abs_root_path(fname)
+                        if abs_fname in new_spotlight_files:
+                            superseded_files.append(fname)
+                        else:
+                            remaining_files[fname] = content
+                    
                     if superseded_files:
-                        # Replace with a reference message
+                        # Create reference message for modified files
                         ref_msg = f"<system>Files were modified: {', '.join(superseded_files)}. These files were modified again later, check further spotlights for updated content.</system>"
                         new_messages.append(dict(role="user", content=ref_msg))
                         new_messages.append(dict(role="assistant", content="<ack>"))
+                        
+                        # If there are remaining files, create a new spotlight for them
+                        if remaining_files:
+                            remaining_content = "<system>Recently modified files:\n"
+                            for fname, content in remaining_files.items():
+                                remaining_content += f"\n{fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
+                            remaining_content += "</system>"
+                            new_messages.append(dict(role="user", content=remaining_content))
+                            new_messages.append(dict(role="assistant", content="<ack>"))
                         i += 2
                         continue
+                        
                 new_messages.append(msg)
                 i += 1
             self.cur_messages = new_messages
