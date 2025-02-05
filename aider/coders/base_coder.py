@@ -1356,7 +1356,7 @@ class Coder:
             
             if changes_content:
                 chunks.latest_changes = [
-                    dict(role="user", content=f"<system>Recently modified files:</system>{changes_content}"),
+                    dict(role="user", content=f"<system>Recently modified files:\n{changes_content}</system>"),
                     dict(role="assistant", content="<ack>")
                 ]
 
