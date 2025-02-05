@@ -226,6 +226,25 @@ class Coder:
     ignore_mentions = None
     chat_language = None
     file_watcher = None
+    spotlight_duration = 5  # Default number of messages to keep changes in spotlight
+    recent_changes = {}  # Maps paths to ChangedFile objects
+
+    def add_to_recent_changes(self, abs_path):
+        """Add or refresh a file in recent changes spotlight"""
+        if abs_path in self.recent_changes:
+            self.recent_changes[abs_path].refresh(self.spotlight_duration)
+        else:
+            self.recent_changes[abs_path] = ChangedFile(abs_path, self.spotlight_duration)
+
+    def update_recent_changes(self):
+        """Update counters and remove expired changes"""
+        expired = []
+        for path, change in self.recent_changes.items():
+            change.remaining_messages -= 1
+            if change.remaining_messages <= 0:
+                expired.append(path)
+        for path in expired:
+            del self.recent_changes[path]
 
     @classmethod
     def create(
