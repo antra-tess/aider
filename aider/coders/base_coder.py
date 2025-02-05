@@ -1485,6 +1485,9 @@ class Coder:
     def send_message(self, inp):
         self.event("message_send_starting")
 
+        # Update counters for recent changes before new message
+        self.update_recent_changes()
+
         # Get timestamped content from io
         timestamped_inp = self.io.format_user_message(inp)
         # Add the message to cur_messages
