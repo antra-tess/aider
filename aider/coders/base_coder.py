@@ -919,9 +919,15 @@ class Coder:
 
     def get_chat_files_messages(self):
         chat_files_messages = []
-        if self.abs_fnames:
+        # Check if we have any files tracked at all (including those in spotlight)
+        has_tracked_files = bool(set(self.abs_fnames) | set(self.recent_changes.keys()))
+        
+        if self.abs_fnames:  # Has files not in spotlight
             files_content = self.gpt_prompts.files_content_prefix
             files_content += self.get_files_content()
+            files_reply = self.gpt_prompts.files_content_assistant_reply
+        elif has_tracked_files:  # All files are in spotlight
+            files_content = self.gpt_prompts.files_content_prefix + "\nAll tracked files are currently in recent changes spotlight."
             files_reply = self.gpt_prompts.files_content_assistant_reply
         elif self.get_repo_map() and self.gpt_prompts.files_no_full_files_with_repo_map:
             files_content = self.gpt_prompts.files_no_full_files_with_repo_map
