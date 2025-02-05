@@ -248,11 +248,13 @@ class Coder:
             for rel_fname, content in changed_files:
                 changes_content += f"\n{rel_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
             
-            # Add the changes message to current messages
+            # Add the changes message to current messages and track the acknowledgment
             self.cur_messages.extend([
                 dict(role="user", content=f"<system>Recently modified files:\n<spotlight timestamp={timestamp}>{changes_content}</spotlight></system>"),
                 dict(role="assistant", content="<ack>")
             ])
+            # Track the acknowledgment message location
+            self.spotlight_locations.append((self.cur_messages, len(self.cur_messages)-1))
 
     @classmethod
     def create(
@@ -308,7 +310,7 @@ class Coder:
                 total_cost=from_coder.total_cost,
                 ignore_mentions=from_coder.ignore_mentions,
                 file_watcher=from_coder.file_watcher,
-                spotlight_duration=from_coder.spotlight_duration,  # Preserve spotlight duration setting
+                spotlight_locations=from_coder.spotlight_locations[:],  # Copy spotlight locations
                 file_hashes=from_coder.file_hashes.copy(),  # Copy file hashes to new coder
             )
             use_kwargs.update(update)  # override to complete the switch
@@ -403,6 +405,9 @@ class Coder:
             lines.append("Restored previous conversation history.")
 
         return lines
+
+    # Track pairs of (message_list, index) for spotlight acknowledgments
+    spotlight_locations = []
 
     def __init__(
         self,
