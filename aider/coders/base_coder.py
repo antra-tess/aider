@@ -223,6 +223,21 @@ class Coder:
                 return hashlib.sha1(f.read()).hexdigest()
         except (OSError, IOError):
             return None
+        
+    def get_spotlighted_files(self):                                                                                                                                    
+        """Extract filenames from spotlight messages in current messages"""                                                                                             
+        spotlighted_files = set()                                                                                                                                       
+        for msg in self.cur_messages:                                                                                                                                   
+            if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]:                                                                                  
+                # Extract filenames from the message content                                                                                                            
+                lines = msg["content"].split("\n")                                                                                                                      
+                for i, line in enumerate(lines):                                                                                                                        
+                    if self.fence[0] in lines[i:]:                                                                                                                      
+                        # The line before a fence is a filename                                                                                                         
+                        fname = line.strip()                                                                                                                            
+                        if fname:                                                                                                                                       
+                            spotlighted_files.add(self.abs_root_path(fname))                                                                                            
+        return spotlighted_files
 
     def check_files_for_changes(self):
         """Check if any tracked files have changed based on their hash"""
@@ -254,7 +269,6 @@ class Coder:
                 dict(role="assistant", content="<ack>")
             ])
             # Track the acknowledgment message location
-            self.spotlight_locations.append((self.cur_messages, len(self.cur_messages)-1))
 
     @classmethod
     def create(
@@ -310,7 +324,6 @@ class Coder:
                 total_cost=from_coder.total_cost,
                 ignore_mentions=from_coder.ignore_mentions,
                 file_watcher=from_coder.file_watcher,
-                spotlight_locations=from_coder.spotlight_locations[:],  # Copy spotlight locations
                 file_hashes=from_coder.file_hashes.copy(),  # Copy file hashes to new coder
             )
             use_kwargs.update(update)  # override to complete the switch
@@ -405,9 +418,6 @@ class Coder:
             lines.append("Restored previous conversation history.")
 
         return lines
-
-    # Track pairs of (message_list, index) for spotlight acknowledgments
-    spotlight_locations = []
 
     def __init__(
         self,
@@ -940,10 +950,14 @@ class Coder:
 
     def get_chat_files_messages(self):
         chat_files_messages = []
-        
-        if self.abs_fnames:  # Has files not in spotlight
+        spotlighted_files = self.get_spotlighted_files()                                                                                                                
+        available_files = set(self.abs_fnames) - spotlighted_files  
+        if available_files:  # Has files not in spotlight
             files_content = self.gpt_prompts.files_content_prefix
             files_content += self.get_files_content()
+            files_reply = self.gpt_prompts.files_content_assistant_reply
+        elif not available_files and spotlighted_files:
+            files_content = self.gpt_prompts.files_in_recent_changes
             files_reply = self.gpt_prompts.files_content_assistant_reply
         elif self.get_repo_map() and self.gpt_prompts.files_no_full_files_with_repo_map:
             files_content = self.gpt_prompts.files_no_full_files_with_repo_map
@@ -2067,6 +2081,9 @@ class Coder:
 
         # Calculate token counts
         uncompressed_tokens_chat = self.main_model.token_count(" ".join(msg["content"] for msg in self.chat_messages))
+        tokens_list_culprits = [msg['content'] for msg in self.cur_messages if not isinstance(msg['content'], str)]
+        if tokens_list_culprits:
+            assert False, tokens_list_culprits
         uncompressed_tokens_cur = self.main_model.token_count(" ".join(msg["content"] for msg in self.cur_messages))
         try:
             # content can be a list of dicts or a string
