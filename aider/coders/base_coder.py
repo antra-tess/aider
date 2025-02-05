@@ -253,7 +253,6 @@ class Coder:
             self.file_hashes[fname] = current_hash
 
     def add_to_recent_changes(self, abs_path):
-        print(f"DEBUG: ADDING/REFRESHING SPOTLIGHT {self.get_rel_fname(abs_path)}")
         """Add or refresh a file in recent changes spotlight"""
         if abs_path in self.recent_changes:
             self.recent_changes[abs_path].refresh(self.spotlight_duration)
@@ -261,11 +260,9 @@ class Coder:
             self.recent_changes[abs_path] = ChangedFile(abs_path, self.spotlight_duration)
 
     def update_recent_changes(self):
-        print(f"DEBUG: Updating recent changes counters. Allowed depth: {self.spotlight_duration}") 
         """Update counters and remove expired changes"""
         expired = []
         for path, change in self.recent_changes.items():
-            print(f"DEBUG: File {self.get_rel_fname(path)} has {change.remaining_messages} messages left in spotlight")   
             change.remaining_messages -= 1
             if change.remaining_messages <= 0:
                 expired.append(path)
@@ -741,11 +738,9 @@ class Coder:
             
             # Clean up tracking dictionaries
             if abs_fname in self.file_hashes:
-                print(f"DEBUG: Removing hash tracking for {fname}")
                 del self.file_hashes[abs_fname]
             
             if abs_fname in self.recent_changes:
-                print(f"DEBUG: Removing from spotlight: {fname}")
                 del self.recent_changes[abs_fname]
             
             self.save_files_cache()
