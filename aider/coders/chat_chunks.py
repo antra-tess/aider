@@ -67,8 +67,8 @@ class ChatChunks:
         chat_spotlights = [(msg, self.chat) for msg in self.chat if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]]
         cur_spotlights = [(msg, self.cur) for msg in self.cur if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]]
         
-        # Strip cache from all spotlighted content in chat history
-        for msg, _ in chat_spotlights:
+        # First strip cache from all spotlighted content
+        for msg, _ in chat_spotlights + cur_spotlights:
             self.strip_cache_control([msg])
             
         if cur_spotlights:
