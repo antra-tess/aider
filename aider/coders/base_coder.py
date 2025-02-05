@@ -734,7 +734,18 @@ class Coder:
     def drop_rel_fname(self, fname):
         abs_fname = self.abs_root_path(fname)
         if abs_fname in self.abs_fnames:
+            # Remove from main tracking
             self.abs_fnames.remove(abs_fname)
+            
+            # Clean up tracking dictionaries
+            if abs_fname in self.file_hashes:
+                print(f"DEBUG: Removing hash tracking for {fname}")
+                del self.file_hashes[abs_fname]
+            
+            if abs_fname in self.recent_changes:
+                print(f"DEBUG: Removing from spotlight: {fname}")
+                del self.recent_changes[abs_fname]
+            
             self.save_files_cache()
             return True
 
