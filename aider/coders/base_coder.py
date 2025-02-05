@@ -229,6 +229,30 @@ class Coder:
     file_watcher = None
     spotlight_duration = 5  # Default number of messages to keep changes in spotlight
     recent_changes = {}  # Maps paths to ChangedFile objects
+    file_hashes = {}  # Store hashes of tracked files
+
+    def store_file_hash(self, fname):
+        """Get hash of file content without extra IO handling"""
+        try:
+            with open(fname, 'rb') as f:  # Use binary mode to avoid encoding issues
+                return hashlib.sha1(f.read()).hexdigest()
+        except (OSError, IOError):
+            return None
+
+    def check_files_for_changes(self):
+        """Check if any tracked files have changed based on their hash"""
+        print("DEBUG: Checking files for changes")
+        for fname in self.abs_fnames:
+            current_hash = self.store_file_hash(fname)
+            if current_hash is None:
+                continue
+                
+            if fname in self.file_hashes:
+                if current_hash != self.file_hashes[fname]:
+                    print(f"DEBUG: Detected change in {self.get_rel_fname(fname)}")
+                    self.add_to_recent_changes(fname)
+            
+            self.file_hashes[fname] = current_hash
 
     def add_to_recent_changes(self, abs_path):
         print(f"DEBUG: ADDING/REFRESHING SPOTLIGHT {self.get_rel_fname(abs_path)}")
@@ -1495,6 +1519,9 @@ class Coder:
 
     def send_message(self, inp):
         self.event("message_send_starting")
+
+        # Check for any files that changed since last message
+        self.check_files_for_changes()
 
         # Update counters for recent changes before new message
         self.update_recent_changes()
