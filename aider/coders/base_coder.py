@@ -227,8 +227,6 @@ class Coder:
     ignore_mentions = None
     chat_language = None
     file_watcher = None
-    spotlight_duration = 0  # Default number of messages to keep changes in spotlight
-    recent_changes = {}  # Maps paths to ChangedFile objects
     file_hashes = {}  # Store hashes of tracked files
 
     def store_file_hash(self, fname):
@@ -262,33 +260,11 @@ class Coder:
             for rel_fname, content in changed_files:
                 changes_content += f"\n{rel_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
             
-            # Insert the changes message before the last user message
-            if self.cur_messages and self.cur_messages[-1]["role"] == "user":
-                self.cur_messages.insert(-1, dict(
-                    role="user",
-                    content=f"<system>Recently modified files:\n{changes_content}</system>"
-                ))
-                self.cur_messages.insert(-1, dict(
-                    role="assistant",
-                    content="<ack>"
-                ))
-
-    def add_to_recent_changes(self, abs_path):
-        """Add or refresh a file in recent changes spotlight"""
-        if abs_path in self.recent_changes:
-            self.recent_changes[abs_path].refresh(self.spotlight_duration)
-        else:
-            self.recent_changes[abs_path] = ChangedFile(abs_path, self.spotlight_duration)
-
-    def update_recent_changes(self):
-        """Update counters and remove expired changes"""
-        expired = []
-        for path, change in self.recent_changes.items():
-            change.remaining_messages -= 1
-            if change.remaining_messages <= 0:
-                expired.append(path)
-        for path in expired:
-            del self.recent_changes[path]
+            # Add the changes message to current messages
+            self.cur_messages.extend([
+                dict(role="user", content=f"<system>Recently modified files:\n<spotlight>{changes_content}</spotlight></system>"),
+                dict(role="assistant", content="<ack>")
+            ])
 
     @classmethod
     def create(
