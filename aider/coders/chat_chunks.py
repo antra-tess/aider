@@ -63,18 +63,19 @@ class ChatChunks:
             # otherwise, just cache readonly_files if there are any
             self.add_cache_control(self.readonly_files)
 
-        # Find any spotlight messages
-        spotlight_messages = self.find_spotlight_messages()
+        # Find any spotlight messages in chat history and current messages
+        chat_spotlights = [(msg, self.chat) for msg in self.chat if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]]
+        cur_spotlights = [(msg, self.cur) for msg in self.cur if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]]
         
-        if spotlight_messages:
-            # If we have spotlight messages, strip cache from all but the last one
-            for msg, msg_list in spotlight_messages[:-1]:
-                self.strip_cache_control([msg])
+        # Strip cache from all spotlighted content in chat history
+        for msg, _ in chat_spotlights:
+            self.strip_cache_control([msg])
             
-            # Add cache control to the most recent spotlight message
-            self.add_cache_control([spotlight_messages[-1][0]])
+        if cur_spotlights:
+            # If we have spotlight messages in current messages, add cache only to the most recent one
+            self.add_cache_control([cur_spotlights[-1][0]])
         else:
-            # No spotlight messages, cache chat_files as before
+            # No spotlight messages in current messages, cache chat_files
             self.add_cache_control(self.chat_files)
 
     def add_cache_control(self, messages):
