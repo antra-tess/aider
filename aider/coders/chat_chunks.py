@@ -34,6 +34,18 @@ class ChatChunks:
             messages.extend(msg_list)
         return messages
 
+    def find_spotlight_messages(self):
+        """Find all messages containing spotlight tags, returns (message, index) pairs"""
+        spotlight_messages = []
+        
+        # Search through all message lists that might contain spotlight tags
+        for msg_list in [self.chat, self.cur]:
+            for i, msg in enumerate(msg_list):
+                if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]:
+                    spotlight_messages.append((msg, msg_list))
+        
+        return spotlight_messages
+
     def add_cache_control_headers(self):
         if self.examples:
             self.add_cache_control(self.examples)
@@ -51,7 +63,19 @@ class ChatChunks:
             # otherwise, just cache readonly_files if there are any
             self.add_cache_control(self.readonly_files)
 
-        self.add_cache_control(self.chat_files)
+        # Find any spotlight messages
+        spotlight_messages = self.find_spotlight_messages()
+        
+        if spotlight_messages:
+            # If we have spotlight messages, strip cache from all but the last one
+            for msg, msg_list in spotlight_messages[:-1]:
+                self.strip_cache_control([msg])
+            
+            # Add cache control to the most recent spotlight message
+            self.add_cache_control([spotlight_messages[-1][0]])
+        else:
+            # No spotlight messages, cache chat_files as before
+            self.add_cache_control(self.chat_files)
 
     def add_cache_control(self, messages):
         if not messages:
