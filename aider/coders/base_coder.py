@@ -227,7 +227,7 @@ class Coder:
     ignore_mentions = None
     chat_language = None
     file_watcher = None
-    spotlight_duration = 5  # Default number of messages to keep changes in spotlight
+    spotlight_duration = 0  # Default number of messages to keep changes in spotlight
     recent_changes = {}  # Maps paths to ChangedFile objects
     file_hashes = {}  # Store hashes of tracked files
 
