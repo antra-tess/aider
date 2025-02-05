@@ -70,7 +70,7 @@ class ChatChunks:
                     self.strip_cache_control([msg_list[idx]])
             
             # Find the last spotlight in cur_messages
-            cur_spotlights = [(i, loc) for i, (msg_list, idx) in enumerate(spotlight_locations) 
+            cur_spotlights = [(i, (msg_list, idx)) for i, (msg_list, idx) in enumerate(spotlight_locations) 
                             if msg_list is self.cur and idx < len(msg_list)]
             
             if cur_spotlights:
