@@ -284,6 +284,12 @@ def get_parser(default_config_files, git_root):
         default=2,
         help="Number of times to ping at 5min intervals to keep prompt cache warm (default: 2)",
     )
+    group.add_argument(
+        "--spotlight-depth",
+        type=int,
+        default=5,
+        help="How many interactions should be the edited message be pushed to front and spotlighted (default: 5)",
+    )
 
     ##########
     group = parser.add_argument_group("Repomap settings")

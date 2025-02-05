@@ -829,7 +829,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         map_tokens = main_model.get_repo_map_tokens()
     else:
         map_tokens = args.map_tokens
-
     try:
         coder = Coder.create(
             main_model=main_model,
@@ -862,6 +861,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             chat_language=args.chat_language,
             detect_urls=args.detect_urls,
             auto_copy_context=args.copy_paste,
+            spotlight_duration=args.spotlight_depth,
         )
     except UnknownEditFormat as err:
         io.tool_error(str(err))
@@ -897,6 +897,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         analytics.event("copy-paste mode")
         ClipboardWatcher(coder.io, verbose=args.verbose)
 
+    coder.check_files_for_changes()
     coder.show_announcements()
 
     if args.show_prompts:
