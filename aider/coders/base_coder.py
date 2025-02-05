@@ -466,7 +466,6 @@ class Coder:
         recent_changes={},
         file_hashes={},
     ):
-        self.spotlight_duration = spotlight_duration
         self.ai_name = ai_name
 
         # Fill in a dummy Analytics if needed, but it is never .enable()'d
@@ -634,6 +633,7 @@ class Coder:
         max_inp_tokens = self.main_model.info.get("max_input_tokens") or 0
 
         has_map_prompt = hasattr(self, "gpt_prompts") and self.gpt_prompts.repo_content_prefix
+        
 
         if use_repo_map and self.repo and has_map_prompt:
             self.repo_map = RepoMap(
@@ -681,6 +681,9 @@ class Coder:
             if self.verbose:
                 self.io.tool_output("JSON Schema:")
                 self.io.tool_output(json.dumps(self.functions, indent=4))
+
+        self.spotlight_duration = spotlight_duration
+        
 
     def setup_lint_cmds(self, lint_cmds):
         if not lint_cmds:
