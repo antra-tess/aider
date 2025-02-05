@@ -14,7 +14,7 @@ import threading
 import time
 import traceback
 import webbrowser
-import time
+from copy import deepcopy
 from collections import defaultdict
 from datetime import datetime
 from json.decoder import JSONDecodeError
