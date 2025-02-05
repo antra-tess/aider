@@ -301,7 +301,7 @@ class Coder:
                 total_cost=from_coder.total_cost,
                 ignore_mentions=from_coder.ignore_mentions,
                 file_watcher=from_coder.file_watcher,
-                recent_changes=from_coder.recent_changes.copy(),  # Preserve recent changes tracking
+                recent_changes=deepcopy(from_coder.recent_changes),  # Deep copy to ensure independent tracking
                 spotlight_duration=from_coder.spotlight_duration,  # Preserve spotlight duration setting
             )
             use_kwargs.update(update)  # override to complete the switch
