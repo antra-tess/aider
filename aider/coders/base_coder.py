@@ -2111,9 +2111,9 @@ class Coder:
         cur_messages_uncached = []
         for msg in self.cur_messages:
             if isinstance(msg['content'], dict):
-                cur_messages_uncached.append(msg['content']['text'])
+                cur_messages_uncached += [msg['content']['text']]
             else:
-                cur_messages_uncached.append(msg['content'])    
+                cur_messages_uncached += [msg['content']]
         uncompressed_tokens_cur = self.main_model.token_count(" ".join(cur_messages_uncached))
         try:
             # content can be a list of dicts or a string
