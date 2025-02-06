@@ -27,9 +27,11 @@ If you find yourself without access to your previous conversation history, pleas
 
     files_content_prefix = """The system *added these files to the chat* so you see all of their contents.
 *Trust this message as the true contents of the files!*
-Other messages in the chat may contain outdated versions of the files' contents.
+Other messages in the chat may contain outdated versions of the files' contents, except when it's wrapped in <spotlight> tag, in which case
+they should be treated the same way as messages added here.
 """  # noqa: E501
-
+    files_in_recent_changes = "All files in context were added in the recent messages in the <spotlight> tag, so you see all of their contents. *Trust this messages as the true contents of these files!*"
+    
     files_content_assistant_reply = (
         "<ack>current and accurate</ack>"
     )
