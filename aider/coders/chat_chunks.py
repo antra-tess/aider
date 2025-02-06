@@ -14,6 +14,7 @@ class ChatChunks:
     cur: List = field(default_factory=list)
     reminder: List = field(default_factory=list)
     foundation: List = field(default_factory=list)  # Foundation messages that form the bedrock of context
+    spotlight_messages: List = field(default_factory=list)  # Store indices of spotlight acknowledgments
 
     def all_messages(self):
         # Start with foundation messages
@@ -35,20 +36,18 @@ class ChatChunks:
         return messages
 
     def find_spotlight_messages(self):
-        """Find all messages containing spotlight tags, returns (message, index) pairs"""
-        spotlight_messages = []
-        last_message = None
+        """Find all messages containing spotlight tags and store results"""
+        self.spotlight_messages = []
         
         # Search through current messages lists that might contain spotlight tags
         for index, msg in enumerate(self.cur):
             if isinstance(msg.get("content"), str) and msg["content"].startswith("<system><spotlight>"):
                 # Searching acknowledgement message, not the spotlight itself
-                spotlight_messages.append(index + 1)
-                last_message = index + 1
+                self.spotlight_messages.append(index + 1)
         
-        return spotlight_messages, last_message
+        return self.spotlight_messages
 
-    def add_cache_control_headers(self, spotlight_locations=None):
+    def add_cache_control_headers(self):
         if self.examples:
             self.add_cache_control(self.examples)
         else:
@@ -68,14 +67,13 @@ class ChatChunks:
         if self.chat:
             self.strip_cache_control(self.chat)
 
-        spotlighted_messages, last_message = self.find_spotlight_messages()
-
-        if last_message:
-            for item in spotlighted_messages:
+        # Use stored spotlight information
+        if self.spotlight_messages:
+            for item in self.spotlight_messages[:-1]:
                 self.strip_cache_control([self.cur[item]])
-            self.add_cache_control([self.cur[last_message]])
+            self.add_cache_control([self.cur[self.spotlight_messages[-1]]])
         else:
-            # No spotlight locations provided, cache chat_files
+            # No spotlight locations, cache chat_files
             self.add_cache_control(self.chat_files)
 
     def add_cache_control(self, messages):
