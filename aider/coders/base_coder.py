@@ -516,7 +516,7 @@ class Coder:
         ignore_mentions=None,
         file_watcher=None,
         auto_copy_context=False,
-        spotlight_duration=0,
+        instruction_depth=0,
         file_hashes={},
     ):
         self.ai_name = ai_name
@@ -735,7 +735,7 @@ class Coder:
                 self.io.tool_output("JSON Schema:")
                 self.io.tool_output(json.dumps(self.functions, indent=4))
 
-        self.spotlight_duration = spotlight_duration
+        self.instruction_depth = instruction_depth
         
 
     def setup_lint_cmds(self, lint_cmds):

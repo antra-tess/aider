@@ -285,10 +285,10 @@ def get_parser(default_config_files, git_root):
         help="Number of times to ping at 5min intervals to keep prompt cache warm (default: 2)",
     )
     group.add_argument(
-        "--spotlight-depth",
+        "--instruction-depth",
         type=int,
         default=5,
-        help="How many interactions should be the edited message be pushed to front and spotlighted (default: 5)",
+        help="How far from last message should the instructions for different modes persist (default: 5)",
     )
 
     ##########
