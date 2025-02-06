@@ -1417,6 +1417,67 @@ class Coder:
                     dict(role="assistant", content="<ack>"),
                 ]
 
+        chunks = ChatChunks()
+        
+        # Find spotlight messages first, since we'll need this info for both
+        # message insertion and cache control
+        chunks.find_spotlight_messages()
+        
+        # Add system messages first
+        if self.main_model.use_system_prompt:
+            chunks.system = [
+                dict(role="system", content="<system>" + main_sys + "</system>")
+            ]
+        else:
+            chunks.system = [
+                dict(role="user", content="<system><floating>" + main_sys + "</floating></system>")
+            ]
+
+        # Foundation messages go at the bottom of the context
+        chunks.foundation = self.foundation.get_messages()
+
+        chunks.examples = example_messages
+
+        # Add memories and chat history separately
+        chunks.memories = list(self.memories)
+        chunks.chat = list(self.chat_messages)
+
+        # Get repo messages but exclude recently changed files
+        chunks.repo = self.get_repo_messages()
+        chunks.readonly_files = self.get_readonly_files_messages()
+
+        chunks.chat_files = self.get_chat_files_messages()
+
+        # Initialize prompts with assistant name
+        if hasattr(self, 'gpt_prompts'):
+            self.gpt_prompts = self.gpt_prompts.__class__(ai_name=self.ai_name)
+
+        if self.gpt_prompts.system_reminder:
+            reminder_message = [
+                dict(
+                    role="system", content="<system>" + self.fmt_system_prompt(self.gpt_prompts.system_reminder) + "</system>"
+                ),
+            ]
+        else:
+            reminder_message = []
+
+        chunks.cur = list(self.cur_messages)
+        chunks.reminder = []
+
+        # If we have a fixed-depth message to add, insert it in the right place
+        if hasattr(self, 'fixed_depth_message'):
+            wrapped_message = f"<system><fixed-depth>{self.fixed_depth_message}</fixed-depth></system>"
+            msg_dict = dict(role="user", content=wrapped_message)
+            
+            # If we have spotlight messages, insert after the last one to preserve cache
+            if chunks.spotlight_messages:
+                insert_pos = chunks.spotlight_messages[-1] + 1
+                chunks.cur.insert(insert_pos, msg_dict)
+            else:
+                # No cache controls, insert at desired depth from end
+                target_pos = max(0, len(chunks.cur) - self.fixed_depth)
+                chunks.cur.insert(target_pos, msg_dict)
+
         # Only add system_reminder for edit modes, not ask mode
         if self.gpt_prompts.system_reminder and self.edit_format != "ask":
             main_sys += "\n" + self.fmt_system_prompt(self.gpt_prompts.system_reminder)
