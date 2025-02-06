@@ -37,14 +37,16 @@ class ChatChunks:
     def find_spotlight_messages(self):
         """Find all messages containing spotlight tags, returns (message, index) pairs"""
         spotlight_messages = []
+        last_message = None
         
-        # Search through all message lists that might contain spotlight tags
-        for msg_list in [self.chat, self.cur]:
-            for i, msg in enumerate(msg_list):
-                if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]:
-                    spotlight_messages.append((msg, msg_list))
+        # Search through current messages lists that might contain spotlight tags
+        for index, msg in enumerate(self.cur):
+            if isinstance(msg.get("content"), str) and msg["content"].startswith("<system><spotlight>"):
+                # Searching acknowledgement message, not the spotlight itself
+                spotlight_messages.append(index + 1)
+                last_message = index + 1
         
-        return spotlight_messages
+        return spotlight_messages, last_message
 
     def add_cache_control_headers(self, spotlight_locations=None):
         if self.examples:
@@ -63,23 +65,15 @@ class ChatChunks:
             # otherwise, just cache readonly_files if there are any
             self.add_cache_control(self.readonly_files)
 
-        if spotlight_locations:
-            # Strip cache from all spotlight acknowledgments
-            for msg_list, idx in spotlight_locations:
-                if idx < len(msg_list):  # Safety check
-                    self.strip_cache_control([msg_list[idx]])
-            
-            # Find the last spotlight in cur_messages
-            cur_spotlights = [(i, (msg_list, idx)) for i, (msg_list, idx) in enumerate(spotlight_locations) 
-                            if msg_list is self.cur and idx < len(msg_list)]
-            
-            if cur_spotlights:
-                # Add cache to the most recent spotlight acknowledgment in cur_messages
-                _, (msg_list, idx) = cur_spotlights[-1]
-                self.add_cache_control([msg_list[idx]])
-            else:
-                # No spotlight messages in current messages, cache chat_files
-                self.add_cache_control(self.chat_files)
+        if self.chat:
+            self.strip_cache_control(self.chat)
+
+        spotlighted_messages, last_message = self.find_spotlight_messages()
+
+        if last_message:
+            for item in spotlighted_messages:
+                self.strip_cache_control([self.cur[item]])
+            self.add_cache_control([self.cur[last_message]])
         else:
             # No spotlight locations provided, cache chat_files
             self.add_cache_control(self.chat_files)
