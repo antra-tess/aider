@@ -228,7 +228,7 @@ class Coder:
         """Extract filenames from spotlight messages in current messages"""                                                                                             
         spotlighted_files = set()                                                                                                                                       
         for msg in self.cur_messages:                                                                                                                                   
-            if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]:                                                                                  
+            if isinstance(msg.get("content"), str) and msg["content"].startswith("<system><spotlight>"):                                                                                  
                 # Extract filenames from the message content                                                                                                            
                 lines = msg["content"].split("\n")                                                                                                                      
                 for i, line in enumerate(lines):                                                                                                                        
@@ -258,7 +258,6 @@ class Coder:
             self.file_hashes[fname] = current_hash
             
         if changed_files:
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             changes_content = ""
             
             # Track which files we're about to spotlight
@@ -272,7 +271,7 @@ class Coder:
             i = 0
             while i < len(self.cur_messages):
                 msg = self.cur_messages[i]
-                if isinstance(msg.get("content"), str) and "<spotlight" in msg["content"]:
+                if isinstance(msg.get("content"), str) and msg["content"].startswith("<system><spotlight>"):
                     # Extract content and files from this spotlight message
                     lines = msg["content"].split("\n")
                     spotlight_files = {}  # Maps filenames to their content blocks
@@ -300,21 +299,18 @@ class Coder:
                             superseded_files.append(fname)
                         else:
                             remaining_files[fname] = content
-                    
                     if superseded_files:
                         # Create reference message for modified files
-                        ref_msg = f"<system>Files were modified: {', '.join(superseded_files)}. These files were modified again later, check further spotlights for updated content.</system>"
-                        new_messages.append(dict(role="user", content=ref_msg))
-                        new_messages.append(dict(role="assistant", content="<ack>"))
-                        
+                        ref_msg = f"<system><spotlight>Files were modified: {', '.join(superseded_files)}. These files were modified again later, check further spotlights for updated content."
                         # If there are remaining files, create a new spotlight for them
                         if remaining_files:
-                            remaining_content = "<system>Recently modified files:\n"
+                            remaining_content = "Also, here's the list of recently modified files that are still current and true:\n"
                             for fname, content in remaining_files.items():
                                 remaining_content += f"\n{fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
-                            remaining_content += "</system>"
-                            new_messages.append(dict(role="user", content=remaining_content))
-                            new_messages.append(dict(role="assistant", content="<ack>"))
+                            ref_msg += remaining_content
+                        ref_msg += "</spotlight></system>"
+                        new_messages.append(dict(role="user", content=ref_msg))
+                        new_messages.append(dict(role="assistant", content="<ack>"))
                         i += 2
                         continue
                         
@@ -324,7 +320,7 @@ class Coder:
             
             # Add the new spotlight message
             self.cur_messages.extend([
-                dict(role="user", content=f"<system>Recently modified files:\n<spotlight timestamp={timestamp}>{changes_content}</spotlight></system>"),
+                dict(role="user", content=f"<system><spotlight>Recently modified files:\n{changes_content}</spotlight></system>"),
                 dict(role="assistant", content="<ack>")
             ])
             # Track the acknowledgment message location
@@ -903,7 +899,10 @@ class Coder:
     def get_cur_message_text(self):
         text = ""
         for msg in self.cur_messages:
-            text += msg["content"] + "\n"
+            if isinstance(msg["content"], str):
+                text += msg["content"] + "\n"
+            else:
+                text += msg["content"][0]['text'] + "\n"
         return text
 
     def get_ident_mentions(self, text):
@@ -2142,8 +2141,8 @@ class Coder:
         uncompressed_tokens_chat = self.main_model.token_count(" ".join(msg["content"] for msg in self.chat_messages))
         cur_messages_uncached = []
         for msg in self.cur_messages:
-            if isinstance(msg['content'], dict):
-                cur_messages_uncached += [msg['content']['text']]
+            if not isinstance(msg['content'], str):
+                cur_messages_uncached += [msg['content'][0]['text']]
             else:
                 cur_messages_uncached += [msg['content']]
         uncompressed_tokens_cur = self.main_model.token_count(" ".join(cur_messages_uncached))
@@ -2447,7 +2446,8 @@ class Coder:
         context = ""
         if history:
             for msg in history:
-                context += "\n" + msg["role"].upper() + ": " + msg["content"] + "\n"
+                if isinstance(msg['content'], str):
+                    context += "\n" + msg["role"].upper() + ": " + msg["content"] + "\n"
 
         return context
 
