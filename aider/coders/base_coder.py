@@ -1466,7 +1466,8 @@ class Coder:
 
         # If we have a fixed-depth message to add, insert it in the right place
         if hasattr(self, 'fixed_depth_message'):
-            modes_instruction_message = f"<system><floating><fixed-depth>{self.fixed_depth_message}</fixed-depth></floating></system>"
+            chunks.cur = [msg for msg in chunks.cur if not (isinstance(msg.get("content"), str) and msg["content"].startswith("<system><floating><fixed_depth>"))] 
+            modes_instruction_message = f"<system><floating><fixed_depth>{self.fixed_depth_message}</fixed_depth></floating></system>"
             msg_dict = dict(role="user", content=modes_instruction_message)
             
             # If we have spotlight messages, insert after the last one to preserve cache
