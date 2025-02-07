@@ -215,6 +215,8 @@ class Coder:
     chat_language = None
     file_watcher = None
     file_hashes = {}  # Store hashes of tracked files
+    TOKENS_NUMBER_FOR_CACHING = 3000
+    last_cached_message = 0
 
     def store_file_hash(self, fname):
         """Get hash of file content without extra IO handling"""
@@ -380,6 +382,7 @@ class Coder:
                 ignore_mentions=from_coder.ignore_mentions,
                 file_watcher=from_coder.file_watcher,
                 file_hashes=from_coder.file_hashes.copy(),  # Copy file hashes to new coder
+                last_cached_message=from_coder.last_cached_message
             )
             use_kwargs.update(update)  # override to complete the switch
             use_kwargs.update(kwargs)  # override passed kwargs
@@ -518,6 +521,7 @@ class Coder:
         auto_copy_context=False,
         instruction_depth=0,
         file_hashes={},
+        last_cached_message=0
     ):
         self.ai_name = ai_name
 
@@ -1419,10 +1423,6 @@ class Coder:
 
         chunks = ChatChunks()
         
-        # Find spotlight messages first, since we'll need this info for both
-        # message insertion and cache control
-        chunks.find_spotlight_messages()
-        
         # Add system messages first
         if self.main_model.use_system_prompt:
             chunks.system = [
@@ -1463,21 +1463,32 @@ class Coder:
 
         chunks.cur = list(self.cur_messages)
         chunks.reminder = []
-
-        # If we have a fixed-depth message to add, insert it in the right place
-        if hasattr(self, 'fixed_depth_message'):
-            chunks.cur = [msg for msg in chunks.cur if not (isinstance(msg.get("content"), str) and msg["content"].startswith("<system><floating><fixed_depth>"))] 
-            modes_instruction_message = f"<system><floating><fixed_depth>{self.fixed_depth_message}</fixed_depth></floating></system>"
-            msg_dict = dict(role="user", content=modes_instruction_message)
-            
-            # If we have spotlight messages, insert after the last one to preserve cache
-            if chunks.spotlight_messages:
-                insert_pos = chunks.spotlight_messages[-1] + 1
-                chunks.cur.insert(insert_pos, msg_dict)
+        chunks.current_cache_indices = []
+        cur_messages_cache_stripped = []
+        chunks_cur = []
+        for index, item in enumerate(list(self.cur_messages)):
+            if isinstance(item, list):
+                check_text = item["content"][0]["text"]
+                if item['content'][0].get('cache_control'):
+                    self.last_cached_message = index
+                    chunks.current_cache_indices.append(index)
             else:
-                # No cache controls, insert at desired depth from end
-                target_pos = max(0, len(chunks.cur) - self.fixed_depth)
-                chunks.cur.insert(target_pos, msg_dict)
+                check_text = item["content"]
+            if check_text == self.gpt_prompts.interface_using_guide:
+                continue
+            cur_messages_cache_stripped += [check_text]
+            chunks_cur.append(item)
+        chunks.cur = chunks_cur
+
+        uncompressed_tokens_cur = self.main_model.token_count(" ".join(cur_messages_cache_stripped[self.last_cached_message:]))
+        # Walikng cache implementation; approximately each 3k tokens we need to move cache by index
+        if uncompressed_tokens_cur >= self.TOKENS_NUMBER_FOR_CACHING:
+            chunks.current_cache_indices.append(len(chunks.cur) - 1)
+            self.last_cached_message = len(chunks.cur) - 1
+        msg_dict = dict(role="user", content=self.gpt_prompts.interface_using_guide)
+        # Insert at depth, or right after last cached message
+        target_pos = max(self.last_cached_message, len(chunks.cur) - self.fixed_depth)
+        chunks.cur.insert(target_pos, msg_dict)
 
         # TODO review impact of token count on image messages
         messages_tokens = self.main_model.token_count(chunks.all_messages())
@@ -2462,7 +2473,11 @@ class Coder:
         if history:
             for msg in history:
                 if isinstance(msg['content'], str):
-                    context += "\n" + msg["role"].upper() + ": " + msg["content"] + "\n"
+                    content = msg['content']
+                else:
+                    content = msg['content'][0]['text']
+                role = msg['role'].upper()
+                context += "\n" + role + ": " + content + "\n"
 
         return context
 

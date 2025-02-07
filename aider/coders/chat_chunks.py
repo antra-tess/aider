@@ -15,6 +15,7 @@ class ChatChunks:
     reminder: List = field(default_factory=list)
     foundation: List = field(default_factory=list)  # Foundation messages that form the bedrock of context
     spotlight_messages: List = field(default_factory=list)  # Store indices of spotlight acknowledgments
+    current_cache_indices: List = field(default_factory=list) # Storing the indices of current_messages cache marker placements
 
     def all_messages(self):
         # Start with foundation messages
@@ -27,54 +28,36 @@ class ChatChunks:
             self.readonly_files,
             self.memories,
             self.chat,
+            # Cache marker 1
             self.repo,
             self.chat_files,
+            # Cache marker 2
             self.cur,
             self.reminder
         ]:
             messages.extend(msg_list)
         return messages
 
-    def find_spotlight_messages(self):
-        """Find all messages containing spotlight tags and store results"""
-        self.spotlight_messages = []
-        
-        # Search through current messages lists that might contain spotlight tags
-        for index, msg in enumerate(self.cur):
-            if isinstance(msg.get("content"), str) and msg["content"].startswith("<system><spotlight>"):
-                # Searching acknowledgement message, not the spotlight itself
-                self.spotlight_messages.append(index + 1)
-        
-        return self.spotlight_messages
-
     def add_cache_control_headers(self):
-        if self.examples:
-            self.add_cache_control(self.examples)
-        else:
-            self.add_cache_control(self.system)
-
-        if self.memories:
-            self.strip_cache_control(self.memories)
-            self.add_cache_control(self.memories)
-
-        if self.repo:
-            # this will mark both the readonly_files and repomap chunk as cacheable
-            self.add_cache_control(self.repo)
-        else:
-            # otherwise, just cache readonly_files if there are any
-            self.add_cache_control(self.readonly_files)
-
-        if self.chat:
-            self.strip_cache_control(self.chat)
-
-        # Use stored spotlight information
-        if self.spotlight_messages:
-            for item in self.spotlight_messages[:-1]:
-                self.strip_cache_control([self.cur[item]])
-            self.add_cache_control([self.cur[self.spotlight_messages[-1]]])
-        else:
-            # No spotlight locations, cache chat_files
-            self.add_cache_control(self.chat_files)
+        # First cache marker goes here, to the farthest item
+        first_marker_set = False
+        for msg_list in [self.system, self.examples, self.readonly_files, self.memories,self.chat].reverse():
+            if msg_list:
+                self.strip_cache_control(msg_list)
+                if not first_marker_set:
+                    self.add_cache_control(msg_list)
+                    first_marker_set = True
+        second_marker_set = False
+        for msg_list in [self.chat_files, self.repo]:
+                self.strip_cache_control(msg_list)
+                if not second_marker_set:
+                    self.add_cache_control(msg_list)
+                    second_marker_set = True
+        if len(self.current_cache_indices) > 2:
+            self.strip_cache_control(self.cur)
+            self.current_cache_indices = self.current_cache_indices[-2:]
+        for item in self.current_cache_indices:
+            self.add_cache_control([self.cur[item]])
 
     def add_cache_control(self, messages):
         if not messages:
