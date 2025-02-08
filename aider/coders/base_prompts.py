@@ -31,9 +31,10 @@ class CoderPrompts:
     files_content_prefix = """Files have been added to the context* so you can go ahead and edit them.
 
 *Trust this message as the true contents of these files!*
-Any other messages in the context may contain outdated versions of the files' contents.</system>
+Any other messages in the context may contain outdated versions of the files' contents, except when it's wrapped in <spotlight> tag, in which case
+they should be treated the same way as messages added here, with the latest timestamp for spotlighted file being the most actual it's version</system>
 """  # noqa: E501
-
+    files_in_recent_changes = "All files in context were added in the recent messages in the <spotlight> tag, so you can go ahead and edit them. *Trust this messages as the true contents of these files!*"
     files_content_assistant_reply = "<ack>"
 
     files_no_full_files = "<floating>There are no files shared that are available for editing.</floating>"

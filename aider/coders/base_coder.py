@@ -14,6 +14,7 @@ import threading
 import time
 import traceback
 import webbrowser
+from copy import deepcopy
 from collections import defaultdict
 from datetime import datetime
 from json.decoder import JSONDecodeError
@@ -213,6 +214,118 @@ class Coder:
     ignore_mentions = None
     chat_language = None
     file_watcher = None
+    file_hashes = {}  # Store hashes of tracked files
+    TOKENS_NUMBER_FOR_CACHING = 3000
+    last_cached_message = 0
+
+    def store_file_hash(self, fname):
+        """Get hash of file content without extra IO handling"""
+        try:
+            with open(fname, 'rb') as f:  # Use binary mode to avoid encoding issues
+                return hashlib.sha1(f.read()).hexdigest()
+        except (OSError, IOError):
+            return None
+        
+    def get_spotlighted_files(self):                                                                                                                                    
+        """Extract filenames from spotlight messages in current messages"""                                                                                             
+        spotlighted_files = set()                                                                                                                                       
+        for msg in self.cur_messages:                                                                                                                                   
+            if isinstance(msg.get("content"), str) and msg["content"].startswith("<system><spotlight>"):                                                                                  
+                # Extract filenames from the message content                                                                                                            
+                lines = msg["content"].split("\n")                                                                                                                      
+                for i, line in enumerate(lines):                                                                                                                        
+                    if self.fence[0] in lines[i:]:                                                                                                                      
+                        # The line before a fence is a filename                                                                                                         
+                        fname = line.strip()                                                                                                                            
+                        if fname:                                                                                                                                       
+                            spotlighted_files.add(self.abs_root_path(fname))                                                                                            
+        return spotlighted_files
+
+    def check_files_for_changes(self):
+        """Check if any tracked files have changed based on their hash"""
+        changed_files = []
+        for fname in self.abs_fnames:
+            current_hash = self.store_file_hash(fname)
+            if current_hash is None:
+                continue
+                
+            if fname in self.file_hashes:
+                if current_hash != self.file_hashes[fname]:
+                    rel_fname = self.get_rel_fname(fname)
+                    content = self.io.read_text(fname)
+                    if content is not None:
+                        changed_files.append((rel_fname, content))
+                    self.io.tool_output(f"Detected changes in {rel_fname}")
+            
+            self.file_hashes[fname] = current_hash
+            
+        if changed_files:
+            changes_content = ""
+            
+            # Track which files we're about to spotlight
+            new_spotlight_files = set()
+            for rel_fname, content in changed_files:
+                changes_content += f"\n{rel_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
+                new_spotlight_files.add(self.abs_root_path(rel_fname))
+            
+            # Handle previous spotlight messages that contain any of our modified files
+            new_messages = []
+            i = 0
+            while i < len(self.cur_messages):
+                msg = self.cur_messages[i]
+                if isinstance(msg.get("content"), str) and msg["content"].startswith("<system><spotlight>"):
+                    # Extract content and files from this spotlight message
+                    lines = msg["content"].split("\n")
+                    spotlight_files = {}  # Maps filenames to their content blocks
+                    current_file = None
+                    current_content = []
+                    
+                    for line in lines:
+                        if self.fence[0] in line:  # Start of a content block
+                            current_content = []
+                        elif self.fence[1] in line:  # End of a content block
+                            if current_file:
+                                spotlight_files[current_file] = "\n".join(current_content)
+                            current_file = None
+                        elif current_file is None and line.strip() and self.fence[0] not in line:
+                            current_file = line.strip()  # This is a filename line
+                        elif current_file:
+                            current_content.append(line)
+                    
+                    # Check which files in this spotlight are being modified
+                    superseded_files = []
+                    remaining_files = {}
+                    for fname, content in spotlight_files.items():
+                        abs_fname = self.abs_root_path(fname)
+                        if abs_fname in new_spotlight_files:
+                            superseded_files.append(fname)
+                        else:
+                            remaining_files[fname] = content
+                    if superseded_files:
+                        # Create reference message for modified files
+                        ref_msg = f"<system><spotlight>Files were modified: {', '.join(superseded_files)}. These files were modified again later, check further spotlights for updated content."
+                        # If there are remaining files, create a new spotlight for them
+                        if remaining_files:
+                            remaining_content = "Also, here's the list of recently modified files that are still current and true:\n"
+                            for fname, content in remaining_files.items():
+                                remaining_content += f"\n{fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
+                            ref_msg += remaining_content
+                        ref_msg += "</spotlight></system>"
+                        new_messages.append(dict(role="user", content=ref_msg))
+                        new_messages.append(dict(role="assistant", content="<ack>"))
+                        i += 2
+                        continue
+                        
+                new_messages.append(msg)
+                i += 1
+            self.cur_messages = new_messages
+            
+            # Add the new spotlight message
+            self.cur_messages.extend([
+                dict(role="user", content=f"<system><spotlight>Recently modified files:\n{changes_content}</spotlight></system>"),
+                dict(role="assistant", content="<ack>")
+            ])
+            # Track the acknowledgment message location
 
     @classmethod
     def create(
@@ -268,6 +381,8 @@ class Coder:
                 total_cost=from_coder.total_cost,
                 ignore_mentions=from_coder.ignore_mentions,
                 file_watcher=from_coder.file_watcher,
+                file_hashes=from_coder.file_hashes.copy(),  # Copy file hashes to new coder
+                last_cached_message=from_coder.last_cached_message
             )
             use_kwargs.update(update)  # override to complete the switch
             use_kwargs.update(kwargs)  # override passed kwargs
@@ -404,6 +519,9 @@ class Coder:
         ignore_mentions=None,
         file_watcher=None,
         auto_copy_context=False,
+        instruction_depth=0,
+        file_hashes={},
+        last_cached_message=0
     ):
         self.ai_name = ai_name
 
@@ -572,6 +690,7 @@ class Coder:
         max_inp_tokens = self.main_model.info.get("max_input_tokens") or 0
 
         has_map_prompt = hasattr(self, "gpt_prompts") and self.gpt_prompts.repo_content_prefix
+        
 
         if use_repo_map and self.repo and has_map_prompt:
             self.repo_map = RepoMap(
@@ -619,6 +738,9 @@ class Coder:
             if self.verbose:
                 self.io.tool_output("JSON Schema:")
                 self.io.tool_output(json.dumps(self.functions, indent=4))
+
+        self.instruction_depth = instruction_depth
+        
 
     def setup_lint_cmds(self, lint_cmds):
         if not lint_cmds:
@@ -671,7 +793,13 @@ class Coder:
     def drop_rel_fname(self, fname):
         abs_fname = self.abs_root_path(fname)
         if abs_fname in self.abs_fnames:
+            # Remove from main tracking
             self.abs_fnames.remove(abs_fname)
+            
+            # Clean up tracking dictionaries
+            if abs_fname in self.file_hashes:
+                del self.file_hashes[abs_fname]
+            
             self.save_files_cache()
             return True
 
@@ -775,7 +903,10 @@ class Coder:
     def get_cur_message_text(self):
         text = ""
         for msg in self.cur_messages:
-            text += msg["content"] + "\n"
+            if isinstance(msg["content"], str):
+                text += msg["content"] + "\n"
+            else:
+                text += msg["content"][0]['text'] + "\n"
         return text
 
     def get_ident_mentions(self, text):
@@ -881,9 +1012,14 @@ class Coder:
 
     def get_chat_files_messages(self):
         chat_files_messages = []
-        if self.abs_fnames:
+        spotlighted_files = self.get_spotlighted_files()                                                                                                                
+        available_files = set(self.abs_fnames) - spotlighted_files  
+        if available_files:  # Has files not in spotlight
             files_content = self.gpt_prompts.files_content_prefix
             files_content += self.get_files_content()
+            files_reply = self.gpt_prompts.files_content_assistant_reply
+        elif not available_files and spotlighted_files:
+            files_content = self.gpt_prompts.files_in_recent_changes
             files_reply = self.gpt_prompts.files_content_assistant_reply
         elif self.get_repo_map() and self.gpt_prompts.files_no_full_files_with_repo_map:
             files_content = self.gpt_prompts.files_no_full_files_with_repo_map
@@ -1285,12 +1421,8 @@ class Coder:
                     dict(role="assistant", content="<ack>"),
                 ]
 
-        # Only add system_reminder for edit modes, not ask mode
-        if self.gpt_prompts.system_reminder and self.edit_format != "ask":
-            main_sys += "\n" + self.fmt_system_prompt(self.gpt_prompts.system_reminder)
-
         chunks = ChatChunks()
-
+        
         # Add system messages first
         if self.main_model.use_system_prompt:
             chunks.system = [
@@ -1310,8 +1442,10 @@ class Coder:
         chunks.memories = list(self.memories)
         chunks.chat = list(self.chat_messages)
 
+        # Get repo messages but exclude recently changed files
         chunks.repo = self.get_repo_messages()
         chunks.readonly_files = self.get_readonly_files_messages()
+
         chunks.chat_files = self.get_chat_files_messages()
 
         # Initialize prompts with assistant name
@@ -1329,6 +1463,32 @@ class Coder:
 
         chunks.cur = list(self.cur_messages)
         chunks.reminder = []
+        chunks.current_cache_indices = []
+        cur_messages_cache_stripped = []
+        chunks_cur = []
+        for index, item in enumerate(list(self.cur_messages)):
+            if isinstance(item, list):
+                check_text = item["content"][0]["text"]
+                if item['content'][0].get('cache_control'):
+                    self.last_cached_message = index
+                    chunks.current_cache_indices.append(index)
+            else:
+                check_text = item["content"]
+            if check_text == self.gpt_prompts.interface_using_guide:
+                continue
+            cur_messages_cache_stripped += [check_text]
+            chunks_cur.append(item)
+        chunks.cur = chunks_cur
+
+        uncompressed_tokens_cur = self.main_model.token_count(" ".join(cur_messages_cache_stripped[self.last_cached_message:]))
+        # Walikng cache implementation; approximately each 3k tokens we need to move cache by index
+        if uncompressed_tokens_cur >= self.TOKENS_NUMBER_FOR_CACHING:
+            chunks.current_cache_indices.append(len(chunks.cur) - 1)
+            self.last_cached_message = len(chunks.cur) - 1
+        msg_dict = dict(role="user", content=self.gpt_prompts.interface_using_guide)
+        # Insert at depth, or right after last cached message
+        target_pos = max(self.last_cached_message, len(chunks.cur) - self.fixed_depth)
+        chunks.cur.insert(target_pos, msg_dict)
 
         # TODO review impact of token count on image messages
         messages_tokens = self.main_model.token_count(chunks.all_messages())
@@ -1428,6 +1588,9 @@ class Coder:
 
     def send_message(self, inp):
         self.event("message_send_starting")
+
+        # Check for any files that changed since last message
+        self.check_files_for_changes()
 
         # Get timestamped content from io
         timestamped_inp = self.io.format_user_message(inp)
@@ -2002,7 +2165,13 @@ class Coder:
 
         # Calculate token counts
         uncompressed_tokens_chat = self.main_model.token_count(" ".join(msg["content"] for msg in self.chat_messages))
-        uncompressed_tokens_cur = self.main_model.token_count(" ".join(msg["content"] for msg in self.cur_messages))
+        cur_messages_uncached = []
+        for msg in self.cur_messages:
+            if not isinstance(msg['content'], str):
+                cur_messages_uncached += [msg['content'][0]['text']]
+            else:
+                cur_messages_uncached += [msg['content']]
+        uncompressed_tokens_cur = self.main_model.token_count(" ".join(cur_messages_uncached))
         try:
             # content can be a list of dicts or a string
             memory_tokens = sum(
@@ -2303,7 +2472,12 @@ class Coder:
         context = ""
         if history:
             for msg in history:
-                context += "\n" + msg["role"].upper() + ": " + msg["content"] + "\n"
+                if isinstance(msg['content'], str):
+                    content = msg['content']
+                else:
+                    content = msg['content'][0]['text']
+                role = msg['role'].upper()
+                context += "\n" + role + ": " + content + "\n"
 
         return context
 
