@@ -64,4 +64,41 @@ Do not edit these files.
     no_shell_cmd_prompt = ""
     no_shell_cmd_reminder = ""
 
+    interface_using_guide = """<system>
+Guide to using the interface:
 
+Conversation mode:
+In conversation mode the interface is on conversation mode. SEARCH/REPLACE blocks are not supported in this mode. No changes will be applied.
+
+Edit mode: 
+In edit mode you can apply changes to files directly. Changes are made using SEARCH/REPLACE blocks that execute immediately.
+
+ Format:
+ filepath.ext
+ <<<<<<< SEARCH
+ exact existing content
+ =======
+ new content
+ >>>>>>> REPLACE
+
+Technical specifications:
+
+ 1 SEARCH/REPLACE blocks execute as soon as you finish your message
+ 2 SEARCH must exactly match existing content, including whitespace
+ 3 Files must be in current context
+ 4 Code movement requires separate operations
+ 5 New files use empty SEARCH section
+
+For exploring changes before execution, use fences without SEARCH/REPLACE markers.
+
+Shell commands can be suggested in {fence[0]}bash blocks when helpful for:
+Viewing changes (e.g. opening modified HTML in browser)
+Running modified programs
+File operations (rename, delete)
+Installing new dependencies
+
+You will see mode change messages as user changes the mode.
+
+This message will be periodically repeated.
+</system>
+"""

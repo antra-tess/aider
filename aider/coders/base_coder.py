@@ -1481,13 +1481,25 @@ class Coder:
         chunks.cur = chunks_cur
 
         uncompressed_tokens_cur = self.main_model.token_count(" ".join(cur_messages_cache_stripped[self.last_cached_message:]))
-        # Walikng cache implementation; approximately each 3k tokens we need to move cache by index
+        # Walking cache implementation; approximately each 3k tokens we need to move cache by index
         if uncompressed_tokens_cur >= self.TOKENS_NUMBER_FOR_CACHING:
-            chunks.current_cache_indices.append(len(chunks.cur) - 1)
-            self.last_cached_message = len(chunks.cur) - 1
+            # Find last non-instruction message
+            caching_candidate = len(chunks.cur) - 1
+            while caching_candidate >= 0:
+                item = chunks.cur[caching_candidate]
+                if isinstance(item, list):
+                    check_text = item["content"][0]["text"]
+                else:
+                    check_text = item["content"]
+                # Skip instruction message for caching
+                if check_text != self.gpt_prompts.interface_using_guide:
+                    chunks.current_cache_indices.append(caching_candidate)
+                    self.last_cached_message = caching_candidate
+                    break
+                caching_candidate -= 1
         msg_dict = dict(role="user", content=self.gpt_prompts.interface_using_guide)
         # Insert at depth, or right after last cached message
-        target_pos = max(self.last_cached_message, len(chunks.cur) - self.fixed_depth)
+        target_pos = max(self.last_cached_message, len(chunks.cur) - self.instruction_depth)
         chunks.cur.insert(target_pos, msg_dict)
 
         # TODO review impact of token count on image messages
@@ -2164,7 +2176,13 @@ class Coder:
         # Count different types of messages
 
         # Calculate token counts
-        uncompressed_tokens_chat = self.main_model.token_count(" ".join(msg["content"] for msg in self.chat_messages))
+        chat_message_uncached = []
+        for msg in self.chat_messages:
+            if not isinstance(msg['content'], str):
+                chat_message_uncached += [msg['content'][0]['text']]
+            else:
+                chat_message_uncached += [msg['content']]
+        uncompressed_tokens_chat = self.main_model.token_count(" ".join(chat_message_uncached))
         cur_messages_uncached = []
         for msg in self.cur_messages:
             if not isinstance(msg['content'], str):
