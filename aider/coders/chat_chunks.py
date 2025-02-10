@@ -41,14 +41,16 @@ class ChatChunks:
     def add_cache_control_headers(self):
         # First cache marker goes here, to the farthest item
         first_marker_set = False
-        for msg_list in [self.system, self.examples, self.readonly_files, self.memories,self.chat].reverse():
+        first_cacheable_list = [self.system, self.examples, self.readonly_files, self.memories, self.chat]
+        for msg_list in reversed(first_cacheable_list):
             if msg_list:
                 self.strip_cache_control(msg_list)
                 if not first_marker_set:
                     self.add_cache_control(msg_list)
                     first_marker_set = True
         second_marker_set = False
-        for msg_list in [self.chat_files, self.repo]:
+        second_cacheable_list = [self.repo, self.chat_files]
+        for msg_list in reversed(second_cacheable_list):
                 self.strip_cache_control(msg_list)
                 if not second_marker_set:
                     self.add_cache_control(msg_list)
@@ -75,6 +77,9 @@ class ChatChunks:
         messages[-1]["content"] = [content]
 
     def strip_cache_control(self, messages):
+        if not messages:
+            return
+
         for message in messages:
             if isinstance(message.get("content"), list) and message["content"][0].get(
                 "cache_control"
