@@ -523,20 +523,6 @@ class Coder:
         file_hashes={},
         last_cached_message=0
     ):
-        self.gpt_prompts.interface_using_guide = """<system>
-Guide to using the interface:
-
-Conversation mode:
-In conversation mode the interface is on conversation mode. SEARCH/REPLACE blocks are not supported in this mode. No changes will be applied.
-
-Edit mode: 
-In edit mode you can apply changes to files directly. Changes are made using SEARCH/REPLACE blocks that execute immediately.
-
- Format:
- filepath.ext
- <<<<<<< SEARCH
- exact existing content
-    ):
         self.ai_name = ai_name
 
         # Fill in a dummy Analytics if needed, but it is never .enable()'d
